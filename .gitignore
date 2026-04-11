@@ -14,4 +14,4 @@
 /LyraStarterGame/Plugins/*
 !/LyraStarterGame/Plugins/GameFeatures/
 /LyraStarterGame/Plugins/GameFeatures/*
-!/LyraStarterGame/Plugins/GameFeatures/AntiCheatFeature/
+!/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/

@@ -30,7 +30,9 @@ public class AntiCheatPluginRuntime : ModuleRules
         		"ModularGameplay", // Game Feature 컴포넌트 주입용
         		"HTTP",          // 서버와 통신하기 위해 필수
         		"Json",          // JSON 데이터를 다루기 위해 필수
-        		"JsonUtilities"  // C++ 구조체를 JSON으로 쉽게 변환하기 위해 필수
+        		"JsonUtilities",  // C++ 구조체를 JSON으로 쉽게 변환하기 위해 필수
+				"OnlineSubsystem",
+				"ModularGameplay"
 			}
 			);
 			

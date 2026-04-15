@@ -22,6 +22,16 @@
 			"LoadingPhase": "Default"
 		}
 	],
+	"Plugins": [
+		{
+			"Name": "ModularGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystem",
+			"Enabled": true
+		}
+	],
 	"ExplicitlyLoaded": true,
 	"BuiltInInitialFeatureState": "Active"
 }

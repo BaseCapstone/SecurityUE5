@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "UObject/ObjectKey.h"
+
+class UGameInstance;
+struct FComponentRequestHandle;
 
 class FAntiCheatPluginRuntimeModule : public IModuleInterface
 {
@@ -12,4 +16,11 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	//~End of IModuleInterface
+
+private:
+	void RegisterComponentRequest(UGameInstance* GameInstance);
+
+private:
+	FDelegateHandle GameInstanceStartHandle;
+	TMap<TObjectKey<UGameInstance>, TSharedPtr<FComponentRequestHandle>> ComponentRequestHandles;
 };

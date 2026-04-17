@@ -8,10 +8,27 @@
 
 # 2. 무거운 에셋 및 엔진 원본 소스 완벽 차단
 /LyraStarterGame/Content/
-/LyraStarterGame/Source/
+/LyraStarterGame/Source/*
+!/LyraStarterGame/Source/LyraGame/
+/LyraStarterGame/Source/LyraGame/*
+!/LyraStarterGame/Source/LyraGame/UI/
+/LyraStarterGame/Source/LyraGame/UI/*
+!/LyraStarterGame/Source/LyraGame/UI/LyraGameViewportClient.h
+!/LyraStarterGame/Source/LyraGame/UI/LyraGameViewportClient.cpp
 
 # 3. 플러그인 필터링 (우리 플러그인만 남기고 전부 차단)
 /LyraStarterGame/Plugins/*
 !/LyraStarterGame/Plugins/GameFeatures/
 /LyraStarterGame/Plugins/GameFeatures/*
 !/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/
+!/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/**
+
+# 4. 허용된 AntiCheatPlugin 안의 빌드 산출물 차단
+/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Binaries/
+/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/
+
+# 5. Local/editor generated leftovers
+/LyraStarterGame/Backup/
+/LyraStarterGame/UpgradeLog.htm
+/LyraStarterGame/Build/Windows/ChunkLayerInfo/
+/LyraStarterGame/Build/Windows/FileOpenOrder/

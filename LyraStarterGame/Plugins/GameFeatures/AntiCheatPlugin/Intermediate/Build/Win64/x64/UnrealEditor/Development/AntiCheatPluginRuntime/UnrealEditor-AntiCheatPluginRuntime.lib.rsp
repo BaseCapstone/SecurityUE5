@@ -1,0 +1,16 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-AntiCheatPluginRuntime.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Intermediate/Build/Win64/x64/LyraEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatDataCollector.cpp.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatPluginRuntimeModule.cpp.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/PerModuleInline.gen.cpp.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatDataCollector.gen.cpp.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatPluginRuntime.init.gen.cpp.obj"
+"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/Default.rc2.res"
+/OUT:"C:/Users/USER/Desktop/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/UnrealEditor-AntiCheatPluginRuntime.lib"

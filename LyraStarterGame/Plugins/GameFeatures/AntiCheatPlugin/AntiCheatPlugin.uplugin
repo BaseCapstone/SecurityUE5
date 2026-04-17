@@ -30,6 +30,13 @@
 		{
 			"Name": "ModularGameplay",
 			"Enabled": true
+<<<<<<< HEAD
+=======
+		},
+		{
+			"Name": "OnlineSubsystem",
+			"Enabled": true
+>>>>>>> feature/data-extraction
 		}
 	],
 	"ExplicitlyLoaded": true,

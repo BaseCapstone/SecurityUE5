@@ -20,7 +20,6 @@ struct FAntiCheatDataPacket
 	UPROPERTY() bool bIsTargetVisible;    
 };
 
-/
 UCLASS( ClassGroup=(AntiCheat), meta=(BlueprintSpawnableComponent) )
 class ANTICHEATPLUGINRUNTIME_API UAntiCheatDataCollector : public UActorComponent
 {

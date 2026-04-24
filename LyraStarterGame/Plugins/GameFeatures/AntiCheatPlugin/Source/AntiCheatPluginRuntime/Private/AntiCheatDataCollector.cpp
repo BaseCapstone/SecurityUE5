@@ -20,6 +20,7 @@ UAntiCheatDataCollector::UAntiCheatDataCollector()
 void UAntiCheatDataCollector::BeginPlay()
 {
     Super::BeginPlay();
+    // 0.1초마다 데이터 수집
     GetWorld()->GetTimerManager().SetTimer(DataTimerHandle, this, &UAntiCheatDataCollector::CollectAndlog, 0.1f, true, 1.0f);
 }
 
@@ -109,6 +110,7 @@ void UAntiCheatDataCollector::CollectAndlog()
 
     FAntiCheatDataPacket DataPacket;
 
+    // 플레이어 닉네임: 아직 계정 연동이 안 되어 User 데스크탑으로 연동
     if (PC->PlayerState)
     {
         DataPacket.UserID = PC->PlayerState->GetPlayerName();
@@ -118,15 +120,15 @@ void UAntiCheatDataCollector::CollectAndlog()
         DataPacket.UserID = TEXT("Guest_User");
     }
 
-    DataPacket.Timestamp = CurrentTime;
-    DataPacket.Location = Loc;
-    DataPacket.Speed = VelocitySize;
-    DataPacket.Rotation = Rot;
-    DataPacket.DeltaRotation = DeltaRot;
-    DataPacket.CurrentHP = CurrentHP;
-    DataPacket.TargetDistance = ClosestEnemyDist;
-    DataPacket.TargetAngle = AngleToEnemy;
-    DataPacket.bIsTargetVisible = bIsEnemyVisible;
+    DataPacket.Timestamp = CurrentTime;             // 게임 월드 시간
+    DataPacket.Location = Loc;                      // 3차원 좌표
+    DataPacket.Speed = VelocitySize;                // 이동 속도
+    DataPacket.Rotation = Rot;                      // 마우스 시야 회전값
+    DataPacket.DeltaRotation = DeltaRot;            // 이전 틱과 비교한 마우스 회전값 변화량
+    DataPacket.CurrentHP = CurrentHP;               // 현재 체력
+    DataPacket.TargetDistance = ClosestEnemyDist;   // 가장 가까운 적과의 거리
+    DataPacket.TargetAngle = AngleToEnemy;          // 카메라 방향 기준, 가장 가까운 적이 몇 도 단위로 떨어져 있는지 변화량
+    DataPacket.bIsTargetVisible = bIsEnemyVisible;  // 가장 가까운 적이 벽 뒤에 가려지지 않고 내 화면상에 물리적으로 보이는 상태인지 여부
 
     FString JsonString;
     if (FJsonObjectConverter::UStructToJsonObjectString(DataPacket, JsonString))

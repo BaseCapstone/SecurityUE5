@@ -11,7 +11,6 @@ app = FastAPI()
 # 언리얼에서 보낼 데이터 형식을 정의 (Pydantic 모델)
 class GameLogSchema(BaseModel):
     user_id: str
-    event_type: str
     event_data: dict  # JSON 데이터를 받기 위한 딕셔너리 타입
 
 @app.get("/api/log")
@@ -30,7 +29,6 @@ async def get_log_by_id(logId: int = Query(...)):
         log_data = {
             "log_id": result.log_id,
             "user_id": result.user_id,
-            "event_type": result.event_type,
             "event_data": result.event_data, # 이미 JSON으로 저장되어 있으니 그대로 사용
             "created_at": str(result.created_at) # 날짜는 문자열로 변환
         }
@@ -45,9 +43,9 @@ async def save_game_log(log: GameLogSchema):
     db = SessionLocal()
     try:
         # SQL 직접 실행 혹은 ORM 방식 사용
-        sql = text("INSERT INTO game_logs (user_id, event_type, event_data) VALUES (:u, :e, :p)")
+        sql = text("INSERT INTO game_logs (user_id, event_data) VALUES (:u, :p)")
         event_data_json = json.dumps(log.event_data)
-        db.execute(sql, {"u": log.user_id, "e": log.event_type, "p": event_data_json})
+        db.execute(sql, {"u": log.user_id, "p": event_data_json})
         db.commit()
 
     except Exception as e:

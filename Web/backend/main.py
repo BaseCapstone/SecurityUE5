@@ -14,7 +14,7 @@ class GameLogSchema(BaseModel):
     event_type: str
     event_data: dict  # JSON 데이터를 받기 위한 딕셔너리 타입
 
-@app.get("/api/log")
+@app.get("/api/log") #로그를 요청하는 GET 엔드포인트
 async def get_log_by_id(logId: int = Query(...)):
     db = SessionLocal()
     try:
@@ -25,13 +25,11 @@ async def get_log_by_id(logId: int = Query(...)):
         if result is None:
             raise HTTPException(status_code=404, detail="Log not found")
 
-        # [핵심 수정] SQLAlchemy의 Row 객체를 딕셔너리로 수동 변환
-        # result._asdict()를 사용하거나, 각 컬럼을 직접 지정하세요.
         log_data = {
-            "log_id": result.log_id,
-            "user_id": result.user_id,
-            "event_type": result.event_type,
-            "event_data": result.event_data, # 이미 JSON으로 저장되어 있으니 그대로 사용
+            "log_id": result.log_id, # 로그 번호
+            "user_id": result.user_id, # 사용자의 ID
+            "event_type": result.event_type, # 발생한 이벤트의 타입
+            "event_data": result.event_data, # 발생한 이벤트의 상세 로그 (JSON 형태)
             "created_at": str(result.created_at) # 날짜는 문자열로 변환
         }
 
@@ -44,7 +42,6 @@ async def get_log_by_id(logId: int = Query(...)):
 async def save_game_log(log: GameLogSchema):
     db = SessionLocal()
     try:
-        # SQL 직접 실행 혹은 ORM 방식 사용
         sql = text("INSERT INTO game_logs (user_id, event_type, event_data) VALUES (:u, :e, :p)")
         event_data_json = json.dumps(log.event_data)
         db.execute(sql, {"u": log.user_id, "e": log.event_type, "p": event_data_json})

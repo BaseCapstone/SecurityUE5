@@ -1,5 +1,6 @@
 #include "AntiCheatDataCollector.h"
 #include "AntiCheatDataSender.h"
+#include "AntiCheatVulnerabilityComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h" 
 #include "JsonObjectConverter.h"      
@@ -47,15 +48,17 @@ void UAntiCheatDataCollector::CollectAndlog()
     if (!GetWorld() || GetWorld()->bIsTearingDown) return;
 
     AActor* Owner = GetOwner();
-    if (!IsValid(Owner)) return;
-
     APlayerController* PC = Cast<APlayerController>(Owner);
-    if (!PC) return;
+    if (!PC || !PC->GetPawn() || !PC->PlayerState) return;
 
     APawn* MyPawn = PC->GetPawn();
-    if (!MyPawn || !MyPawn->IsValidLowLevel()) return;
 
-    if (!PC->PlayerState) return;
+    int32 CurrentLabel = 0;
+    UAntiCheatVulnerabilityComponent* VulnComp = Owner->FindComponentByClass<UAntiCheatVulnerabilityComponent>();
+    if (VulnComp && VulnComp->IsAnyHackActive())
+    {
+        CurrentLabel = 1;
+    }
 
     // 기본 물리 및 시간 데이터 수집
     FVector Loc = MyPawn->GetActorLocation();
@@ -152,7 +155,7 @@ void UAntiCheatDataCollector::CollectAndlog()
     {
         DataPacket.UserID = TEXT("Guest_User");
     }
-
+   
     DataPacket.Timestamp = CurrentTime;             // 게임 월드 시간
     DataPacket.Location = Loc;                      // 3차원 좌표
     DataPacket.Speed = VelocitySize;                // 이동 속도
@@ -162,6 +165,7 @@ void UAntiCheatDataCollector::CollectAndlog()
     DataPacket.TargetDistance = ClosestEnemyDist;   // 가장 가까운 적과의 거리
     DataPacket.TargetAngle = AngleToEnemy;          // 카메라 방향 기준, 가장 가까운 적이 몇 도 단위로 떨어져 있는지 변화량
     DataPacket.bIsTargetVisible = bIsEnemyVisible;  // 가장 가까운 적이 벽 뒤에 가려지지 않고 내 화면상에 물리적으로 보이는 상태인지 여부
+    DataPacket.Label = CurrentLabel; // Label 값 저장
 
     // 완성된 패킷을 배열 버퍼에 추가
     PacketBuffer.Add(DataPacket);

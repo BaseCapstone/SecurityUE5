@@ -2,8 +2,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "AntiCheatDataCollector.generated.h"
-USTRUCT(BlueprintType)
 
+USTRUCT(BlueprintType)
 // 플레이어 데이터 패킷 구조체
 struct FAntiCheatDataPacket
 {
@@ -14,7 +14,7 @@ struct FAntiCheatDataPacket
 
 	// 데이터 수집 시간
 	UPROPERTY() float Timestamp;
-
+	
 	// 현재 플레이어의 월드 좌표
 	UPROPERTY() FVector Location;         
 	
@@ -37,7 +37,11 @@ struct FAntiCheatDataPacket
 	UPROPERTY() float TargetAngle;        
 	
 	// 타겟이 벽 등 장애물에 가려지지 않고 시야에 보이는지 여부(벽 뒤의 적을 추척)
-	UPROPERTY() bool bIsTargetVisible;    
+	UPROPERTY() bool bIsTargetVisible;   
+
+	// 핵 사용 여부 (0: 정상, 1: 핵 사용)
+	UPROPERTY()
+	int32 Label;
 };
 
 // 플레이어 캐릭터 또는 컨트롤러에 부착되어 안티치트 데이터를 주기적으로 수집하는 컴포넌트
@@ -78,5 +82,5 @@ private:
 	const int32 MaxBufferSize = 30;
 
 	// AWS API Gateway 또는 EC2 서버 URL 주소 입력
-	FString AWSEndpointURL = TEXT("https://perfectly-curdle-gecko.ngrok-free.dev/log");
+	FString AWSEndpointURL = TEXT("https://eojftjeufu84fkk.m.pipedream.net");
 };

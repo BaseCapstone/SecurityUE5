@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "RFIr6dDIvHI=",
+  "dgSpecHash": "c2+Z3m8J0W8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\USER\\Desktop\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
+  "projectFilePath": "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\USER\\.nuget\\packages\\bitfaster.caching\\2.4.1\\bitfaster.caching.2.4.1.nupkg.sha512",
     "C:\\Users\\USER\\.nuget\\packages\\blake3\\1.1.0\\blake3.1.1.0.nupkg.sha512",

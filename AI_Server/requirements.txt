@@ -18,3 +18,4 @@ jupyterlab
 uvicorn 
 fastapi
 xformers
+

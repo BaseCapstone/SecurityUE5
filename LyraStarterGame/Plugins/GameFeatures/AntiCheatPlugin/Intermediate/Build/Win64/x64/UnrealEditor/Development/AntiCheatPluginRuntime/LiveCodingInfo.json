@@ -1,0 +1,9 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.AntiCheatPluginRuntime.cpp.obj": [
+			"AntiCheatPluginRuntimeModule.cpp.obj",
+			"PerModuleInline.gen.cpp.obj"
+		]
+	}
+}

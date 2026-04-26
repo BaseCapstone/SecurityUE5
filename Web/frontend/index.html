@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Lyra Anti-Cheat Security System - 실시간 핵 탐지 및 보안 관리 플랫폼">
+  <title>LYRA SHIELD | Anti-Cheat Security Platform</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+
+<body>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TOP BAR -->
+  <!-- ═══════════════════════════════════════════ -->
+  <header class="top-bar" id="top-bar">
+    <div class="top-bar__left">
+      <button class="top-bar__menu-btn" id="menu-toggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="index.html" class="top-bar__logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" fill="currentColor" opacity="0.3" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-text__main">LYRA SHIELD</span>
+          <span class="logo-text__sub">ANTI-CHEAT SECURITY</span>
+        </div>
+      </a>
+    </div>
+    <div class="top-bar__right">
+      <button class="btn btn--ghost" id="register-btn">회원가입</button>
+      <button class="btn btn--outline" id="login-btn">로그인</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- NAVIGATION BAR -->
+  <!-- ═══════════════════════════════════════════ -->
+  <nav class="nav-bar" id="nav-bar">
+    <div class="nav-bar__inner">
+      <ul class="nav-bar__links" id="nav-links">
+        <li><a href="#news" class="nav-link active" data-section="news">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+              <path
+                d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z" />
+            </svg>
+            뉴스
+          </a></li>
+        <li><a href="#patch" class="nav-link" data-section="patch">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+                clip-rule="evenodd" />
+            </svg>
+            패치노트
+          </a></li>
+        <li><a href="#community" class="nav-link" data-section="community">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
+            </svg>
+            커뮤니티
+          </a></li>
+        <li><a href="#ranking" class="nav-link" data-section="ranking">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+            </svg>
+            랭킹
+          </a></li>
+        <li><a href="#support" class="nav-link" data-section="support">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668zM12 10a2 2 0 11-4 0 2 2 0 014 0z"
+                clip-rule="evenodd" />
+            </svg>
+            고객지원
+          </a></li>
+      </ul>
+      <button class="btn btn--game-start" id="game-start-btn">
+        <span class="btn__glow"></span>
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        GAME START
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <div class="mobile-nav">
+      <button class="mobile-nav__close" id="mobile-nav-close" aria-label="메뉴 닫기">&times;</button>
+      <ul class="mobile-nav__links">
+        <li><a href="#news">뉴스</a></li>
+        <li><a href="#patch">패치노트</a></li>
+        <li><a href="#community">커뮤니티</a></li>
+        <li><a href="#ranking">랭킹</a></li>
+        <li><a href="#support">고객지원</a></li>
+      </ul>
+      <div class="mobile-nav__actions">
+        <button class="btn btn--outline btn--full">로그인</button>
+        <button class="btn btn--game-start btn--full" id="mobile-game-start">
+          <span class="btn__glow"></span>
+          GAME START
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <!-- Animated Background -->
+    <div class="hero__bg">
+      <div class="hero__grid"></div>
+      <div class="hero__particles" id="hero-particles"></div>
+      <div class="hero__gradient"></div>
+    </div>
+
+    <!-- Slider -->
+    <div class="hero__slider" id="hero-slider">
+      <!-- Slide 1 -->
+      <div class="hero__slide active" data-slide="0">
+        <div class="hero__content">
+          <div class="hero__badge">🔥 시즌 업데이트</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">실시간 핵 탐지</span>
+            <span class="hero__title-line hero__title-line--accent">AI 보안 시스템</span>
+          </h1>
+          <p class="hero__desc">
+            AI 기반 실시간 분석으로 비정상 플레이어를 즉시 감지합니다.<br>
+            더 공정하고 깨끗한 게임 환경을 경험하세요.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg">자세히 보기</button>
+            <button class="btn btn--ghost btn--lg">시스템 소개 →</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <div class="hero__shield-anim">
+            <div class="shield-ring ring-1"></div>
+            <div class="shield-ring ring-2"></div>
+            <div class="shield-ring ring-3"></div>
+            <div class="shield-core">
+              <svg viewBox="0 0 80 80" fill="none">
+                <path d="M40 5L70 20V50L40 75L10 50V20L40 5Z" stroke="url(#shield-grad)" stroke-width="2" fill="none" />
+                <path d="M40 15L60 25V45L40 65L20 45V25L40 15Z" stroke="url(#shield-grad)" stroke-width="1.5"
+                  fill="none" opacity="0.6" />
+                <path d="M40 25L50 30V40L40 50L30 40V30L40 25Z" fill="url(#shield-grad)" opacity="0.4" />
+                <path d="M35 35L40 28L45 35L40 42Z" fill="white" />
+                <defs>
+                  <linearGradient id="shield-grad" x1="10" y1="5" x2="70" y2="75">
+                    <stop offset="0%" stop-color="#e52d27" />
+                    <stop offset="100%" stop-color="#f97316" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="hero__slide" data-slide="1">
+        <div class="hero__content">
+          <div class="hero__badge">📊 관리자 도구</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">보안 대시보드</span>
+            <span class="hero__title-line hero__title-line--accent">실시간 모니터링</span>
+          </h1>
+          <p class="hero__desc">
+            의심 유저의 핵 사용 확률을 실시간으로 확인하고<br>
+            즉각적인 제재 조치를 취할 수 있습니다.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg">대시보드 접속</button>
+            <button class="btn btn--ghost btn--lg">관리자 가이드 →</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <div class="hero__dashboard-preview">
+            <div class="dash-card dash-card--1">
+              <div class="dash-card__header">탐지율</div>
+              <div class="dash-card__value">99.7<span>%</span></div>
+            </div>
+            <div class="dash-card dash-card--2">
+              <div class="dash-card__header">활성 유저</div>
+              <div class="dash-card__value">2,847</div>
+            </div>
+            <div class="dash-card dash-card--3">
+              <div class="dash-card__header">금일 제재</div>
+              <div class="dash-card__value">12</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="hero__slide" data-slide="2">
+        <div class="hero__content">
+          <div class="hero__badge">🎮 LYRA 시즌 3</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">새로운 맵 &</span>
+            <span class="hero__title-line hero__title-line--accent">무기 업데이트</span>
+          </h1>
+          <p class="hero__desc">
+            시즌 3 대규모 업데이트와 함께<br>
+            강화된 보안 시스템이 적용됩니다.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg">업데이트 노트</button>
+            <button class="btn btn--ghost btn--lg">지금 플레이 →</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <div class="hero__season-badge">
+            <div class="season-number">S3</div>
+            <div class="season-text">SEASON THREE</div>
+            <div class="season-ring"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slider Controls -->
+    <div class="hero__controls">
+      <div class="hero__indicators">
+        <button class="hero__indicator active" data-slide="0" aria-label="슬라이드 1"></button>
+        <button class="hero__indicator" data-slide="1" aria-label="슬라이드 2"></button>
+        <button class="hero__indicator" data-slide="2" aria-label="슬라이드 3"></button>
+      </div>
+      <div class="hero__arrows">
+        <button class="hero__arrow hero__arrow--prev" id="hero-prev" aria-label="이전 슬라이드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="hero__arrow hero__arrow--next" id="hero-next" aria-label="다음 슬라이드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CONTENT SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="news">
+    <div class="content__container">
+      <!-- Section Header -->
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">📢</span>
+          최신 소식
+        </h2>
+        <a href="#" class="section-header__more">전체보기 →</a>
+      </div>
+
+      <!-- News & Event Cards -->
+      <div class="card-grid">
+        <!-- Card 1 -->
+        <article class="card card--featured" id="card-news-1">
+          <div class="card__image" style="--card-hue: 200">
+            <div class="card__image-content">
+              <svg viewBox="0 0 120 80" fill="none">
+                <rect x="10" y="10" width="100" height="60" rx="8" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+                <circle cx="35" cy="35" r="12" fill="rgba(0,240,255,0.3)" />
+                <rect x="55" y="28" width="45" height="4" rx="2" fill="rgba(255,255,255,0.4)" />
+                <rect x="55" y="38" width="30" height="4" rx="2" fill="rgba(255,255,255,0.2)" />
+                <rect x="15" y="52" width="85" height="12" rx="4" fill="rgba(0,240,255,0.15)" />
+              </svg>
+            </div>
+            <div class="card__tag">공지사항</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">v2.4 보안 패치 업데이트 안내</h3>
+            <p class="card__desc">AI 탐지 모델 v3.0 적용 및 새로운 행동 패턴 분석 알고리즘이 추가되었습니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.04.15</span>
+              <span class="card__views">👁 1,247</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" id="card-news-2">
+          <div class="card__image" style="--card-hue: 270">
+            <div class="card__image-content">
+              <svg viewBox="0 0 120 80" fill="none">
+                <path d="M60 10L90 30V55L60 70L30 55V30L60 10Z" stroke="rgba(255,255,255,0.3)" stroke-width="1"
+                  fill="rgba(139,92,246,0.2)" />
+                <path d="M60 25L75 33V48L60 55L45 48V33L60 25Z" fill="rgba(139,92,246,0.3)" />
+              </svg>
+            </div>
+            <div class="card__tag card__tag--event">이벤트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">봄맞이 출석 체크 이벤트</h3>
+            <p class="card__desc">14일 연속 출석 시 한정 스킨과 보안 뱃지를 지급합니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.04.12</span>
+              <span class="card__views">👁 3,582</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" id="card-news-3">
+          <div class="card__image" style="--card-hue: 150">
+            <div class="card__image-content">
+              <svg viewBox="0 0 120 80" fill="none">
+                <rect x="20" y="15" width="80" height="50" rx="6" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+                <polyline points="25,55 45,35 55,42 75,22 95,38" stroke="rgba(52,211,153,0.6)" stroke-width="2"
+                  fill="none" />
+                <circle cx="45" cy="35" r="3" fill="rgba(52,211,153,0.8)" />
+                <circle cx="75" cy="22" r="3" fill="rgba(52,211,153,0.8)" />
+              </svg>
+            </div>
+            <div class="card__tag card__tag--update">업데이트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">시즌 3 랭킹 시스템 개편</h3>
+            <p class="card__desc">보안 점수 기반의 새로운 랭킹 시스템이 시즌 3부터 적용됩니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.04.10</span>
+              <span class="card__views">👁 2,103</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" id="card-news-4">
+          <div class="card__image" style="--card-hue: 340">
+            <div class="card__image-content">
+              <svg viewBox="0 0 120 80" fill="none">
+                <circle cx="60" cy="40" r="25" stroke="rgba(255,255,255,0.3)" stroke-width="1" />
+                <path d="M60 20 L65 35 L80 35 L68 45 L72 60 L60 50 L48 60 L52 45 L40 35 L55 35 Z"
+                  fill="rgba(251,113,133,0.4)" />
+              </svg>
+            </div>
+            <div class="card__tag card__tag--notice">점검</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">4/17(목) 정기 점검 안내</h3>
+            <p class="card__desc">서버 안정화 및 보안 모듈 업데이트를 위한 정기 점검이 예정되어 있습니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.04.08</span>
+              <span class="card__views">👁 956</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Quick Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-item__icon">🛡️</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-detection">99.7%</span>
+            <span class="stat-item__label">탐지 정확도</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">👥</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-users">15,847</span>
+            <span class="stat-item__label">누적 보호 유저</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">⚡</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-blocked">1,203</span>
+            <span class="stat-item__label">금월 차단 수</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">🔄</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-uptime">99.99%</span>
+            <span class="stat-item__label">서버 가동률</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ADMIN DASHBOARD (관리자 전용 — 기본 숨김) -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="admin-dashboard" id="admin-dashboard" style="display: none;">
+    <div class="admin-dashboard__container">
+      <!-- 관리자 헤더 -->
+      <div class="admin-header" id="admin-header">
+        <div class="admin-header__title-area">
+          <h1 class="admin-header__title" id="admin-page-title">
+            <svg class="admin-header__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            관리자 대시보드
+          </h1>
+          <p class="admin-header__subtitle">LYRA SHIELD 보안 관리 시스템</p>
+        </div>
+        <div class="admin-header__actions">
+          <span class="admin-badge">🔑 ADMIN</span>
+        </div>
+      </div>
+
+      <!-- ═══ PAGE: 대시보드 ═══ -->
+      <div data-page="dashboard">
+
+      <!-- 실시간 통계 카드 -->
+      <div class="admin-stats">
+        <div class="admin-stat-card admin-stat-card--red">
+          <div class="admin-stat-card__icon">🛡️</div>
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__value" id="admin-stat-detection">99.7%</span>
+            <span class="admin-stat-card__label">탐지 정확도</span>
+          </div>
+          <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 0.3%</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card--blue">
+          <div class="admin-stat-card__icon">👥</div>
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__value" id="admin-stat-online">247</span>
+            <span class="admin-stat-card__label">현재 접속자</span>
+          </div>
+          <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 12</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card--orange">
+          <div class="admin-stat-card__icon">⚠️</div>
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__value" id="admin-stat-suspicious">5</span>
+            <span class="admin-stat-card__label">의심 유저</span>
+          </div>
+          <div class="admin-stat-card__trend admin-stat-card__trend--down">▼ 2</div>
+        </div>
+        <div class="admin-stat-card admin-stat-card--green">
+          <div class="admin-stat-card__icon">🚫</div>
+          <div class="admin-stat-card__info">
+            <span class="admin-stat-card__value" id="admin-stat-banned">38</span>
+            <span class="admin-stat-card__label">금월 제재</span>
+          </div>
+          <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 6</div>
+        </div>
+      </div>
+
+      <!-- 관리 패널 그리드 -->
+      <div class="admin-panels">
+        <!-- 의심 유저 목록 -->
+        <div class="admin-panel admin-panel--wide">
+          <div class="admin-panel__header">
+            <h3 class="admin-panel__title">⚡ 실시간 의심 유저 모니터링</h3>
+            <button class="btn btn--ghost admin-panel__action" id="admin-refresh-btn">🔄 새로고침</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="admin-user-table">
+              <thead>
+                <tr>
+                  <th>유저 ID</th>
+                  <th>닉네임</th>
+                  <th>핵 의심 확률</th>
+                  <th>상태</th>
+                  <th>최근 활동</th>
+                  <th>조치</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="admin-table__id">#10472</td>
+                  <td>ShadowHunter</td>
+                  <td><span class="probability probability--high">92.4%</span></td>
+                  <td><span class="status-badge status-badge--danger">위험</span></td>
+                  <td>에임봇 패턴 감지</td>
+                  <td><button class="btn btn--primary btn--sm" onclick="adminBanUser('#10472')">제재</button></td>
+                </tr>
+                <tr>
+                  <td class="admin-table__id">#10891</td>
+                  <td>NightWolf99</td>
+                  <td><span class="probability probability--high">87.1%</span></td>
+                  <td><span class="status-badge status-badge--danger">위험</span></td>
+                  <td>비정상 이동 속도</td>
+                  <td><button class="btn btn--primary btn--sm" onclick="adminBanUser('#10891')">제재</button></td>
+                </tr>
+                <tr>
+                  <td class="admin-table__id">#11203</td>
+                  <td>ProGamer_KR</td>
+                  <td><span class="probability probability--medium">63.8%</span></td>
+                  <td><span class="status-badge status-badge--warning">주의</span></td>
+                  <td>벽투시 의심 행동</td>
+                  <td><button class="btn btn--outline btn--sm" onclick="adminWatchUser('#11203')">감시</button></td>
+                </tr>
+                <tr>
+                  <td class="admin-table__id">#11587</td>
+                  <td>xXDestroyerXx</td>
+                  <td><span class="probability probability--medium">51.2%</span></td>
+                  <td><span class="status-badge status-badge--warning">주의</span></td>
+                  <td>비정상 킬/데스 비율</td>
+                  <td><button class="btn btn--outline btn--sm" onclick="adminWatchUser('#11587')">감시</button></td>
+                </tr>
+                <tr>
+                  <td class="admin-table__id">#12044</td>
+                  <td>SnipeKing</td>
+                  <td><span class="probability probability--low">28.5%</span></td>
+                  <td><span class="status-badge status-badge--safe">정상</span></td>
+                  <td>높은 헤드샷 비율</td>
+                  <td><button class="btn btn--ghost btn--sm">해제</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 최근 탐지 로그 -->
+        <div class="admin-panel">
+          <div class="admin-panel__header">
+            <h3 class="admin-panel__title">📋 최근 탐지 로그</h3>
+          </div>
+          <ul class="admin-log" id="admin-log">
+            <li class="admin-log__item admin-log__item--danger">
+              <span class="admin-log__time">18:24</span>
+              <span class="admin-log__msg"><strong>ShadowHunter</strong> — 에임봇 패턴 재감지 (3회차)</span>
+            </li>
+            <li class="admin-log__item admin-log__item--warning">
+              <span class="admin-log__time">18:19</span>
+              <span class="admin-log__msg"><strong>ProGamer_KR</strong> — 벽투시 의심 행동 기록</span>
+            </li>
+            <li class="admin-log__item admin-log__item--danger">
+              <span class="admin-log__time">18:12</span>
+              <span class="admin-log__msg"><strong>NightWolf99</strong> — 속도핵 패턴 탐지</span>
+            </li>
+            <li class="admin-log__item admin-log__item--info">
+              <span class="admin-log__time">18:05</span>
+              <span class="admin-log__msg"><strong>SnipeKing</strong> — 감시 대상 등록</span>
+            </li>
+            <li class="admin-log__item admin-log__item--success">
+              <span class="admin-log__time">17:58</span>
+              <span class="admin-log__msg"><strong>CheaterX</strong> — 영구 제재 완료</span>
+            </li>
+            <li class="admin-log__item admin-log__item--info">
+              <span class="admin-log__time">17:45</span>
+              <span class="admin-log__msg">AI 모델 v3.0 업데이트 적용 완료</span>
+            </li>
+            <li class="admin-log__item admin-log__item--warning">
+              <span class="admin-log__time">17:32</span>
+              <span class="admin-log__msg"><strong>xXDestroyerXx</strong> — 비정상 킬/데스 비율 감지</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 서버 상태 -->
+        <div class="admin-panel">
+          <div class="admin-panel__header">
+            <h3 class="admin-panel__title">🖥️ 서버 상태</h3>
+          </div>
+          <div class="admin-server-status">
+            <div class="server-item">
+              <div class="server-item__name">
+                <span class="server-dot server-dot--online"></span>
+                KR-Seoul-01
+              </div>
+              <div class="server-item__bar">
+                <div class="server-item__fill" style="width: 72%;"></div>
+              </div>
+              <span class="server-item__value">72%</span>
+            </div>
+            <div class="server-item">
+              <div class="server-item__name">
+                <span class="server-dot server-dot--online"></span>
+                KR-Seoul-02
+              </div>
+              <div class="server-item__bar">
+                <div class="server-item__fill" style="width: 58%;"></div>
+              </div>
+              <span class="server-item__value">58%</span>
+            </div>
+            <div class="server-item">
+              <div class="server-item__name">
+                <span class="server-dot server-dot--online"></span>
+                KR-Busan-01
+              </div>
+              <div class="server-item__bar">
+                <div class="server-item__fill" style="width: 45%;"></div>
+              </div>
+              <span class="server-item__value">45%</span>
+            </div>
+            <div class="server-item">
+              <div class="server-item__name">
+                <span class="server-dot server-dot--warning"></span>
+                JP-Tokyo-01
+              </div>
+              <div class="server-item__bar">
+                <div class="server-item__fill server-item__fill--warning" style="width: 89%;"></div>
+              </div>
+              <span class="server-item__value">89%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div><!-- end data-page="dashboard" -->
+
+      <!-- ═══ PAGE: 사용자 관리 ═══ -->
+      <div data-page="users" style="display: none;">
+        <div class="admin-panels">
+          <div class="admin-panel admin-panel--wide">
+            <div class="admin-panel__header">
+              <h3 class="admin-panel__title">👥 전체 사용자 목록</h3>
+              <span style="color: #64748b; font-size: 13px;">총 15,847명</span>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>유저 ID</th>
+                    <th>닉네임</th>
+                    <th>가입일</th>
+                    <th>최근 접속</th>
+                    <th>보안 점수</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="admin-table__id">#10001</td>
+                    <td>BladeRunner</td>
+                    <td>2025.08.15</td>
+                    <td>2026.04.26</td>
+                    <td><span class="probability probability--low">95점</span></td>
+                    <td><span class="status-badge status-badge--safe">정상</span></td>
+                  </tr>
+                  <tr>
+                    <td class="admin-table__id">#10045</td>
+                    <td>StarPlayer_KR</td>
+                    <td>2025.09.02</td>
+                    <td>2026.04.25</td>
+                    <td><span class="probability probability--low">91점</span></td>
+                    <td><span class="status-badge status-badge--safe">정상</span></td>
+                  </tr>
+                  <tr>
+                    <td class="admin-table__id">#10472</td>
+                    <td>ShadowHunter</td>
+                    <td>2025.11.20</td>
+                    <td>2026.04.26</td>
+                    <td><span class="probability probability--high">12점</span></td>
+                    <td><span class="status-badge status-badge--danger">제재</span></td>
+                  </tr>
+                  <tr>
+                    <td class="admin-table__id">#10891</td>
+                    <td>NightWolf99</td>
+                    <td>2026.01.05</td>
+                    <td>2026.04.26</td>
+                    <td><span class="probability probability--high">8점</span></td>
+                    <td><span class="status-badge status-badge--danger">제재</span></td>
+                  </tr>
+                  <tr>
+                    <td class="admin-table__id">#11203</td>
+                    <td>ProGamer_KR</td>
+                    <td>2026.02.14</td>
+                    <td>2026.04.26</td>
+                    <td><span class="probability probability--medium">52점</span></td>
+                    <td><span class="status-badge status-badge--warning">주의</span></td>
+                  </tr>
+                  <tr>
+                    <td class="admin-table__id">#12044</td>
+                    <td>SnipeKing</td>
+                    <td>2026.03.01</td>
+                    <td>2026.04.26</td>
+                    <td><span class="probability probability--low">78점</span></td>
+                    <td><span class="status-badge status-badge--safe">정상</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div><!-- end data-page="users" -->
+
+      <!-- ═══ PAGE: 통계 ═══ -->
+      <div data-page="stats" style="display: none;">
+        <div class="admin-stats">
+          <div class="admin-stat-card admin-stat-card--red">
+            <div class="admin-stat-card__icon">📊</div>
+            <div class="admin-stat-card__info">
+              <span class="admin-stat-card__value">1,203</span>
+              <span class="admin-stat-card__label">금월 총 탐지 건수</span>
+            </div>
+          </div>
+          <div class="admin-stat-card admin-stat-card--blue">
+            <div class="admin-stat-card__icon">🎯</div>
+            <div class="admin-stat-card__info">
+              <span class="admin-stat-card__value">892</span>
+              <span class="admin-stat-card__label">에임봇 탐지</span>
+            </div>
+          </div>
+          <div class="admin-stat-card admin-stat-card--orange">
+            <div class="admin-stat-card__icon">💨</div>
+            <div class="admin-stat-card__info">
+              <span class="admin-stat-card__value">198</span>
+              <span class="admin-stat-card__label">속도핵 탐지</span>
+            </div>
+          </div>
+          <div class="admin-stat-card admin-stat-card--green">
+            <div class="admin-stat-card__icon">👁️</div>
+            <div class="admin-stat-card__info">
+              <span class="admin-stat-card__value">113</span>
+              <span class="admin-stat-card__label">벽투시 탐지</span>
+            </div>
+          </div>
+        </div>
+        <div class="admin-panels">
+          <div class="admin-panel admin-panel--wide">
+            <div class="admin-panel__header">
+              <h3 class="admin-panel__title">📈 주간 탐지 추이</h3>
+            </div>
+            <div style="padding: 24px; color: #94a3b8;">
+              <div style="display: flex; align-items: flex-end; gap: 12px; height: 180px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:60%;"></div>
+                  <span style="font-size:11px;">월</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:45%;"></div>
+                  <span style="font-size:11px;">화</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:80%;"></div>
+                  <span style="font-size:11px;">수</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:55%;"></div>
+                  <span style="font-size:11px;">목</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:90%;"></div>
+                  <span style="font-size:11px;">금</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:100%;"></div>
+                  <span style="font-size:11px;">토</span>
+                </div>
+                <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
+                  <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:75%;"></div>
+                  <span style="font-size:11px;">일</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end data-page="stats" -->
+
+      <!-- ═══ PAGE: 탐지 로그 ═══ -->
+      <div data-page="logs" style="display: none;">
+        <div class="admin-panels">
+          <div class="admin-panel admin-panel--wide">
+            <div class="admin-panel__header">
+              <h3 class="admin-panel__title">📋 전체 탐지 로그</h3>
+            </div>
+            <ul class="admin-log" id="admin-log-full" style="max-height: 600px;">
+              <li class="admin-log__item admin-log__item--danger">
+                <span class="admin-log__time">18:24</span>
+                <span class="admin-log__msg"><strong>ShadowHunter</strong> — 에임봇 패턴 재감지 (3회차)</span>
+              </li>
+              <li class="admin-log__item admin-log__item--warning">
+                <span class="admin-log__time">18:19</span>
+                <span class="admin-log__msg"><strong>ProGamer_KR</strong> — 벽투시 의심 행동 기록</span>
+              </li>
+              <li class="admin-log__item admin-log__item--danger">
+                <span class="admin-log__time">18:12</span>
+                <span class="admin-log__msg"><strong>NightWolf99</strong> — 속도핵 패턴 탐지</span>
+              </li>
+              <li class="admin-log__item admin-log__item--info">
+                <span class="admin-log__time">18:05</span>
+                <span class="admin-log__msg"><strong>SnipeKing</strong> — 감시 대상 등록</span>
+              </li>
+              <li class="admin-log__item admin-log__item--success">
+                <span class="admin-log__time">17:58</span>
+                <span class="admin-log__msg"><strong>CheaterX</strong> — 영구 제재 완료</span>
+              </li>
+              <li class="admin-log__item admin-log__item--info">
+                <span class="admin-log__time">17:45</span>
+                <span class="admin-log__msg">AI 모델 v3.0 업데이트 적용 완료</span>
+              </li>
+              <li class="admin-log__item admin-log__item--warning">
+                <span class="admin-log__time">17:32</span>
+                <span class="admin-log__msg"><strong>xXDestroyerXx</strong> — 비정상 킬/데스 비율 감지</span>
+              </li>
+              <li class="admin-log__item admin-log__item--success">
+                <span class="admin-log__time">16:50</span>
+                <span class="admin-log__msg"><strong>HackMaster</strong> — 7일 정지 처리</span>
+              </li>
+              <li class="admin-log__item admin-log__item--danger">
+                <span class="admin-log__time">16:22</span>
+                <span class="admin-log__msg"><strong>GhostAim</strong> — 에임봇 + 속도핵 복합 탐지</span>
+              </li>
+              <li class="admin-log__item admin-log__item--info">
+                <span class="admin-log__time">15:40</span>
+                <span class="admin-log__msg">서버 KR-Seoul-01 점검 완료</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div><!-- end data-page="logs" -->
+
+      <!-- ═══ PAGE: 설정 ═══ -->
+      <div data-page="settings" style="display: none;">
+        <div class="admin-panels">
+          <div class="admin-panel admin-panel--wide">
+            <div class="admin-panel__header">
+              <h3 class="admin-panel__title">⚙️ 시스템 설정</h3>
+            </div>
+            <div style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div>
+                  <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">AI 탐지 모델</div>
+                  <div style="color: #64748b; font-size: 13px;">현재 버전: v3.0 | 마지막 업데이트: 2026.04.15</div>
+                </div>
+                <button class="btn btn--outline btn--sm" style="border-color: rgba(255,255,255,0.2); color: #cbd5e1;">업데이트 확인</button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div>
+                  <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">자동 제재 임계값</div>
+                  <div style="color: #64748b; font-size: 13px;">핵 의심 확률 90% 이상 시 자동 제재</div>
+                </div>
+                <span style="color: #fca5a5; font-family: var(--font-mono); font-weight: 700;">90%</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div>
+                  <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">알림 설정</div>
+                  <div style="color: #64748b; font-size: 13px;">위험 등급 유저 탐지 시 실시간 알림</div>
+                </div>
+                <span style="color: #4ade80; font-weight: 700;">활성화</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+                <div>
+                  <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">로그 보존 기간</div>
+                  <div style="color: #64748b; font-size: 13px;">탐지 로그 자동 삭제 주기</div>
+                </div>
+                <span style="color: #cbd5e1; font-family: var(--font-mono); font-weight: 700;">90일</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- end data-page="settings" -->
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__container">
+      <div class="footer__top">
+        <div class="footer__brand">
+          <div class="footer__logo">
+            <div class="logo-icon logo-icon--sm">
+              <svg viewBox="0 0 40 40" fill="none">
+                <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+                <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+              </svg>
+            </div>
+            <span>LYRA SHIELD</span>
+          </div>
+          <p class="footer__desc">AI 기반 실시간 게임 보안 솔루션</p>
+        </div>
+        <div class="footer__links-group">
+          <div class="footer__links">
+            <h4>서비스</h4>
+            <a href="#">게임 소개</a>
+            <a href="#">보안 시스템</a>
+            <a href="#">업데이트 내역</a>
+          </div>
+          <div class="footer__links">
+            <h4>커뮤니티</h4>
+            <a href="#">공식 카페</a>
+            <a href="#">Discord</a>
+            <a href="#">버그 제보</a>
+          </div>
+          <div class="footer__links">
+            <h4>지원</h4>
+            <a href="#">FAQ</a>
+            <a href="#">문의하기</a>
+            <a href="#">제재 이의</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <p>&copy; 2026 Lyra Shield Security. Capstone Project. All rights reserved.</p>
+        <div class="footer__legal">
+          <a href="#">이용약관</a>
+          <a href="#">개인정보처리방침</a>
+          <a href="#">운영정책</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- LOGIN MODAL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="login-modal">
+    <div class="modal">
+      <button class="modal__close" id="modal-close" aria-label="닫기">&times;</button>
+      <div class="modal__header">
+        <div class="logo-icon logo-icon--modal">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" fill="currentColor" opacity="0.3" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+        <h2 class="modal__title">LYRA SHIELD 로그인</h2>
+        <p class="modal__subtitle">보안 플랫폼에 접속합니다</p>
+      </div>
+      <form class="modal__form" id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-id">아이디</label>
+          <input class="form-input" type="text" id="login-id" placeholder="아이디를 입력하세요" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-pw">비밀번호</label>
+          <input class="form-input" type="password" id="login-pw" placeholder="비밀번호를 입력하세요"
+            autocomplete="current-password" required>
+        </div>
+        <div class="form-options">
+          <label class="form-checkbox">
+            <input type="checkbox" id="remember-me">
+            <span class="form-checkbox__mark"></span>
+            로그인 유지
+          </label>
+          <a href="#" class="form-link">비밀번호 찾기</a>
+        </div>
+        <button type="submit" class="btn btn--primary btn--full btn--lg">로그인</button>
+        <div class="modal__divider"><span>또는</span></div>
+        <button type="button" class="btn btn--outline btn--full" id="modal-register-btn">회원가입</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- GAME START OVERLAY -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="game-launch-overlay" id="game-launch-overlay">
+    <div class="game-launch">
+      <div class="game-launch__spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring spinner-ring--2"></div>
+        <div class="spinner-core">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+      </div>
+      <h2 class="game-launch__title">게임 실행 중...</h2>
+      <p class="game-launch__desc">Lyra 클라이언트를 시작하고 있습니다</p>
+      <div class="game-launch__progress">
+        <div class="game-launch__progress-bar" id="launch-progress"></div>
+      </div>
+      <button class="btn btn--ghost" id="launch-cancel">취소</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/utils.js"></script>
+  <script src="js/slider.js"></script>
+  <script src="js/navigation.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/game-launch.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/main.js"></script>
+</body>
+
+</html>

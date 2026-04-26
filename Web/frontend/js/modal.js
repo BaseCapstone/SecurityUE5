@@ -50,15 +50,14 @@ function initLoginModal() {
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const id = document.getElementById('login-id').value;
-      const pw = document.getElementById('login-pw').value;
+      const id = document.getElementById('login-id').value.trim();
+      const pw = document.getElementById('login-pw').value.trim();
 
       if (!id || !pw) {
         shakeElement(form);
         return;
       }
 
-      // Simulate login
       const submitBtn = form.querySelector('[type="submit"]');
       submitBtn.textContent = '로그인 중...';
       submitBtn.disabled = true;
@@ -67,8 +66,14 @@ function initLoginModal() {
         submitBtn.textContent = '로그인';
         submitBtn.disabled = false;
         closeModal();
-        showToast('로그인 성공! 환영합니다.', 'success');
-        updateLoginState(id);
+
+        // 관리자 계정 확인 (admin / admin)
+        if (id === 'admin' && pw === 'admin') {
+          activateAdminMode();
+        } else {
+          showToast('로그인 성공! 환영합니다.', 'success');
+          updateLoginState(id);
+        }
       }, 1500);
     });
   }

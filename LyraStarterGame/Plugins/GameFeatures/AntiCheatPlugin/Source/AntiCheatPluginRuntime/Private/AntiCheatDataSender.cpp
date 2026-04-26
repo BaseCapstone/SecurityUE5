@@ -31,6 +31,9 @@ void UAntiCheatDataSender::SendDataToAWS(const TArray<FAntiCheatDataPacket>& Pac
 		UE_LOG(LogTemp, Error, TEXT("Failed to serialize JsonArray to String."));
 		return;
 	}
+	// 직렬화된 JSON 문자열을 언리얼 로그에 출력
+	UE_LOG(LogTemp, Warning, TEXT("--- Attempting to send data to AWS ---"));
+	UE_LOG(LogTemp, Log, TEXT("JSON Payload: %s"), *JsonString);
 
 	// HTTP POST 요청 생성
 	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();

@@ -1,0 +1,463 @@
+/* ═══════════════════════════════════════════════════
+   ADMIN DASHBOARD — 관리자 전용 페이지 스타일
+   ═══════════════════════════════════════════════════ */
+
+/* ─── 대시보드 컨테이너 ─── */
+.admin-dashboard {
+  margin-top: var(--header-total);
+  min-height: calc(100vh - var(--header-total));
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  padding: var(--space-2xl) 0;
+  animation: adminFadeIn 0.6s ease;
+}
+
+@keyframes adminFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.admin-dashboard__container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+}
+
+/* ─── 관리자 헤더 ─── */
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-header__title {
+  font-family: var(--font-main);
+  font-size: 28px;
+  font-weight: 800;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.admin-header__icon {
+  width: 32px;
+  height: 32px;
+  color: var(--accent-red);
+  filter: drop-shadow(0 0 8px rgba(229, 45, 39, 0.4));
+}
+
+.admin-header__subtitle {
+  font-size: 14px;
+  color: #64748b;
+  margin-top: var(--space-xs);
+  letter-spacing: 0.05em;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, rgba(229, 45, 39, 0.2), rgba(229, 45, 39, 0.1));
+  border: 1px solid rgba(229, 45, 39, 0.4);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fca5a5;
+  letter-spacing: 0.08em;
+  animation: badgeGlow 2s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(229, 45, 39, 0); }
+  50% { box-shadow: 0 0 12px 2px rgba(229, 45, 39, 0.15); }
+}
+
+/* ─── 통계 카드 그리드 ─── */
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.admin-stat-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+.admin-stat-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  border-radius: 4px 0 0 4px;
+}
+.admin-stat-card--red::before { background: var(--accent-red); }
+.admin-stat-card--blue::before { background: var(--accent-blue); }
+.admin-stat-card--orange::before { background: var(--accent-orange); }
+.admin-stat-card--green::before { background: var(--accent-green); }
+
+.admin-stat-card__icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--border-radius);
+  flex-shrink: 0;
+}
+
+.admin-stat-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-stat-card__value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+
+.admin-stat-card__label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.admin-stat-card__trend {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.admin-stat-card__trend--up {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.1);
+}
+.admin-stat-card__trend--down {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ─── 관리 패널 그리드 ─── */
+.admin-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+.admin-panel {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.admin-panel--wide {
+  grid-column: 1 / -1;
+}
+
+.admin-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg) var(--space-lg) var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.admin-panel__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.admin-panel__action {
+  font-size: 13px !important;
+  color: #64748b !important;
+}
+.admin-panel__action:hover {
+  color: var(--accent-cyan) !important;
+}
+
+/* ─── 유저 테이블 ─── */
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th {
+  text-align: left;
+  padding: 14px var(--space-lg);
+  color: #64748b;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.admin-table td {
+  padding: 14px var(--space-lg);
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.admin-table tbody tr {
+  transition: background var(--transition-fast);
+}
+.admin-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-table__id {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: #94a3b8;
+}
+
+/* 확률 뱃지 */
+.probability {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+.probability--high {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+}
+.probability--medium {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+}
+.probability--low {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+}
+
+/* 상태 뱃지 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.status-badge--danger {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.status-badge--warning {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.status-badge--safe {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* 작은 버튼 */
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 6px;
+}
+
+/* ─── 탐지 로그 ─── */
+.admin-log {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.admin-log__item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: 12px var(--space-lg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 13px;
+  transition: background var(--transition-fast);
+  border-left: 3px solid transparent;
+}
+.admin-log__item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.admin-log__item--danger { border-left-color: #ef4444; }
+.admin-log__item--warning { border-left-color: #f59e0b; }
+.admin-log__item--success { border-left-color: #22c55e; }
+.admin-log__item--info { border-left-color: #3b82f6; }
+
+.admin-log__time {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #64748b;
+  min-width: 40px;
+}
+
+.admin-log__msg {
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+.admin-log__msg strong {
+  color: #f1f5f9;
+}
+
+/* ─── 서버 상태 ─── */
+.admin-server-status {
+  padding: var(--space-md) var(--space-lg) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.server-item__name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  min-width: 140px;
+  font-family: var(--font-mono);
+}
+
+.server-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.server-dot--online {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+.server-dot--warning {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+  animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.server-item__bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.server-item__fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+.server-item__fill--warning {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.server-item__value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ─── 관리자 모드 시 네비게이션 스타일 변경 ─── */
+body.is-admin .nav-bar {
+  border-bottom-color: rgba(239, 68, 68, 0.7);
+  background: linear-gradient(180deg, #1a0a0e 0%, #1e1020 100%);
+}
+
+body.is-admin .top-bar {
+  background: #0f0a0c;
+  border-bottom-color: rgba(239, 68, 68, 0.2);
+}
+body.is-admin .top-bar .logo-text__main,
+body.is-admin .top-bar .logo-text__sub {
+  color: #f1f5f9;
+}
+body.is-admin .top-bar .logo-text__sub {
+  color: #64748b;
+}
+
+/* ─── 반응형 ─── */
+@media (max-width: 1024px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+  .admin-header__title {
+    font-size: 22px;
+  }
+  .admin-stat-card__value {
+    font-size: 22px;
+  }
+}

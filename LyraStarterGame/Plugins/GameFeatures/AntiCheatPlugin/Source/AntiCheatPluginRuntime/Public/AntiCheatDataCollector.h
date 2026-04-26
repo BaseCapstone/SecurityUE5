@@ -82,5 +82,5 @@ private:
 	const int32 MaxBufferSize = 30;
 
 	// AWS API Gateway 또는 EC2 서버 URL 주소 입력
-	FString AWSEndpointURL = TEXT("https://eojftjeufu84fkk.m.pipedream.net");
+	FString AWSEndpointURL = TEXT("https://perfectly-curdle-gecko.ngrok-free.dev/log");
 };

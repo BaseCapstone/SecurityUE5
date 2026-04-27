@@ -65,7 +65,8 @@ function activateAdminMode() {
     adminDashboard.style.display = 'block';
   }
 
-  // body에 관리자 모드 클래스 추가 (스타일 변경용)
+  // body와 html에 관리자 모드 클래스 추가 (스타일 및 오버스크롤 배경 변경용)
+  document.documentElement.classList.add('is-admin');
   document.body.classList.add('is-admin');
 
   // 상단 바 로그인 상태를 관리자 전용으로 변경
@@ -115,6 +116,7 @@ function deactivateAdminMode() {
     adminDashboard.style.display = 'none';
   }
 
+  document.documentElement.classList.remove('is-admin');
   document.body.classList.remove('is-admin');
   sessionStorage.removeItem('lyra_admin');
 }
@@ -259,8 +261,11 @@ function checkAdminSession() {
   }
 }
 
+
+
 // DOM 로드 후 초기화
 document.addEventListener('DOMContentLoaded', () => {
   initAdminRefresh();
+  initUserManagement();
   checkAdminSession();
 });

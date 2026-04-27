@@ -144,6 +144,8 @@
   padding: var(--space-2xl);
   width: 100%;
   max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
   margin: var(--space-md);
   position: relative;
   transform: translateY(20px) scale(0.95);
@@ -293,6 +295,48 @@
   background: var(--bg-secondary);
   color: var(--text-muted);
   font-size: 13px;
+}
+
+/* Modal Views (Login / Register / Forgot) */
+.modal__views {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal__view {
+  display: none;
+  animation: modalFadeIn 0.3s ease forwards;
+}
+
+.modal__view.is-active {
+  display: block;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Form Validation & Error States */
+.form-error {
+  color: var(--accent-red);
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.form-input--error {
+  border-color: var(--accent-red);
+}
+.form-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 45, 39, 0.08);
+}
+
+.form-input--success {
+  border-color: var(--accent-green);
+}
+.form-input--success:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
 }
 
 /* ═══════════════════════════════════════════════════

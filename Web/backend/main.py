@@ -64,8 +64,8 @@ def get_db():
         db.close()
 
 # 로그를 요청하는 GET 엔드포인트
-@app.get("/api/log")
-async def get_log_by_id(logId: int = Query(...), db: Session = Depends(get_db)):
+@app.get("/api/logs/{logId}")
+async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
     # 모든 로그를 가져오는 쿼리 실행
     sql = text("SELECT * FROM game_logs WHERE log_id = :id")
     result = db.execute(sql, {"id": logId}).fetchone()
@@ -89,7 +89,7 @@ async def get_log_by_id(logId: int = Query(...), db: Session = Depends(get_db)):
     return {"log": log_data}
 
 # 로그를 받는 POST 엔드포인트
-@app.post("/log")
+@app.post("api/logs", status_code=status.HTTP_201_CREATED)
 async def save_game_log(log_data: list = Body(...), db: Session = Depends(get_db)): # log_data는 배열 [ {...}, {...} ]의 형태
     try:
         if not log_data:

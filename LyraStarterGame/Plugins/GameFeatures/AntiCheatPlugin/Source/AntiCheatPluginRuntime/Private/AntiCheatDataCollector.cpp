@@ -132,7 +132,7 @@ void UAntiCheatDataCollector::CollectAndlog()
         {
             DataSender->SendDataToAWS(PacketBuffer, AWSEndpointURL); // AWSEndpointURL 변수가 헤더에 있어야 함
         }
-        PacketBuffer.Empty();
+        PacketBuffer.Reset();
     }
 
     // 실시간 디버그 로그 출력 (Realtime Data)

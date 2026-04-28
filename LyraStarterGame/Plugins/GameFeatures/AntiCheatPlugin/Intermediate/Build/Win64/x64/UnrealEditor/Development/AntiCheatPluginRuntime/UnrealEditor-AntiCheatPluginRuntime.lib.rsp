@@ -6,8 +6,9 @@
 /NAME:"UnrealEditor-AntiCheatPluginRuntime.dll"
 /IGNORE:4221
 /NODEFAULTLIB
-"C:/Capstone/SecurityUE5/LyraStarterGame/Intermediate/Build/Win64/x64/LyraEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
-"C:/Capstone/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/Module.AntiCheatPluginRuntime.cpp.obj"
-"C:/Capstone/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/PerModuleInline.gen.cpp.obj"
-"C:/Capstone/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/Default.rc2.res"
-/OUT:"C:/Capstone/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/UnrealEditor-AntiCheatPluginRuntime.lib"
+"C:/SecurityUE5/LyraStarterGame/Intermediate/Build/Win64/x64/LyraEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"C:/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/Module.AntiCheatPluginRuntime.cpp.obj"
+"C:/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatDataCollector.cpp.obj"
+"C:/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/AntiCheatVulnerabilityComponent.cpp.obj"
+"C:/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/Default.rc2.res"
+/OUT:"C:/SecurityUE5/LyraStarterGame/Plugins/GameFeatures/AntiCheatPlugin/Intermediate/Build/Win64/x64/UnrealEditor/Development/AntiCheatPluginRuntime/UnrealEditor-AntiCheatPluginRuntime.lib"

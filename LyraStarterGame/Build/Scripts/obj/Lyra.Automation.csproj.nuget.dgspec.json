@@ -1,118 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Capstone\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj": {}
+    "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj": {}
   },
   "projects": {
-    "C:\\Capstone\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj": {
-      "version": "1.0.0",
-      "restore": {
-        "projectUniqueName": "C:\\Capstone\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
-        "projectName": "Lyra.Automation",
-        "projectPath": "C:\\Capstone\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
-        "outputPath": "C:\\Capstone\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\obj\\",
-        "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
-        "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
-        ],
-        "originalTargetFrameworks": [
-          "net8.0"
-        ],
-        "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {}
-        },
-        "frameworks": {
-          "net8.0": {
-            "targetAlias": "net8.0",
-            "projectReferences": {
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj",
-                "privateAssets": "all"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj",
-                "privateAssets": "all"
-              },
-              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj": {
-                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj"
-              }
-            }
-          }
-        },
-        "warningProperties": {
-          "allWarningsAsErrors": true,
-          "warnAsError": [
-            "NU1605"
-          ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
-        }
-      },
-      "frameworks": {
-        "net8.0": {
-          "targetAlias": "net8.0",
-          "imports": [
-            "net461",
-            "net462",
-            "net47",
-            "net471",
-            "net472",
-            "net48",
-            "net481"
-          ],
-          "assetTargetFallback": true,
-          "warn": true,
-          "frameworkReferences": {
-            "Microsoft.NETCore.App": {
-              "privateAssets": "all"
-            }
-          },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.300\\win-x64\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
-        }
-      }
-    },
     "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Android\\Android.Automation.csproj": {
       "version": "1.0.0",
       "restore": {
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Android\\Android.Automation.csproj",
         "projectName": "Android.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Android\\Android.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Android\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -153,7 +58,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -193,14 +98,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj",
         "projectName": "AutomationUtils.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -248,7 +153,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -319,14 +224,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj",
         "projectName": "CrowdinLocalization.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -367,7 +272,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -407,14 +312,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj",
         "projectName": "Gauntlet.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -471,7 +376,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -521,14 +426,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj",
         "projectName": "Localization.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -565,7 +470,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -599,14 +504,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj",
         "projectName": "OneSkyLocalization.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -647,7 +552,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -687,14 +592,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Scripts\\AutomationScripts.Automation.csproj",
         "projectName": "AutomationScripts.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Scripts\\AutomationScripts.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Scripts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -739,7 +644,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -788,14 +693,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj",
         "projectName": "SmartlingLocalization.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -836,7 +741,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -876,14 +781,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj",
         "projectName": "XLocLocalization.Automation",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -924,7 +829,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -970,14 +875,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Build\\EpicGames.Build.csproj",
         "projectName": "EpicGames.Build",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Build\\EpicGames.Build.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Build\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1010,7 +915,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1058,14 +963,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj",
         "projectName": "EpicGames.Core",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1088,7 +993,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1156,14 +1061,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Horde\\EpicGames.Horde.csproj",
         "projectName": "EpicGames.Horde",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Horde\\EpicGames.Horde.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Horde\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1202,7 +1107,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1294,14 +1199,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.IoHash\\EpicGames.IoHash.csproj",
         "projectName": "EpicGames.IoHash",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.IoHash\\EpicGames.IoHash.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.IoHash\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1328,7 +1233,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1372,14 +1277,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.MsBuild\\EpicGames.MsBuild.csproj",
         "projectName": "EpicGames.MsBuild",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.MsBuild\\EpicGames.MsBuild.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.MsBuild\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1406,7 +1311,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1455,14 +1360,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.OIDC\\EpicGames.OIDC.csproj",
         "projectName": "EpicGames.OIDC",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.OIDC\\EpicGames.OIDC.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.OIDC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1485,7 +1390,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1541,14 +1446,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Oodle\\EpicGames.Oodle.csproj",
         "projectName": "EpicGames.Oodle",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Oodle\\EpicGames.Oodle.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Oodle\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1571,7 +1476,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1605,14 +1510,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Perforce\\EpicGames.Perforce.csproj",
         "projectName": "EpicGames.Perforce",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Perforce\\EpicGames.Perforce.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Perforce\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1639,7 +1544,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1679,14 +1584,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.ProjectStore\\EpicGames.ProjectStore.csproj",
         "projectName": "EpicGames.ProjectStore",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.ProjectStore\\EpicGames.ProjectStore.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.ProjectStore\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1719,7 +1624,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1753,14 +1658,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Serialization\\EpicGames.Serialization.csproj",
         "projectName": "EpicGames.Serialization",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Serialization\\EpicGames.Serialization.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Serialization\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1790,7 +1695,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1830,14 +1735,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UBA\\EpicGames.UBA.csproj",
         "projectName": "EpicGames.UBA",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UBA\\EpicGames.UBA.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UBA\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1860,7 +1765,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1904,14 +1809,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UHT\\EpicGames.UHT.csproj",
         "projectName": "EpicGames.UHT",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UHT\\EpicGames.UHT.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.UHT\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -1941,7 +1846,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -1981,14 +1886,14 @@
         "projectUniqueName": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj",
         "projectName": "UnrealBuildTool",
         "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj",
-        "packagesPath": "C:\\Users\\dahyu\\.nuget\\packages\\",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
         "outputPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\dahyu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -2036,7 +1941,7 @@
           ]
         },
         "restoreAuditProperties": {
-          "enableAudit": "true",
+          "enableAudit": "false",
           "auditLevel": "low",
           "auditMode": "direct"
         }
@@ -2094,6 +1999,100 @@
               "version": "[8.0.0, )"
             }
           },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Binaries\\ThirdParty\\DotNet\\8.0.300\\win-x64\\sdk\\8.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
+        "projectName": "Lyra.Automation",
+        "projectPath": "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\Lyra.Automation.csproj",
+        "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
+        "outputPath": "C:\\SecurityUE5\\LyraStarterGame\\Build\\Scripts\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\AutomationUtils\\AutomationUtils.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\CrowdinLocalization\\CrowdinLocalization.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Gauntlet\\Gauntlet.Automation.csproj",
+                "privateAssets": "all"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\Localization\\Localization.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\OneSkyLocalization\\OneSkyLocalization.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\SmartlingLocalization\\SmartlingLocalization.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\AutomationTool\\XLocLocalization\\XLocLocalization.Automation.csproj"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\Shared\\EpicGames.Core\\EpicGames.Core.csproj",
+                "privateAssets": "all"
+              },
+              "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj": {
+                "projectPath": "C:\\Program Files\\Epic Games\\UE_5.6\\Engine\\Source\\Programs\\UnrealBuildTool\\UnrealBuildTool.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "false",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
           "imports": [
             "net461",
             "net462",

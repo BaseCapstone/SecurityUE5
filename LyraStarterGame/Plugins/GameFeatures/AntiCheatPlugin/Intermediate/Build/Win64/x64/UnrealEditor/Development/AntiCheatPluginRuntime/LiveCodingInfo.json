@@ -2,8 +2,14 @@
 	"RemapUnityFiles": 
 	{
 		"Module.AntiCheatPluginRuntime.cpp.obj": [
+			"AntiCheatDataCollector.gen.cpp.obj",
+			"AntiCheatDataSender.gen.cpp.obj",
+			"AntiCheatPluginRuntime.init.gen.cpp.obj",
+			"PerModuleInline.gen.cpp.obj",
+			"AntiCheatDataSender.cpp.obj",
 			"AntiCheatPluginRuntimeModule.cpp.obj",
-			"PerModuleInline.gen.cpp.obj"
+			"AntiCheatDataCollector.cpp.obj",
+			"AntiCheatVulnerabilityComponent.cpp.obj"
 		]
 	}
 }

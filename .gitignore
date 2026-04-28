@@ -32,3 +32,18 @@
 /LyraStarterGame/UpgradeLog.htm
 /LyraStarterGame/Build/Windows/ChunkLayerInfo/
 /LyraStarterGame/Build/Windows/FileOpenOrder/
+
+# Debug symbols
+*.pdb
+
+# Unreal generated files
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+*.sln
+
+# C# / Automation build outputs
+/LyraStarterGame/Build/Scripts/obj/
+/LyraStarterGame/Build/Scripts/bin/

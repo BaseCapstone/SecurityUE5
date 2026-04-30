@@ -9,7 +9,6 @@ function initLoginModal() {
   
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
-  const forgotForm = document.getElementById('forgot-form');
 
   function openModal(view = 'login') {
     if (modal) {
@@ -26,7 +25,6 @@ function initLoginModal() {
       // Reset forms
       if (loginForm) loginForm.reset();
       if (registerForm) registerForm.reset();
-      if (forgotForm) forgotForm.reset();
     }
   }
 
@@ -179,32 +177,7 @@ function initLoginModal() {
     });
   }
 
-  // Forgot Form Submit (Mock)
-  if (forgotForm) {
-    forgotForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const id = document.getElementById('forgot-id').value.trim();
-      const name = document.getElementById('forgot-name').value.trim();
 
-      if (!id || !name) {
-        shakeElement(forgotForm);
-        return;
-      }
-
-      const submitBtn = document.getElementById('forgot-submit-btn');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = '확인 중...';
-      submitBtn.disabled = true;
-
-      // Mock
-      setTimeout(() => {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        showToast('임시 비밀번호가 발급되었습니다.', 'success');
-        switchAuthView('login');
-      }, 1000);
-    });
-  }
 }
 
 // 뷰 전환 함수 (글로벌 접근 가능)
@@ -232,9 +205,6 @@ window.switchAuthView = function(view) {
       } else if (view === 'register') {
         title.textContent = '회원가입';
         subtitle.textContent = '새로운 계정을 생성합니다';
-      } else if (view === 'forgot') {
-        title.textContent = '비밀번호 찾기';
-        subtitle.textContent = '계정 정보를 확인합니다';
       }
     }
   }

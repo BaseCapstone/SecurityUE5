@@ -52,18 +52,7 @@ function initLoginModal() {
       submitBtn.disabled = true;
 
       try {
-        // 관리자 하드코딩
-        if (id === 'admin' && pw === 'admin') {
-          setTimeout(() => {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            closeModal();
-            activateAdminMode();
-          }, 500);
-          return;
-        }
-
-        // 실제 API 호출
+        // 모든 로그인은 DB API를 통해 처리
         const response = await fetch('http://localhost:8000/api/auth/login', {
           method: 'POST',
           headers: {
@@ -77,7 +66,19 @@ function initLoginModal() {
         if (response.ok) {
           sessionStorage.setItem('token', data.token);
           sessionStorage.setItem('username', data.user.username);
-          showToast('로그인 성공! 환영합니다.', 'success');
+          sessionStorage.setItem('user_name', data.user.name);
+          sessionStorage.setItem('user_id', data.user.id);
+          sessionStorage.setItem('user_role', data.user.role || 'user');
+
+          // 관리자 계정이면 관리자 모드 활성화
+          if (data.user.role === 'admin') {
+            closeModal();
+            sessionStorage.setItem('lyra_admin', 'true');
+            activateAdminMode();
+            return;
+          }
+
+          showToast(`${data.user.name}님, 환영합니다!`, 'success');
           updateLoginState(data.user.username);
           closeModal();
         } else {
@@ -234,6 +235,9 @@ function updateLoginState(username) {
     document.getElementById('logout-btn').addEventListener('click', () => {
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('username');
+      sessionStorage.removeItem('user_name');
+      sessionStorage.removeItem('user_id');
+      sessionStorage.removeItem('user_role');
       location.reload();
     });
   }
@@ -242,7 +246,8 @@ function updateLoginState(username) {
 // 페이지 로드 시 로그인 상태 체크
 document.addEventListener('DOMContentLoaded', () => {
   const savedUser = sessionStorage.getItem('username');
-  if (savedUser && !sessionStorage.getItem('lyra_admin')) {
+  const savedRole = sessionStorage.getItem('user_role');
+  if (savedUser && !sessionStorage.getItem('lyra_admin') && savedRole !== 'admin') {
     updateLoginState(savedUser);
   }
 });

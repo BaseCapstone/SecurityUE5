@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, func, text, ForeignKey
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, func, text, ForeignKey
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 # .env 파일 로드
 load_dotenv()
@@ -24,5 +24,19 @@ class User(Base):
     name = Column(String(50), nullable=False)
     username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), default="user", nullable=False)  # "user" 또는 "admin"
     created_at = Column(DateTime, default=func.now())
     last_login = Column(DateTime, nullable=True)
+
+    # 관계 설정
+    game_logs = relationship("GameLog", back_populates="user")
+
+class GameLog(Base):
+    __tablename__ = "game_logs"
+    log_id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)  # 유저 연결 (nullable: 기존 로그 호환)
+    event_data = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+
+    # 관계 설정
+    user = relationship("User", back_populates="game_logs")

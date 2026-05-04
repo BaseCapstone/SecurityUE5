@@ -1062,6 +1062,44 @@
       </div>
       <h2 class="game-launch__title">게임 실행 중...</h2>
       <p class="game-launch__desc">Lyra 클라이언트를 시작하고 있습니다</p>
+
+      <!-- 유저 정보 표시 영역 -->
+      <div class="launch-user" id="launch-user-info" style="
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        min-width: 260px;
+      ">
+        <!-- JS에서 동적으로 채워짐 -->
+      </div>
+      <style>
+        .launch-user__avatar {
+          width: 40px; height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e52d27, #f97316);
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 800; font-size: 18px; color: white;
+          flex-shrink: 0;
+        }
+        .launch-user__details {
+          display: flex; flex-direction: column; gap: 2px; text-align: left;
+        }
+        .launch-user__name {
+          font-weight: 700; font-size: 15px; color: #f1f5f9;
+        }
+        .launch-user__id {
+          font-size: 12px; color: #64748b; font-family: var(--font-mono, monospace);
+        }
+        .launch-user__stat {
+          font-size: 11px; color: #94a3b8; margin-top: 2px;
+        }
+      </style>
+
       <div class="game-launch__progress">
         <div class="game-launch__progress-bar" id="launch-progress"></div>
       </div>

@@ -54,7 +54,7 @@ function initGameLaunch() {
 
   async function fetchUserProfileAndLaunch(token) {
     try {
-      const response = await fetch('http://localhost:8000/api/user/profile', {
+      const response = await fetch('/api/user/profile', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

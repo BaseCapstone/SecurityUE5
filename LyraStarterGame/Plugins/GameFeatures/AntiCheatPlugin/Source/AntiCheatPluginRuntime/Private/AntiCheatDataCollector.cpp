@@ -58,16 +58,29 @@ void UAntiCheatDataCollector::CollectAndlog()
     if (!PC) return; // 아직 조종 전이거나 봇이면 여기서 멈춤 (로그 안 뜸)
 
     // ==============================================================
-    // ★ 핵심 수정: 핵 컴포넌트는 모듈에 의해 '컨트롤러(PC)'에 붙어있습니다!
+    // 핵 컴포넌트는 모듈에 의해 컨트롤러(PC)에 붙어있습니다.
     // 따라서 Owner가 아닌 PC에서 찾아야 합니다.
     // ==============================================================
-    int32 CurrentLabel = 0;
+    int32 CurrentSpeedHack = 0;
+    int32 CurrentAim = 0;
+    int32 CurrentGodMode = 0;
+    int32 CurrentESP = 0;
+
     UAntiCheatVulnerabilityComponent* VulnComp = PC->FindComponentByClass<UAntiCheatVulnerabilityComponent>();
 
-    if (VulnComp && VulnComp->IsAnyHackActive())
+    if (VulnComp)
     {
-        CurrentLabel = 1; // 핵이 켜져있으면 1로 변경!
+        CurrentSpeedHack = VulnComp->IsSpeedHackEnabled() ? 1 : 0;
+        CurrentAim = VulnComp->IsAimHackEnabled() ? 1 : 0;
+        CurrentGodMode = VulnComp->IsGodModeEnabled() ? 1 : 0;
+        CurrentESP = VulnComp->IsESPEnabled() ? 1 : 0;
     }
+
+    const bool bAnyHackActive =
+        CurrentSpeedHack == 1 ||
+        CurrentAim == 1 ||
+        CurrentGodMode == 1 ||
+        CurrentESP == 1;
 
     // 3. 데이터 패킷 구성 (기존 동일)
     FAntiCheatDataPacket DataPacket;
@@ -121,8 +134,12 @@ void UAntiCheatDataCollector::CollectAndlog()
         DataPacket.bIsTargetVisible = !GetWorld()->LineTraceSingleByChannel(Hit, Owner->GetActorLocation(), BestTarget->GetActorLocation(), ECC_Visibility, Params);
     }
 
-    // 최종 라벨 저장
-    DataPacket.Label = CurrentLabel;
+    // 핵 종류별 활성 상태 저장
+    DataPacket.SpeedHack = CurrentSpeedHack;
+    DataPacket.Aim = CurrentAim;
+    DataPacket.GodMode = CurrentGodMode;
+    DataPacket.ESP = CurrentESP;
+
     PacketBuffer.Add(DataPacket);
 
     // 버퍼 전송 (AWS)
@@ -141,11 +158,20 @@ void UAntiCheatDataCollector::CollectAndlog()
     if (GEngine)
     {
         FString DataString = FString::Printf(TEXT("=== [AntiCheat Real-time Data] ===\n")
-            TEXT("Label (0=Normal, 1=Hack): %d\n")
+            TEXT("SpeedHack: %d | Aim: %d | GodMode: %d | ESP: %d\n")
             TEXT("Speed: %.1f | TargetDist: %.1f"),
-            CurrentLabel, DataPacket.Speed, DataPacket.TargetDistance);
+            DataPacket.SpeedHack,
+            DataPacket.Aim,
+            DataPacket.GodMode,
+            DataPacket.ESP,
+            DataPacket.Speed,
+            DataPacket.TargetDistance);
 
-        // 첫 번째 인자를 1로 주면 화면 한 곳에 깔끔하게 덮어쓰기 됨
-        GEngine->AddOnScreenDebugMessage(1, 0.5f, CurrentLabel == 1 ? FColor::Red : FColor::Cyan, DataString);
+        GEngine->AddOnScreenDebugMessage(
+            1,
+            0.5f,
+            bAnyHackActive ? FColor::Red : FColor::Cyan,
+            DataString
+        );
     }
 }

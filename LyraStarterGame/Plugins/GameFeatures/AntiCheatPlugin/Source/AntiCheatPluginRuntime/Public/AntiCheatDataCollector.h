@@ -41,7 +41,13 @@ struct FAntiCheatDataPacket
 
 	// 핵 사용 여부 (0: 정상, 1: 핵 사용)
 	UPROPERTY()
-	int32 Label;
+	int32 SpeedHack = 0;
+	UPROPERTY()
+	int32 Aim = 0;
+	UPROPERTY()
+	int32 GodMode = 0;
+	UPROPERTY()
+	int32 ESP = 0;
 };
 
 // 플레이어 캐릭터 또는 컨트롤러에 부착되어 안티치트 데이터를 주기적으로 수집하는 컴포넌트

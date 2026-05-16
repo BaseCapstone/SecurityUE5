@@ -13,6 +13,10 @@
 #include "Character/LyraHealthComponent.h" 
 #include "CollisionQueryParams.h"
 #include "EngineUtils.h"
+#include "GameFramework/GameStateBase.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayTagContainer.h"
 
 UAntiCheatDataCollector::UAntiCheatDataCollector()
 {
@@ -55,7 +59,28 @@ void UAntiCheatDataCollector::CollectAndlog()
 
     // 2. 이 캐릭터를 조종하는 컨트롤러(PC) 가져오기
     APlayerController* PC = Cast<APlayerController>(PawnOwner->GetController());
-    if (!PC) return; // 아직 조종 전이거나 봇이면 여기서 멈춤 (로그 안 뜸)
+    if (!PC) return;
+
+    // 게임 대기시간 / 정상 무적 상태 / 매치 전후에는 로그 수집 및 전송 금지
+    if (!ShouldCollectTrainingLog(PawnOwner))
+    {
+        PacketBuffer.Reset();
+
+        bHasLastControlRotation = false;
+        LastControlRotation = FRotator::ZeroRotator;
+
+        if (GEngine)
+        {
+            GEngine->AddOnScreenDebugMessage(
+                2,
+                0.5f,
+                FColor::Yellow,
+                TEXT("[AntiCheat] Waiting or DamageImmune - log collection paused")
+            );
+        }
+
+        return;
+    }
 
     // ==============================================================
     // 핵 컴포넌트는 모듈에 의해 컨트롤러(PC)에 붙어있습니다.
@@ -83,7 +108,8 @@ void UAntiCheatDataCollector::CollectAndlog()
         CurrentESP == 1;
 
     // 3. 데이터 패킷 구성 (기존 동일)
-    FAntiCheatDataPacket DataPacket;
+    FAntiCheatDataPacket DataPacket{};
+    DataPacket.CurrentHP = 0.0f;
     DataPacket.UserID = PC->PlayerState ? PC->PlayerState->GetPlayerName() : TEXT("UnknownPlayer");
     DataPacket.Timestamp = GetWorld()->GetTimeSeconds();
     DataPacket.Location = Owner->GetActorLocation();
@@ -91,7 +117,19 @@ void UAntiCheatDataCollector::CollectAndlog()
 
     FRotator CurrentRotation = PC->GetControlRotation();
     DataPacket.Rotation = CurrentRotation;
-    DataPacket.DeltaRotation = CurrentRotation - LastControlRotation;
+
+    if (!bHasLastControlRotation)
+    {
+        DataPacket.DeltaRotation = FRotator::ZeroRotator;
+        bHasLastControlRotation = true;
+    }
+    else
+    {
+        FRotator Delta = CurrentRotation - LastControlRotation;
+        Delta.Normalize();
+        DataPacket.DeltaRotation = Delta;
+    }
+
     LastControlRotation = CurrentRotation;
 
     if (const ULyraHealthComponent* HealthComp = Owner->FindComponentByClass<ULyraHealthComponent>())
@@ -143,7 +181,7 @@ void UAntiCheatDataCollector::CollectAndlog()
     PacketBuffer.Add(DataPacket);
 
     // 버퍼 전송 (AWS)
-    if (PacketBuffer.Num() >= 30) // MaxBufferSize(30)
+    if (PacketBuffer.Num() >= MaxBufferSize) // MaxBufferSize(30)
     {
         if (DataSender)
         {
@@ -174,4 +212,72 @@ void UAntiCheatDataCollector::CollectAndlog()
             DataString
         );
     }
+}
+
+bool UAntiCheatDataCollector::HasLyraDamageImmunity(const APawn* PawnOwner) const
+{
+    if (!IsValid(PawnOwner))
+    {
+        return true;
+    }
+
+    UAbilitySystemComponent* ASC =
+        UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PawnOwner);
+
+    if (!IsValid(ASC))
+    {
+        return true;
+    }
+
+    static const FGameplayTag DamageImmunityTag =
+        FGameplayTag::RequestGameplayTag(FName("Gameplay.DamageImmunity"), false);
+
+    if (!DamageImmunityTag.IsValid())
+    {
+        return false;
+    }
+
+    return ASC->HasMatchingGameplayTag(DamageImmunityTag);
+}
+
+bool UAntiCheatDataCollector::ShouldCollectTrainingLog(const APawn* PawnOwner)
+{
+    UWorld* World = GetWorld();
+    if (!IsValid(World) || World->bIsTearingDown)
+    {
+        return false;
+    }
+
+    AGameStateBase* GameState = World->GetGameState<AGameStateBase>();
+    if (!IsValid(GameState))
+    {
+        return false;
+    }
+
+    // 매치가 아직 시작되지 않았거나 이미 끝났으면 수집하지 않음
+    if (!GameState->HasMatchStarted() || GameState->HasMatchEnded())
+    {
+        LogCollectionStartTime = -1.0f;
+        return false;
+    }
+
+    // Lyra 대기시간 정상 무적 태그가 남아 있으면 수집하지 않음
+    if (HasLyraDamageImmunity(PawnOwner))
+    {
+        LogCollectionStartTime = -1.0f;
+        return false;
+    }
+
+    // 무적 태그가 사라진 직후 0.5~1초 정도만 안정화 대기
+    if (LogCollectionStartTime < 0.0f)
+    {
+        LogCollectionStartTime = World->GetTimeSeconds() + PostImmunityGraceSeconds;
+    }
+
+    if (World->GetTimeSeconds() < LogCollectionStartTime)
+    {
+        return false;
+    }
+
+    return true;
 }

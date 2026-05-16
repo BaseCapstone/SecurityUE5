@@ -3,6 +3,8 @@
 #include "Components/ActorComponent.h"
 #include "AntiCheatDataCollector.generated.h"
 
+class APawn;
+
 USTRUCT(BlueprintType)
 // 플레이어 데이터 패킷 구조체
 struct FAntiCheatDataPacket
@@ -72,6 +74,23 @@ private:
 
 	// 에임봇 탐지를 위해 이전 수집 시점의 회전값을 임시로 저장하는 변수
 	FRotator LastControlRotation;
+
+	// 첫 수집 시 DeltaRotation이 비정상적으로 튀는 것을 방지
+	bool bHasLastControlRotation = false;
+
+	// 실제 로그 수집을 시작해도 되는 월드 시간
+	float LogCollectionStartTime = -1.0f;
+
+	// 정상 무적 태그가 사라진 뒤 약간만 더 기다릴 시간
+	// 너무 길게 잡지 말 것. 0.5~1.0초 정도면 충분
+	UPROPERTY(EditAnywhere, Category = "AntiCheat")
+	float PostImmunityGraceSeconds = 1.0f;
+
+	// 현재 Pawn이 Lyra 대기시간 무적 상태인지 확인
+	bool HasLyraDamageImmunity(const APawn* PawnOwner) const;
+
+	// 현재 시점에 학습용 로그를 수집해도 되는지 검사
+	bool ShouldCollectTrainingLog(const APawn* PawnOwner);
 
 	// 현재 플레이어의 상태를 FAntiCheatDataPacket에 담아 로그로 기록하거나 서버로 전송
 	UFUNCTION()

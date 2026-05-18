@@ -38,7 +38,7 @@ pause
 reg add "%REG_ROOT%" /ve /t REG_SZ /d "URL:LyraGame Protocol" /f
 reg add "%REG_ROOT%" /v "URL Protocol" /t REG_SZ /d "" /f
 reg add "%REG_ROOT%\DefaultIcon" /ve /t REG_SZ /d "\"%GAME_PATH%\",0" /f
-reg add "%REG_ROOT%\shell\open\command" /ve /t REG_SZ /d "\"%LAUNCHER%\" \"%%1\"" /f
+reg add "%REG_ROOT%\shell\open\command" /ve /t REG_SZ /d "\"%ComSpec%\" /c \"\"%LAUNCHER%\" \"%%1\"\"" /f
 
 echo.
 echo ==========================================

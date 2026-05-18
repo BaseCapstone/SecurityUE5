@@ -160,36 +160,72 @@ async function initUserManagement() {
 /**
  * 관리자 - 사용자 상세 모달 열기 (임시 데이터 렌더링)
  */
-function openAdminUserModal(data) {
+async function openAdminUserModal(data) {
   const modal = document.getElementById('admin-user-modal');
   document.getElementById('admin-user-title').textContent = data.nicknameDisplay;
   document.getElementById('admin-user-id').textContent = data.idDisplay;
   document.getElementById('admin-user-score').textContent = data.scoreDisplay;
   
-  // 상태에 따른 로그 프레임워크 표시
   const logList = document.getElementById('admin-user-log-list');
-  logList.innerHTML = '';
+  logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
   
-  // 더미 로그 생성 (점수나 상태에 따라 유동적으로 표시)
-  let logs = [];
-  if(data.score < 50) {
-    logs.push({ time: '18:24', msg: '에임봇 패턴 의심 (정확도 비정상)', type: 'danger' });
-    logs.push({ time: '17:10', msg: '비정상 이동 속도 감지', type: 'warning' });
-  } else if (data.score < 80) {
-    logs.push({ time: '15:20', msg: '짧은 시간 다수 킬 발생 (모니터링)', type: 'warning' });
-  } else {
-    logs.push({ time: '12:00', msg: '정상적인 플레이 패턴 확인', type: 'info' });
-  }
-
-  logs.forEach(log => {
-    const li = document.createElement('li');
-    li.className = `admin-log__item admin-log__item--${log.type}`;
-    li.innerHTML = `
-      <span class="admin-log__time">${log.time}</span>
-      <span class="admin-log__msg">${log.msg}</span>
-    `;
-    logList.appendChild(li);
-  });
-
   modal.classList.add('is-active');
+
+  const userId = data.id.replace('#', '');
+  const token = sessionStorage.getItem('token');
+  
+  try {
+    const response = await fetch(`/api/admin/users/${userId}/logs`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      logList.innerHTML = '';
+      
+      if (result.logs.length === 0) {
+        logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 게임 로그가 없습니다.</span></li>';
+        return;
+      }
+
+      result.logs.forEach(log => {
+        const time = new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        
+        let events = Array.isArray(log.event_data) ? log.event_data : [log.event_data];
+        
+        events.forEach(evt => {
+            let msg = '정상적인 플레이 패턴 확인';
+            let type = 'info';
+            
+            // 핵 감지 로직 적용
+            if (evt.SpeedHack === 1 || evt.Aim === 1 || evt.GodMode === 1 || evt.ESP === 1) {
+                let hacks = [];
+                if (evt.SpeedHack === 1) hacks.push('스피드핵');
+                if (evt.Aim === 1) hacks.push('에임핵');
+                if (evt.GodMode === 1) hacks.push('무적핵');
+                if (evt.ESP === 1) hacks.push('ESP');
+                msg = `비정상 프로그램 의심 (${hacks.join(', ')})`;
+                type = 'danger';
+            } else if (evt.Speed > 1000) {
+                msg = `비정상적인 이동 속도 감지 (속도: ${evt.Speed.toFixed(1)})`;
+                type = 'warning';
+            } else {
+                msg = `일반 플레이 로그 기록 (속도: ${evt.Speed ? evt.Speed.toFixed(1) : 0})`;
+            }
+
+            const li = document.createElement('li');
+            li.className = `admin-log__item admin-log__item--${type}`;
+            li.innerHTML = `
+              <span class="admin-log__time">${time}</span>
+              <span class="admin-log__msg">${msg}</span>
+            `;
+            logList.appendChild(li);
+        });
+      });
+    } else {
+      logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">데이터를 불러오지 못했습니다.</span></li>';
+    }
+  } catch (error) {
+    logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
+  }
 }

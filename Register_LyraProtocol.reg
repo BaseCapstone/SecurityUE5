@@ -1,15 +1,15 @@
 Windows Registry Editor Version 5.00
 
-[HKEY_CLASSES_ROOT\lyragame]
+[HKEY_CURRENT_USER\Software\Classes\lyragame]
 @="URL:LyraGame Protocol"
 "URL Protocol"=""
 
-[HKEY_CLASSES_ROOT\lyragame\DefaultIcon]
-@="\"C:\\Capstone\\sample\\Windows\\LyraGame.exe\",0"
+[HKEY_CURRENT_USER\Software\Classes\lyragame\DefaultIcon]
+@="\"C:\\Path\\To\\LyraGame.exe\",0"
 
-[HKEY_CLASSES_ROOT\lyragame\shell]
+[HKEY_CURRENT_USER\Software\Classes\lyragame\shell]
 
-[HKEY_CLASSES_ROOT\lyragame\shell\open]
+[HKEY_CURRENT_USER\Software\Classes\lyragame\shell\open]
 
-[HKEY_CLASSES_ROOT\lyragame\shell\open\command]
-@="\"C:\\Capstone\\SecurityUE5\\Launch_LyraGame.bat\" \"%1\""
+[HKEY_CURRENT_USER\Software\Classes\lyragame\shell\open\command]
+@="\"C:\\Path\\To\\Launch_LyraGame.bat\" \"%1\""

@@ -1,6 +1,3 @@
-/* ═════════════════════════
-   GAME LAUNCH
-   ═════════════════════════ */
 function initGameLaunch() {
   const gameStartBtns = document.querySelectorAll('#game-start-btn, #mobile-game-start');
   const overlay = document.getElementById('game-launch-overlay');
@@ -9,50 +6,52 @@ function initGameLaunch() {
   let launchTimer = null;
 
   function startLaunch() {
-    // ── 로그인 여부 체크 ──
     const token = sessionStorage.getItem('token');
     const isAdmin = sessionStorage.getItem('lyra_admin') === 'true';
 
     if (!token && !isAdmin) {
-      // 비로그인 상태 → 로그인 모달 자동 오픈
-      showToast('게임을 실행하려면 먼저 로그인해주세요.', 'warning');
+      showToast('Please log in before starting the game.', 'warning');
       const loginBtn = document.getElementById('login-btn');
       if (loginBtn) loginBtn.click();
       return;
     }
 
     if (isAdmin) {
-      showToast('관리자 계정으로는 게임을 실행할 수 없습니다.', 'warning');
+      showToast('Admin accounts cannot start the game client.', 'warning');
       return;
     }
 
-    // ── 로그인 유저 정보 표시 ──
-    const username = sessionStorage.getItem('username') || '알 수 없음';
-    const userName = sessionStorage.getItem('user_name') || '';
-    const userId = sessionStorage.getItem('user_id') || '';
+    updateLaunchUserFromSession();
 
-    const userInfoEl = document.getElementById('launch-user-info');
-    if (userInfoEl) {
-      userInfoEl.innerHTML = `
-        <div class="launch-user__avatar">${username.charAt(0).toUpperCase()}</div>
-        <div class="launch-user__details">
-          <span class="launch-user__name">${userName || username}</span>
-          <span class="launch-user__id">@${username} (ID: ${userId})</span>
-        </div>
-      `;
-      userInfoEl.style.display = 'flex';
-    }
-
-    // ── 유저 프로필 API 호출 후 게임 실행 ──
     if (overlay) {
       overlay.classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
 
-    fetchUserProfileAndLaunch(token);
+    launchGameClient(token);
+    fetchUserProfile(token);
+    animateProgress();
   }
 
-  async function fetchUserProfileAndLaunch(token) {
+  function updateLaunchUserFromSession() {
+    const username = sessionStorage.getItem('username') || 'Player';
+    const userName = sessionStorage.getItem('user_name') || '';
+    const userId = sessionStorage.getItem('user_id') || '';
+    const userInfoEl = document.getElementById('launch-user-info');
+
+    if (!userInfoEl) return;
+
+    userInfoEl.innerHTML = `
+      <div class="launch-user__avatar">${username.charAt(0).toUpperCase()}</div>
+      <div class="launch-user__details">
+        <span class="launch-user__name">${userName || username}</span>
+        <span class="launch-user__id">@${username} (ID: ${userId})</span>
+      </div>
+    `;
+    userInfoEl.style.display = 'flex';
+  }
+
+  async function fetchUserProfile(token) {
     try {
       const response = await fetch('/api/user/profile', {
         method: 'GET',
@@ -61,41 +60,55 @@ function initGameLaunch() {
         }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        // 프로필 정보 업데이트
-        const userInfoEl = document.getElementById('launch-user-info');
-        if (userInfoEl) {
-          const u = data.user;
-          userInfoEl.innerHTML = `
-            <div class="launch-user__avatar">${u.username.charAt(0).toUpperCase()}</div>
-            <div class="launch-user__details">
-              <span class="launch-user__name">${u.name}</span>
-              <span class="launch-user__id">@${u.username} (ID: ${u.id})</span>
-              <span class="launch-user__stat">게임 로그: ${data.game_stats.total_logs}건</span>
-            </div>
-          `;
-        }
-      }
-    } catch (error) {
-      console.warn('프로필 조회 실패 (게임 실행은 진행):', error);
-    }
+      if (!response.ok) return;
 
-    // 프로필 조회 결과와 관계없이 게임 실행 진행
-    animateProgress();
+      const data = await response.json();
+      const userInfoEl = document.getElementById('launch-user-info');
+      if (!userInfoEl || !data.user) return;
+
+      const user = data.user;
+      const totalLogs = data.game_stats ? data.game_stats.total_logs : 0;
+      userInfoEl.innerHTML = `
+        <div class="launch-user__avatar">${user.username.charAt(0).toUpperCase()}</div>
+        <div class="launch-user__details">
+          <span class="launch-user__name">${user.name}</span>
+          <span class="launch-user__id">@${user.username} (ID: ${user.id})</span>
+          <span class="launch-user__stat">Game logs: ${totalLogs}</span>
+        </div>
+      `;
+    } catch (error) {
+      console.warn('Profile fetch failed, continuing game launch:', error);
+    }
+  }
+
+  function launchGameClient(token) {
+    const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}`;
+    const iframe = document.createElement('iframe');
+
+    iframe.style.display = 'none';
+    iframe.src = launchUrl;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+    }, 1000);
   }
 
   function cancelLaunch() {
     if (overlay) {
       overlay.classList.remove('is-open');
       document.body.style.overflow = '';
-      if (launchTimer) clearInterval(launchTimer);
-      if (progressBar) progressBar.style.width = '0%';
     }
+
+    if (launchTimer) clearInterval(launchTimer);
+    launchTimer = null;
+
+    if (progressBar) progressBar.style.width = '0%';
   }
 
   function animateProgress() {
     let progress = 0;
+    if (launchTimer) clearInterval(launchTimer);
     if (progressBar) progressBar.style.width = '0%';
 
     launchTimer = setInterval(() => {
@@ -103,24 +116,16 @@ function initGameLaunch() {
       if (progress >= 100) {
         progress = 100;
         clearInterval(launchTimer);
+        launchTimer = null;
         if (progressBar) progressBar.style.width = '100%';
 
         setTimeout(() => {
           cancelLaunch();
-          const username = sessionStorage.getItem('username') || '';
-          showToast(`${username}님, 게임 클라이언트가 실행되었습니다!`, 'success');
-          
-          // 커스텀 프로토콜을 iframe으로 실행하여 브라우저 팝업 차단을 우회
-          const token = sessionStorage.getItem('token') || '';
-          const iframe = document.createElement('iframe');
-          iframe.style.display = 'none';
-          iframe.src = `lyragame://launch?token=${token}`;
-          document.body.appendChild(iframe);
-          
-          // 1초 뒤 iframe 제거
-          setTimeout(() => document.body.removeChild(iframe), 1000);
+          const username = sessionStorage.getItem('username') || 'Player';
+          showToast(`${username}'s game client launch request was sent.`, 'success');
         }, 500);
       }
+
       if (progressBar) progressBar.style.width = progress + '%';
     }, 200);
   }

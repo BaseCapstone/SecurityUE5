@@ -83,15 +83,7 @@ function initGameLaunch() {
 
   function launchGameClient(token) {
     const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}`;
-    const iframe = document.createElement('iframe');
-
-    iframe.style.display = 'none';
-    iframe.src = launchUrl;
-    document.body.appendChild(iframe);
-
-    setTimeout(() => {
-      if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
-    }, 1000);
+    window.location.href = launchUrl;
   }
 
   function cancelLaunch() {

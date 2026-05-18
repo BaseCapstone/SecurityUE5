@@ -109,6 +109,16 @@ function initGameLaunch() {
           cancelLaunch();
           const username = sessionStorage.getItem('username') || '';
           showToast(`${username}님, 게임 클라이언트가 실행되었습니다!`, 'success');
+          
+          // 커스텀 프로토콜을 iframe으로 실행하여 브라우저 팝업 차단을 우회
+          const token = sessionStorage.getItem('token') || '';
+          const iframe = document.createElement('iframe');
+          iframe.style.display = 'none';
+          iframe.src = `lyragame://launch?token=${token}`;
+          document.body.appendChild(iframe);
+          
+          // 1초 뒤 iframe 제거
+          setTimeout(() => document.body.removeChild(iframe), 1000);
         }, 500);
       }
       if (progressBar) progressBar.style.width = progress + '%';

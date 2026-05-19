@@ -334,6 +334,36 @@ async def get_all_users(
     
     return {"users": result, "total": len(result)}
 
+@app.get("/api/admin/users/{user_id}/logs")
+async def get_user_logs_for_admin(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """관리자 전용 — 특정 유저의 실제 게임 로그 반환."""
+    logs = db.query(GameLog).filter(
+        GameLog.user_id == user_id
+    ).order_by(GameLog.created_at.desc()).limit(100).all()
+    
+    result = []
+    for log in logs:
+        raw = log.event_data
+        if isinstance(raw, str):
+            try:
+                event_data = json.loads(raw)
+            except json.JSONDecodeError:
+                event_data = raw
+        else:
+            event_data = raw
+        
+        result.append({
+            "log_id": log.log_id,
+            "event_data": event_data,
+            "created_at": str(log.created_at)
+        })
+    
+    return {"user_id": user_id, "logs": result, "total": len(result)}
+
 # ═══════════════════════════════════════════════════
 # 서버 시작 시 테이블 자동 생성
 # ═══════════════════════════════════════════════════

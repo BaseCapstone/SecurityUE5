@@ -18,9 +18,16 @@ data_lists = []
 
 print(f"로그 처리 시작...")
 
-for log_id in range(5,10000):
+# 로그 아이디 범위는 첫 로그부터 마지막 로그까지 탐색
+# 로그 아이디는 1부터 시작하나 중간에 삭제되면 300번 로그가 시작일 수 있음
+# 가정이 아닌 실제 로그 아이디 범위를 받아오도록
+
+first_log_id = 3800
+length = 21645
+
+for log_id in range(first_log_id, first_log_id + length):
     print(f"{log_id}번 로그 처리 중...")
-    response = requests.get(f"https://perfectly-curdle-gecko.ngrok-free.dev/api/log?logId={log_id}")
+    response = requests.get(f"http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/logs?logId={log_id}")
 
     if response.status_code != 200:
         print("로그 가져오기 실패:", response.status_code)
@@ -37,8 +44,13 @@ for log_id in range(5,10000):
         print(f"{log_id}번 로그는 데이터 개수가 30개가 아니라서 넘어갑니다.")
         continue
 
+    current_speedLabel = datas[0]["speedHack"]
+    current_godLabel = datas[0]["godMode"]
+    current_espLabel = datas[0]["eSP"]
+    current_aimLabel = datas[0]["aim"]
+
     current_time = datas[0]["timestamp"]
-    current_label = datas[0]["label"]
+    
 
     data_list = []
     err = False
@@ -47,9 +59,12 @@ for log_id in range(5,10000):
         userId = data["userId"]
         timestamp = data["timestamp"]
 
-        label = data["label"]
+        speedLabel = data["speedHack"]
+        godLabel = data["godMode"]
+        espLabel = data["eSP"]
+        aimLabel = data["aim"]
 
-        if current_time > timestamp or current_label != label:
+        if current_time > timestamp or not (current_speedLabel == speedLabel and current_godLabel == godLabel and current_espLabel == espLabel and current_aimLabel == aimLabel):
             err = True
             print("리스트의 순서가 틀리거나 핵 사용 여부가 변경되어 해당 데이터는 넘어갑니다.")
             break
@@ -88,7 +103,7 @@ for log_id in range(5,10000):
             distance,
             angle,
             visible,
-            label
+            speedLabel, godLabel, espLabel, aimLabel
         ])
 
         print(
@@ -105,8 +120,8 @@ data_folder = "data/"
 with open(data_folder + "output.jsonl", "w", encoding="utf-8") as f:
     for data_list in data_lists:
         obj = {
-            "frames": [row[:-1] for row in data_list],
-            "label": data_list[0][-1]
+            "frames": [row[:-4] for row in data_list],
+            "label": data_list[0][-4:]
         }
         f.write(json.dumps(obj) + "\n")
 

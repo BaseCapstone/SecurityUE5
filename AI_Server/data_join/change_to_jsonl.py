@@ -30,7 +30,7 @@ def write_jsonl_split(json_iterable, base_filename="output", max_lines=10000):
 # 디비와의 통신 GET
 app = FastAPI()
 
-response = requests.get(f"http://~~~~ 디비 주소/api/log/{log_id}")
+response = requests.get(f"http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com/api/log/{log_id}")
 
 if response.status_code == 200:
     data = response.json()

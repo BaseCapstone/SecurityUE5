@@ -103,6 +103,10 @@ private:
 	// AWS로 보내기 전 데이터를 임시로 쌓아둘 배열 (버퍼)
 	TArray<FAntiCheatDataPacket> PacketBuffer;
 
+	// DB user id and short-lived game JWT passed by the web launcher.
+	FString LinkedUserID;
+	FString GameAuthToken;
+
 	// 몇 개가 쌓이면 보낼 것인지 (현재: 0.1초 x 30개 = 3초 단위로 전송)
 	const int32 MaxBufferSize = 30;
 

@@ -5,7 +5,7 @@
 #include "JsonObjectConverter.h"
 #include "Serialization/JsonSerializer.h" 
 
-void UAntiCheatDataSender::SendDataToAWS(const TArray<FAntiCheatDataPacket>& PacketList, const FString& EndpointURL)
+void UAntiCheatDataSender::SendDataToAWS(const TArray<FAntiCheatDataPacket>& PacketList, const FString& EndpointURL, const FString& GameAuthToken)
 {
 	if (PacketList.IsEmpty()) return;
 
@@ -45,6 +45,10 @@ void UAntiCheatDataSender::SendDataToAWS(const TArray<FAntiCheatDataPacket>& Pac
 	Request->SetURL(EndpointURL);
 	Request->SetVerb("POST");
 	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	if (!GameAuthToken.IsEmpty())
+	{
+		Request->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *GameAuthToken));
+	}
 
 	// 변환된 JSON 리스트 데이터를 바디에 적재
 	Request->SetContentAsString(JsonString);

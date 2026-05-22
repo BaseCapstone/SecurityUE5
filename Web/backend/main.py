@@ -27,6 +27,7 @@ import os
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "lyra_shield_secret_key_change_me")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+GAME_TOKEN_EXPIRE_HOURS = 6
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,6 +46,21 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def decode_bearer_token(authorization: Optional[str]) -> dict:
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Login is required.")
+
+    parts = authorization.split()
+    if len(parts) != 2 or parts[0].lower() != "bearer":
+        raise HTTPException(status_code=401, detail="Invalid authorization format.")
+
+    try:
+        return jwt.decode(parts[1], SECRET_KEY, algorithms=[ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired.")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token.")
 
 def mask_string(s: str, visible: int = 2) -> str:
     """문자열의 앞 visible글자만 보여주고 나머지를 *로 마스킹합니다."""
@@ -113,6 +129,25 @@ def get_current_user(
     
     return user
 
+def get_current_game_user(
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+) -> User:
+    payload = decode_bearer_token(authorization)
+    if payload.get("token_type") != "game":
+        raise HTTPException(status_code=401, detail="Game token is required.")
+
+    user_id = payload.get("user_id")
+    username = payload.get("sub")
+    if user_id is None or username is None:
+        raise HTTPException(status_code=401, detail="Invalid game token.")
+
+    user = db.query(User).filter(User.id == user_id, User.username == username).first()
+    if user is None:
+        raise HTTPException(status_code=401, detail="User not found.")
+
+    return user
+
 # ═══════════════════════════════════════════════════
 # 인증 API (회원가입 / 로그인)
 # ═══════════════════════════════════════════════════
@@ -173,6 +208,36 @@ async def login_user(login_data: LoginSchema, db: Session = Depends(get_db)):
 # ═══════════════════════════════════════════════════
 # 유저 프로필 / 게임 데이터 API (로그인 필수)
 # ═══════════════════════════════════════════════════
+
+@app.post("/api/auth/game-token")
+async def issue_game_token(current_user: User = Depends(get_current_user)):
+    """Issue a short-lived JWT for the game client after web login."""
+    if current_user.role == "admin":
+        raise HTTPException(status_code=403, detail="Admin accounts cannot start the game client.")
+
+    expires_delta = timedelta(hours=GAME_TOKEN_EXPIRE_HOURS)
+    expires_at = datetime.utcnow() + expires_delta
+    game_token = create_access_token(
+        data={
+            "sub": current_user.username,
+            "user_id": current_user.id,
+            "role": current_user.role,
+            "token_type": "game"
+        },
+        expires_delta=expires_delta
+    )
+
+    return {
+        "game_token": game_token,
+        "token_type": "Bearer",
+        "expires_at": expires_at.isoformat() + "Z",
+        "expires_in_seconds": int(expires_delta.total_seconds()),
+        "user": {
+            "id": current_user.id,
+            "username": current_user.username,
+            "name": current_user.name
+        }
+    }
 
 @app.get("/api/user/profile")
 async def get_user_profile(
@@ -261,7 +326,7 @@ async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
 @app.post("/api/logs", status_code=status.HTTP_201_CREATED)
 async def save_game_log(
     log_data: list = Body(...),
-    authorization: Optional[str] = Header(None),
+    current_user: User = Depends(get_current_game_user),
     db: Session = Depends(get_db)
 ):
     """게임 로그를 저장합니다. 인증된 유저면 user_id를 함께 저장합니다."""
@@ -269,25 +334,10 @@ async def save_game_log(
         if not log_data:
             raise HTTPException(status_code=400, detail="Empty log data")
 
-        # 인증된 유저가 있으면 user_id 연결
-        user_id = None
-        if authorization:
-            try:
-                parts = authorization.split()
-                if len(parts) == 2 and parts[0].lower() == "bearer":
-                    payload = jwt.decode(parts[1], SECRET_KEY, algorithms=[ALGORITHM])
-                    username = payload.get("sub")
-                    if username:
-                        user = db.query(User).filter(User.username == username).first()
-                        if user:
-                            user_id = user.id
-            except Exception:
-                pass  # 인증 실패해도 로그 저장은 진행
-
         event_data_json = json.dumps(log_data)
         
         new_log = GameLog(
-            user_id=user_id,
+            user_id=current_user.id,
             event_data=event_data_json
         )
         db.add(new_log)
@@ -299,7 +349,7 @@ async def save_game_log(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "로그 데이터 저장 완료", "user_id": user_id}
+    return {"message": "Log data saved", "user_id": current_user.id}
 
 # ═══════════════════════════════════════════════════
 # 관리자 전용 API (role='admin' 필수)

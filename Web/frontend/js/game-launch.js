@@ -5,7 +5,7 @@ function initGameLaunch() {
   const progressBar = document.getElementById('launch-progress');
   let launchTimer = null;
 
-  function startLaunch() {
+  async function startLaunch() {
     const token = sessionStorage.getItem('token');
     const isAdmin = sessionStorage.getItem('lyra_admin') === 'true';
 
@@ -28,9 +28,16 @@ function initGameLaunch() {
       document.body.style.overflow = 'hidden';
     }
 
-    launchGameClient(token);
-    fetchUserProfile(token);
-    animateProgress();
+    try {
+      const launchSession = await fetchGameLaunchSession(token);
+      launchGameClient(launchSession);
+      fetchUserProfile(token);
+      animateProgress();
+    } catch (error) {
+      console.error('Game token request failed:', error);
+      showToast(error.message || 'Failed to prepare the game session.', 'error');
+      cancelLaunch();
+    }
   }
 
   function updateLaunchUserFromSession() {
@@ -81,8 +88,27 @@ function initGameLaunch() {
     }
   }
 
-  function launchGameClient(token) {
-    const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}`;
+  async function fetchGameLaunchSession(token) {
+    const response = await fetch('/api/auth/game-token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.detail || 'Failed to issue game token.');
+    }
+
+    return {
+      token: data.game_token,
+      userId: data.user ? data.user.id : sessionStorage.getItem('user_id')
+    };
+  }
+
+  function launchGameClient({ token, userId }) {
+    const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}&user_id=${encodeURIComponent(userId || '')}`;
     window.location.href = launchUrl;
   }
 

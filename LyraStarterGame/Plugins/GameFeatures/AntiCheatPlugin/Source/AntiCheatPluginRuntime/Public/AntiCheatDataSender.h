@@ -14,7 +14,7 @@ class ANTICHEATPLUGINRUNTIME_API UAntiCheatDataSender : public UObject
 
 public:
 	// 리스트로 모인 데이터를 AWS 엔드 포인트로 전송
-	void SendDataToAWS(const TArray<FAntiCheatDataPacket>& PacketList, const FString& EndpointURL);
+	void SendDataToAWS(const TArray<FAntiCheatDataPacket>& PacketList, const FString& EndpointURL, const FString& GameAuthToken);
 
 private: 
 	// HTTP 요청이 완료되었을 때 호출되는 콜백 함수

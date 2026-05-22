@@ -17,6 +17,8 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "GameplayTagContainer.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 UAntiCheatDataCollector::UAntiCheatDataCollector()
 {
@@ -29,6 +31,14 @@ void UAntiCheatDataCollector::BeginPlay()
     Super::BeginPlay();
 
     DataSender = NewObject<UAntiCheatDataSender>(this);
+
+    FParse::Value(FCommandLine::Get(), TEXT("GameUserId="), LinkedUserID);
+    FParse::Value(FCommandLine::Get(), TEXT("GameAuthToken="), GameAuthToken);
+
+    if (LinkedUserID.IsEmpty())
+    {
+        LinkedUserID = TEXT("UnknownUser");
+    }
 
     // 0.1초마다 데이터 수집 실행
     if (GetWorld())
@@ -110,7 +120,7 @@ void UAntiCheatDataCollector::CollectAndlog()
     // 3. 데이터 패킷 구성 (기존 동일)
     FAntiCheatDataPacket DataPacket{};
     DataPacket.CurrentHP = 0.0f;
-    DataPacket.UserID = PC->PlayerState ? PC->PlayerState->GetPlayerName() : TEXT("UnknownPlayer");
+    DataPacket.UserID = LinkedUserID;
     DataPacket.Timestamp = GetWorld()->GetTimeSeconds();
     DataPacket.Location = Owner->GetActorLocation();
     DataPacket.Speed = Owner->GetVelocity().Size();
@@ -185,7 +195,7 @@ void UAntiCheatDataCollector::CollectAndlog()
     {
         if (DataSender)
         {
-            DataSender->SendDataToAWS(PacketBuffer, AWSEndpointURL); // AWSEndpointURL 변수가 헤더에 있어야 함
+            DataSender->SendDataToAWS(PacketBuffer, AWSEndpointURL, GameAuthToken); // AWSEndpointURL 변수가 헤더에 있어야 함
         }
         PacketBuffer.Reset();
     }

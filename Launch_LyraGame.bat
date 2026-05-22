@@ -51,5 +51,5 @@ if not defined GAME_EXE (
 for %%I in ("%GAME_EXE%") do set "GAME_DIR=%%~dpI"
 cd /d "%GAME_DIR%"
 echo [%date% %time%] Starting: %GAME_EXE% user_id=%GAME_USER_ID% token=%TOKEN_STATUS% endpoint=%GAME_LOG_ENDPOINT%>> "%LOG_FILE%"
-start "" "%GAME_EXE%" -GameAuthToken="%GAME_AUTH_TOKEN%" -GameUserId="%GAME_USER_ID%" -GameLogEndpoint="%GAME_LOG_ENDPOINT%"
+start "" "%GAME_EXE%" -GameAuthToken=%GAME_AUTH_TOKEN% -GameUserId=%GAME_USER_ID% -GameLogEndpoint=%GAME_LOG_ENDPOINT%
 exit

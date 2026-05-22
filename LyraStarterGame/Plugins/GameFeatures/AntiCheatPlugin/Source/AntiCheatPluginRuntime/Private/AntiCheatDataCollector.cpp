@@ -33,9 +33,18 @@ void UAntiCheatDataCollector::BeginPlay()
 
     DataSender = NewObject<UAntiCheatDataSender>(this);
 
-    FParse::Value(FCommandLine::Get(), TEXT("GameUserId="), LinkedUserID);
-    FParse::Value(FCommandLine::Get(), TEXT("GameAuthToken="), GameAuthToken);
-    FParse::Value(FCommandLine::Get(), TEXT("GameLogEndpoint="), GameLogEndpoint);
+    if (!FParse::Value(FCommandLine::Get(), TEXT("-GameUserId="), LinkedUserID))
+    {
+        FParse::Value(FCommandLine::Get(), TEXT("GameUserId="), LinkedUserID);
+    }
+    if (!FParse::Value(FCommandLine::Get(), TEXT("-GameAuthToken="), GameAuthToken))
+    {
+        FParse::Value(FCommandLine::Get(), TEXT("GameAuthToken="), GameAuthToken);
+    }
+    if (!FParse::Value(FCommandLine::Get(), TEXT("-GameLogEndpoint="), GameLogEndpoint))
+    {
+        FParse::Value(FCommandLine::Get(), TEXT("GameLogEndpoint="), GameLogEndpoint);
+    }
 
     if (!GameLogEndpoint.IsEmpty())
     {

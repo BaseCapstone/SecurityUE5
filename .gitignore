@@ -43,7 +43,7 @@ Saved/
 DerivedDataCache/
 .vs/
 *.sln
-
+*.idea/
 # C# / Automation build outputs
 /LyraStarterGame/Build/Scripts/obj/
 /LyraStarterGame/Build/Scripts/bin/

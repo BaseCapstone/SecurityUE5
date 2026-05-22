@@ -47,6 +47,8 @@ void UAntiCheatDataCollector::BeginPlay()
         LinkedUserID = TEXT("UnknownUser");
     }
 
+    UE_LOG(LogTemp, Warning, TEXT("[AntiCheat] Launch args loaded. UserID=%s Token=%s Endpoint=%s"), *LinkedUserID, GameAuthToken.IsEmpty() ? TEXT("missing") : TEXT("present"), *AWSEndpointURL);
+
     // 0.1초마다 데이터 수집 실행
     if (GetWorld())
     {

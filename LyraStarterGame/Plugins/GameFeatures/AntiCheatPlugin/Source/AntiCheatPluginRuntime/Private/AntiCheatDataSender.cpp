@@ -48,6 +48,11 @@ void UAntiCheatDataSender::SendDataToAWS(const TArray<FAntiCheatDataPacket>& Pac
 	if (!GameAuthToken.IsEmpty())
 	{
 		Request->SetHeader(TEXT("Authorization"), FString::Printf(TEXT("Bearer %s"), *GameAuthToken));
+		UE_LOG(LogTemp, Log, TEXT("[AntiCheat] Authorization header set for log upload."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[AntiCheat] GameAuthToken is empty. Log upload will be unauthorized."));
 	}
 
 	// 변환된 JSON 리스트 데이터를 바디에 적재

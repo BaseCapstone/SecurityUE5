@@ -106,6 +106,7 @@ private:
 	// DB user id and short-lived game JWT passed by the web launcher.
 	FString LinkedUserID;
 	FString GameAuthToken;
+	FString GameLogEndpoint;
 
 	// 몇 개가 쌓이면 보낼 것인지 (현재: 0.1초 x 30개 = 3초 단위로 전송)
 	const int32 MaxBufferSize = 30;

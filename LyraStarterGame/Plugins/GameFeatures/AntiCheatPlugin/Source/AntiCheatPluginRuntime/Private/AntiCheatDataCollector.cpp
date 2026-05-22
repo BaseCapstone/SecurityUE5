@@ -19,6 +19,7 @@
 #include "GameplayTagContainer.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "GenericPlatform/GenericPlatformHttp.h"
 
 UAntiCheatDataCollector::UAntiCheatDataCollector()
 {
@@ -34,6 +35,12 @@ void UAntiCheatDataCollector::BeginPlay()
 
     FParse::Value(FCommandLine::Get(), TEXT("GameUserId="), LinkedUserID);
     FParse::Value(FCommandLine::Get(), TEXT("GameAuthToken="), GameAuthToken);
+    FParse::Value(FCommandLine::Get(), TEXT("GameLogEndpoint="), GameLogEndpoint);
+
+    if (!GameLogEndpoint.IsEmpty())
+    {
+        AWSEndpointURL = FGenericPlatformHttp::UrlDecode(GameLogEndpoint);
+    }
 
     if (LinkedUserID.IsEmpty())
     {

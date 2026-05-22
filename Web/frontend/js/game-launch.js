@@ -108,7 +108,8 @@ function initGameLaunch() {
   }
 
   function launchGameClient({ token, userId }) {
-    const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}&user_id=${encodeURIComponent(userId || '')}`;
+    const logEndpoint = `${window.location.origin}/api/logs`;
+    const launchUrl = `lyragame://launch?token=${encodeURIComponent(token || '')}&user_id=${encodeURIComponent(userId || '')}&api_url=${encodeURIComponent(logEndpoint)}`;
     window.location.href = launchUrl;
   }
 

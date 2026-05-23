@@ -291,10 +291,109 @@ async def get_user_game_data(
     
     return {
         "user_id": current_user.id,
-        "username": current_user.username,
         "logs": result,
         "total": len(result)
     }
+
+# ═══════════════════════════════════════════════════
+# 퍼블릭 통계 / 랭킹 API (홈 화면 및 대시보드 연동용)
+# ═══════════════════════════════════════════════════
+
+@app.get("/api/public/stats")
+async def get_public_stats(db: Session = Depends(get_db)):
+    # 1. 누적 보호 유저 (기본 15840 + DB 유저 수)
+    user_count = db.query(User).count()
+    total_users = 15840 + user_count
+    
+    # 2. 실시간 검출/차단 로그 수 분석
+    logs = db.query(GameLog).all()
+    hack_log_count = 0
+    for log in logs:
+        try:
+            raw = log.event_data
+            if isinstance(raw, str):
+                evt_data = json.loads(raw)
+            else:
+                evt_data = raw
+                
+            events = evt_data if isinstance(evt_data, list) else [evt_data]
+            for evt in events:
+                is_hack = False
+                if (evt.get('SpeedHack') == 1 or 
+                    evt.get('Aim') == 1 or 
+                    evt.get('GodMode') == 1 or 
+                    evt.get('ESP') == 1 or 
+                    (evt.get('Speed') is not None and evt.get('Speed') > 1000)):
+                    is_hack = True
+                
+                if is_hack:
+                    hack_log_count += 1
+                    break
+        except Exception:
+            pass
+            
+    # 3. 유저 점수기반 상태 집계
+    danger_count = 0
+    warning_count = 0
+    all_users = db.query(User).all()
+    for u in all_users:
+        if u.role == "admin":
+            continue
+        user_log_cnt = db.query(GameLog).filter(GameLog.user_id == u.id).count()
+        score = 100 - (user_log_cnt * 2)
+        if score < 30:
+            danger_count += 1
+        elif score < 70:
+            warning_count += 1
+
+    # 최근 10분 내 로그인 유저 수
+    ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
+    recent_login_count = db.query(User).filter(User.last_login >= ten_minutes_ago).count()
+    
+    # 하드코딩 사양에 맞춰 동적 베이스 수치 연산
+    banned_count = 1203 + hack_log_count
+    current_online = 247 + recent_login_count
+    suspicious_count = 5 + warning_count
+    monthly_banned = 38 + danger_count
+    
+    return {
+        "detection_accuracy": "99.7%",
+        "total_protected_users": total_users,
+        "blocked_count": banned_count,
+        "server_uptime": "99.99%",
+        "online_users": current_online,
+        "suspicious_users": suspicious_count,
+        "banned_users": monthly_banned
+    }
+
+@app.get("/api/public/ranking")
+async def get_public_ranking(db: Session = Depends(get_db)):
+    users = db.query(User).all()
+    ranking_list = []
+    
+    for u in users:
+        if u.role == "admin":
+            continue
+        log_count = db.query(GameLog).filter(GameLog.user_id == u.id).count()
+        score = 100 - (log_count * 2)
+        if score < 0:
+            score = 0
+            
+        masked_username = mask_string(u.username)
+        
+        ranking_list.append({
+            "username": masked_username,
+            "score": score,
+            "total_logs": log_count,
+            "status": "정상" if score >= 70 else ("주의" if score >= 30 else "제재")
+        })
+        
+    # 정렬: 스코어 내림차순 -> 로그 수 오름차순
+    ranking_list.sort(key=lambda x: (-x["score"], x["total_logs"]))
+    
+    # 상위 10명만 노출
+    top_ranking = ranking_list[:10]
+    return {"ranking": top_ranking}
 
 # ═══════════════════════════════════════════════════
 # 게임 로그 API (언리얼 클라이언트용)

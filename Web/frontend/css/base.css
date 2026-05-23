@@ -5,15 +5,15 @@
 
 /* ─── CSS Variables / Design Tokens ─── */
 :root {
-  /* Colors - Light Game Portal */
-  --bg-primary: #f4f0eb;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f8f6f3;
-  --bg-dark: #1a1a2e;
-  --bg-darker: #0f0f1a;
-  --bg-card: #ffffff;
-  --bg-glass: rgba(255, 255, 255, 0.85);
-  --bg-glass-hover: rgba(255, 255, 255, 0.95);
+  /* Colors - Dark Sci-Fi Game Portal */
+  --bg-primary: #0a0e17;        /* Deep slate-black */
+  --bg-secondary: #0f1322;      /* Dark navy-charcoal */
+  --bg-tertiary: #171c2e;       /* Medium navy-slate */
+  --bg-dark: #080b12;           /* Pure dark */
+  --bg-darker: #05070a;         /* Pure dark background for footers */
+  --bg-card: #151a2d;           /* Slate-blue card background */
+  --bg-glass: rgba(15, 19, 34, 0.85);
+  --bg-glass-hover: rgba(21, 26, 45, 0.95);
 
   /* Accent Colors */
   --accent-red: #e52d27;
@@ -25,25 +25,25 @@
   --accent-green: #10b981;
   --accent-orange: #f97316;
   --accent-purple: #8b5cf6;
-  --accent-navy: #1e293b;
+  --accent-navy: #f8fafc;       /* Updated to match dark theme primary text */
 
   /* Gradients */
-  --grad-nav: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-  --grad-hero: linear-gradient(135deg, #fff8f0 0%, #fef3e2 40%, #fde8d0 100%);
+  --grad-nav: linear-gradient(180deg, #0f1322 0%, #0a0e17 100%);
+  --grad-hero: linear-gradient(135deg, #09090e 0%, #111124 50%, #1a0b2e 100%); /* Cool dark gradient */
   --grad-hero-accent: linear-gradient(135deg, #ff6b35 0%, #e52d27 50%, #d63384 100%);
   --grad-game-btn: linear-gradient(135deg, #e52d27 0%, #c41e1a 100%);
-  --grad-card-hover: linear-gradient(135deg, rgba(229, 45, 39, 0.05) 0%, rgba(37, 99, 235, 0.05) 100%);
+  --grad-card-hover: linear-gradient(135deg, rgba(229, 45, 39, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
 
   /* Text */
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --text-light: #f1f5f9;
+  --text-primary: #f8fafc;      /* Crisp white */
+  --text-secondary: #cbd5e1;    /* Soft light grey */
+  --text-muted: #64748b;        /* Cool slate grey */
+  --text-light: #f1f5f9;        /* Light grey */
   --text-nav: #cbd5e1;
 
   /* Borders */
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --border-card: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.08); /* Translucent light border */
+  --border-card: rgba(255, 255, 255, 0.06);
   --border-nav: rgba(255, 255, 255, 0.1);
 
   /* Shadows */

@@ -85,6 +85,11 @@ function activateAdminMode() {
   // sessionStorage에 관리자 상태 저장 (F5 대응)
   sessionStorage.setItem('lyra_admin', 'true');
 
+  // 실시간 통계 정보 불러오기
+  if (typeof fetchPublicStats === 'function') {
+    fetchPublicStats();
+  }
+
   showToast('관리자 모드로 접속하였습니다.', 'success');
 }
 
@@ -232,22 +237,22 @@ function addAdminLog(type, message) {
 function initAdminRefresh() {
   const refreshBtn = document.getElementById('admin-refresh-btn');
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
+    refreshBtn.addEventListener('click', async () => {
       refreshBtn.textContent = '⏳ 갱신 중...';
       refreshBtn.disabled = true;
 
-      setTimeout(() => {
-        const onlineStat = document.getElementById('admin-stat-online');
-        if (onlineStat) {
-          onlineStat.textContent = Math.floor(200 + Math.random() * 100);
+      try {
+        if (typeof fetchPublicStats === 'function') {
+          await fetchPublicStats();
         }
-
-        refreshBtn.textContent = '🔄 새로고침';
-        refreshBtn.disabled = false;
-
         addAdminLog('info', '대시보드 데이터가 갱신되었습니다.');
         showToast('데이터가 갱신되었습니다.', 'info');
-      }, 1000);
+      } catch (error) {
+        showToast('데이터 갱신에 실패했습니다.', 'error');
+      } finally {
+        refreshBtn.textContent = '🔄 새로고침';
+        refreshBtn.disabled = false;
+      }
     });
   }
 }

@@ -29,12 +29,12 @@
 }
 
 .btn--outline {
-  border: 1.5px solid var(--accent-navy);
-  color: var(--accent-navy);
+  border: 1.5px solid var(--accent-red);
+  color: var(--text-primary);
   background: transparent;
 }
 .btn--outline:hover {
-  background: var(--accent-navy);
+  background: var(--accent-red);
   color: white;
 }
 

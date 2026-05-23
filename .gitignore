@@ -32,3 +32,7 @@
 /LyraStarterGame/UpgradeLog.htm
 /LyraStarterGame/Build/Windows/ChunkLayerInfo/
 /LyraStarterGame/Build/Windows/FileOpenOrder/
+
+# 6. AI 서버 관련 (모델과 데이터는 버전 관리에서 제외)
+/AI_Server/models/
+/AI_Server/data/

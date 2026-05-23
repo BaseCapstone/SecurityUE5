@@ -7,7 +7,7 @@
   left: 0;
   right: 0;
   height: var(--top-bar-h);
-  background: #ffffff;
+  background: var(--bg-dark);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -68,7 +68,7 @@
   font-weight: 800;
   font-size: 20px;
   letter-spacing: 0.06em;
-  color: var(--accent-navy);
+  color: var(--text-primary);
 }
 .logo-text__sub {
   display: block;
@@ -91,12 +91,12 @@
 .top-bar__right .btn--outline {
   font-size: 13px;
   padding: 8px 20px;
-  border: 1.5px solid var(--accent-navy);
-  color: var(--accent-navy);
+  border: 1.5px solid var(--accent-red);
+  color: var(--text-primary);
   border-radius: 4px;
 }
 .top-bar__right .btn--outline:hover {
-  background: var(--accent-navy);
+  background: var(--accent-red);
   color: white;
 }
 
@@ -252,7 +252,7 @@
 .footer {
   background: var(--bg-darker);
   border-top: 3px solid var(--accent-red);
-  padding: var(--space-3xl) 0 var(--space-xl);
+  padding: var(--space-xl) 0;
 }
 
 .footer__container {

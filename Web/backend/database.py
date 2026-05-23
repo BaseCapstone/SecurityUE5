@@ -14,7 +14,18 @@ db_name = os.getenv("DB_NAME", "security_ue5")
 
 DB_URL = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{db_name}"
 
-engine = create_engine(DB_URL)
+try:
+    # MySQL 연결 시도 (빠른 실패를 위해 2초 타임아웃 지정)
+    engine = create_engine(DB_URL, connect_args={"connect_timeout": 2})
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    print("[DB] MySQL connection success!")
+except Exception as e:
+    print(f"[DB] MySQL connection failed: {e}")
+    print("[DB] Falling back to SQLite (security_ue5.db)...")
+    DB_URL = "sqlite:///./security_ue5.db"
+    engine = create_engine(DB_URL, connect_args={"check_same_thread": False})
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

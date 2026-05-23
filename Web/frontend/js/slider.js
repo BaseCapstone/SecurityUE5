@@ -45,8 +45,7 @@ function initHeroSlider() {
         // 이미지 로드 성공 시 그라데이션 레이어를 투명 반투명 오버레이로 변경하여 배경 이미지가 노출되도록 함
         const gradientEl = hero.querySelector('.hero__gradient');
         if (gradientEl) {
-          // 좌측 텍스트 시인성 확보를 위한 반투명 블랙 그라데이션 오버레이
-          gradientEl.style.background = 'linear-gradient(to right, rgba(15, 15, 26, 0.85) 0%, rgba(15, 15, 26, 0.4) 50%, rgba(15, 15, 26, 0.6) 100%)';
+          gradientEl.style.background = 'var(--grad-hero-overlay)';
         }
       };
       img.onerror = () => {
@@ -115,52 +114,20 @@ function initHeroSlider() {
   }
 
   // ═══════════════════════════════════════════
-  // 슬라이더 배너 이미지 및 버튼 액션 링크 연결
+  // 슬라이더 버튼 액션 링크 연결
   // ═══════════════════════════════════════════
   
-  // 전체 슬라이드 영역 클릭 바인딩 (배너 전체 클릭 시 이동)
-  slides.forEach(slide => {
-    slide.addEventListener('click', (e) => {
-      // 버튼 또는 버튼이 포함된 영역 클릭 시에는 슬라이더 전체 클릭 이벤트 무시
-      if (e.target.closest('.hero__actions') || e.target.closest('.btn')) {
-        return;
-      }
-      
-      const overlay = slide.querySelector('.hero__slide-link-overlay');
-      if (!overlay) return;
-      
-      const action = overlay.dataset.action;
-      if (action === 'patch') {
-        switchUserSection('patch');
-      } else if (action === 'login') {
-        const loginBtn = document.getElementById('login-btn');
-        if (loginBtn) loginBtn.click();
-      } else if (action === 'play') {
-        const startBtn = document.getElementById('game-start-btn');
-        if (startBtn) startBtn.click();
-      }
-    });
-  });
-
-  // Slide 1 버튼 액션
+  // Slide 1 버튼 액션 (상세보기, 시스템 소개)
   const s1Btn1 = document.getElementById('hero-btn-details-1');
   const s1Btn2 = document.getElementById('hero-btn-guide-1');
-  if (s1Btn1) s1Btn1.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('patch'); });
-  if (s1Btn2) s1Btn2.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('support'); });
+  if (s1Btn1) s1Btn1.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('system-intro'); });
+  if (s1Btn2) s1Btn2.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('system-intro'); });
 
-  // Slide 2 버튼 액션
-  const s2Btn1 = document.getElementById('hero-btn-dashboard-2');
+  // Slide 2 버튼 액션 (관리자 가이드)
   const s2Btn2 = document.getElementById('hero-btn-guide-2');
-  if (s2Btn1) {
-    s2Btn1.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const loginBtn = document.getElementById('login-btn');
-      if (loginBtn) loginBtn.click();
-    });
-  }
-  if (s2Btn2) s2Btn2.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('support'); });
+  if (s2Btn2) s2Btn2.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('admin-guide'); });
 
-  // Slide 3 버튼 액션
+  // Slide 3 버튼 액션 (업데이트 노트, 플레이)
   const s3Btn1 = document.getElementById('hero-btn-patch-3');
   const s3Btn2 = document.getElementById('hero-btn-play-3');
   if (s3Btn1) s3Btn1.addEventListener('click', (e) => { e.stopPropagation(); switchUserSection('patch'); });

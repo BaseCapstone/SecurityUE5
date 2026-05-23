@@ -36,6 +36,7 @@ function initLoginModal() {
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      sessionStorage.removeItem('lyra_admin'); // 기존 관리자 흔적 확실히 지우기
       const idInput = document.getElementById('login-id');
       const pwInput = document.getElementById('login-pw');
       const id = idInput.value.trim();
@@ -70,11 +71,11 @@ function initLoginModal() {
           sessionStorage.setItem('user_id', data.user.id);
           sessionStorage.setItem('user_role', data.user.role || 'user');
 
-          // 관리자 계정이면 관리자 모드 활성화
+          // 관리자 계정이면 관리자 모드로 리다이렉트
           if (data.user.role === 'admin') {
             closeModal();
             sessionStorage.setItem('lyra_admin', 'true');
-            activateAdminMode();
+            window.location.href = 'admin.html';
             return;
           }
 
@@ -238,6 +239,7 @@ function updateLoginState(username) {
       sessionStorage.removeItem('user_name');
       sessionStorage.removeItem('user_id');
       sessionStorage.removeItem('user_role');
+      sessionStorage.removeItem('lyra_admin');
       location.reload();
     });
   }
@@ -303,20 +305,22 @@ function initLegalModal() {
   if (linkPrivacy) linkPrivacy.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('privacy'); });
   if (linkPolicy) linkPolicy.addEventListener('click', (e) => { e.preventDefault(); openLegalModal('policy'); });
   if (closeBtn) closeBtn.addEventListener('click', closeLegalModal);
-
-  // Close modal when clicking overlay
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) closeLegalModal();
-    });
-  }
 }
 
 // 페이지 로드 시 로그인 상태 체크 및 약관 모달 초기화
 document.addEventListener('DOMContentLoaded', () => {
   const savedUser = sessionStorage.getItem('username');
   const savedRole = sessionStorage.getItem('user_role');
-  if (savedUser && !sessionStorage.getItem('lyra_admin') && savedRole !== 'admin') {
+  const isAdmin = sessionStorage.getItem('lyra_admin') === 'true';
+
+  // 만약 관리자 세션이 감지되면 메인 페이지(index.html)에서 관리자 대시보드로 자동 리다이렉트
+  if (savedRole === 'admin' || isAdmin) {
+    sessionStorage.setItem('lyra_admin', 'true');
+    window.location.replace('admin.html');
+    return;
+  }
+
+  if (savedUser && savedRole !== 'admin') {
     updateLoginState(savedUser);
   }
   

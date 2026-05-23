@@ -49,18 +49,18 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 
 def decode_bearer_token(authorization: Optional[str]) -> dict:
     if not authorization:
-        raise HTTPException(status_code=401, detail="Login is required.")
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Invalid authorization format.")
+        raise HTTPException(status_code=401, detail="잘못된 인증 형식입니다.")
 
     try:
         return jwt.decode(parts[1], SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token has expired.")
+        raise HTTPException(status_code=401, detail="토큰이 만료되었습니다. 다시 로그인해주세요.")
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token.")
+        raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
 
 def mask_string(s: str, visible: int = 2) -> str:
     """문자열의 앞 visible글자만 보여주고 나머지를 *로 마스킹합니다."""
@@ -135,16 +135,16 @@ def get_current_game_user(
 ) -> User:
     payload = decode_bearer_token(authorization)
     if payload.get("token_type") != "game":
-        raise HTTPException(status_code=401, detail="Game token is required.")
+        raise HTTPException(status_code=401, detail="게임 토큰이 필요합니다.")
 
     user_id = payload.get("user_id")
     username = payload.get("sub")
     if user_id is None or username is None:
-        raise HTTPException(status_code=401, detail="Invalid game token.")
+        raise HTTPException(status_code=401, detail="유효하지 않은 게임 토큰입니다.")
 
     user = db.query(User).filter(User.id == user_id, User.username == username).first()
     if user is None:
-        raise HTTPException(status_code=401, detail="User not found.")
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
 
     return user
 
@@ -213,7 +213,7 @@ async def login_user(login_data: LoginSchema, db: Session = Depends(get_db)):
 async def issue_game_token(current_user: User = Depends(get_current_user)):
     """Issue a short-lived JWT for the game client after web login."""
     if current_user.role == "admin":
-        raise HTTPException(status_code=403, detail="Admin accounts cannot start the game client.")
+        raise HTTPException(status_code=403, detail="관리자 계정은 게임 클라이언트를 실행할 수 없습니다.")
 
     expires_delta = timedelta(hours=GAME_TOKEN_EXPIRE_HOURS)
     expires_at = datetime.utcnow() + expires_delta
@@ -405,7 +405,7 @@ async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
     log = db.query(GameLog).filter(GameLog.log_id == logId).first()
     
     if log is None:
-        raise HTTPException(status_code=404, detail="Log not found")
+        raise HTTPException(status_code=404, detail="로그를 찾을 수 없습니다.")
 
     raw_event_data = log.event_data
     if isinstance(raw_event_data, str):
@@ -431,7 +431,7 @@ async def save_game_log(
     """게임 로그를 저장합니다. 인증된 유저면 user_id를 함께 저장합니다."""
     try:
         if not log_data:
-            raise HTTPException(status_code=400, detail="Empty log data")
+            raise HTTPException(status_code=400, detail="로그 데이터가 비어 있습니다.")
 
         event_data_json = json.dumps(log_data)
         
@@ -448,7 +448,7 @@ async def save_game_log(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "Log data saved", "user_id": current_user.id}
+    return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user.id}
 
 # ═══════════════════════════════════════════════════
 # 관리자 전용 API (role='admin' 필수)

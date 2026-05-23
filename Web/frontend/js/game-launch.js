@@ -10,14 +10,14 @@ function initGameLaunch() {
     const isAdmin = sessionStorage.getItem('lyra_admin') === 'true';
 
     if (!token && !isAdmin) {
-      showToast('Please log in before starting the game.', 'warning');
+      showToast('게임 실행 전 로그인이 필요합니다.', 'warning');
       const loginBtn = document.getElementById('login-btn');
       if (loginBtn) loginBtn.click();
       return;
     }
 
     if (isAdmin) {
-      showToast('Admin accounts cannot start the game client.', 'warning');
+      showToast('관리자 계정은 게임 클라이언트를 실행할 수 없습니다.', 'warning');
       return;
     }
 
@@ -35,7 +35,7 @@ function initGameLaunch() {
       animateProgress();
     } catch (error) {
       console.error('Game token request failed:', error);
-      showToast(error.message || 'Failed to prepare the game session.', 'error');
+      showToast(error.message || '게임 세션 준비에 실패했습니다.', 'error');
       cancelLaunch();
     }
   }
@@ -98,7 +98,7 @@ function initGameLaunch() {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error(data.detail || 'Failed to issue game token.');
+      throw new Error(data.detail || '게임 토큰 발급에 실패했습니다.');
     }
 
     return {
@@ -141,7 +141,7 @@ function initGameLaunch() {
         setTimeout(() => {
           cancelLaunch();
           const username = sessionStorage.getItem('username') || 'Player';
-          showToast(`${username}'s game client launch request was sent.`, 'success');
+          showToast(`${username}님의 게임 클라이언트 실행 요청이 전송되었습니다.`, 'success');
         }, 500);
       }
 

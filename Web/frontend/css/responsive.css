@@ -32,7 +32,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   :root {
-    --top-bar-h: 52px;
+    --top-bar-h: 60px;
     --nav-bar-h: 0px;
   }
 

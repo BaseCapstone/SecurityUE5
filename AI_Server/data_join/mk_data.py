@@ -1,3 +1,4 @@
+import os
 import requests
 import json
 # from ai.predict import predict_anomaly
@@ -27,7 +28,7 @@ length = 21645
 
 for log_id in range(first_log_id, first_log_id + length):
     print(f"{log_id}번 로그 처리 중...")
-    response = requests.get(f"http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/logs?logId={log_id}")
+    response = requests.get(f"http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/logs/{log_id}")
 
     if response.status_code != 200:
         print("로그 가져오기 실패:", response.status_code)
@@ -106,18 +107,23 @@ for log_id in range(first_log_id, first_log_id + length):
             speedLabel, godLabel, espLabel, aimLabel
         ])
 
-        print(
-            f"{timestamp}"
-        )
+        # print(
+        #     f"{timestamp}"
+        # )
 
     if not err:
         data_lists.append(data_list)
 
         
-data_folder = "data/"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# 데이터셋 생성
-with open(data_folder + "output.jsonl", "w", encoding="utf-8") as f:
+data_folder = os.path.join(BASE_DIR, "data")
+
+os.makedirs(data_folder, exist_ok=True)
+
+output_path = os.path.join(data_folder, "output.jsonl")
+
+with open(output_path, "w", encoding="utf-8") as f:
     for data_list in data_lists:
         obj = {
             "frames": [row[:-4] for row in data_list],

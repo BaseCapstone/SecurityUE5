@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 
 
 class MovementJsonlDataset(Dataset):
-    def __init__(self, jsonl_path, sequence_length=30, feature_dim=12):
+    def __init__(self, jsonl_path, sequence_length=30, feature_dim=15, num_labels=4):
         self.samples = []
 
         with open(jsonl_path, "r", encoding="utf-8") as f:
@@ -20,6 +20,9 @@ class MovementJsonlDataset(Dataset):
 
                 # feature 개수 검증
                 if len(frames[0]) != feature_dim:
+                    continue
+
+                if not isinstance(label, list) or len(label) != num_labels:
                     continue
 
                 self.samples.append((frames, label))

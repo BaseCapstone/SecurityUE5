@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class MovementAnomalyRNN(nn.Module):
-    def __init__(self, feature_dim, hidden_dim=64, num_layers=2):
+    def __init__(self, feature_dim, hidden_dim=64, num_layers=2, num_labels=4):
         super().__init__()
 
         self.lstm = nn.LSTM(
@@ -17,7 +17,7 @@ class MovementAnomalyRNN(nn.Module):
             nn.Linear(hidden_dim, 32),
             nn.ReLU(),
             nn.Dropout(0.2),
-            nn.Linear(32, 1)
+            nn.Linear(32, num_labels)
         )
 
     def forward(self, x):

@@ -40,6 +40,15 @@ function initNavigation() {
     });
   });
 
+  // Logo click navigation
+  const logoLink = document.querySelector('.top-bar__logo');
+  if (logoLink) {
+    logoLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchUserSection('main');
+    });
+  }
+
   // Mobile nav links close menu and switch section
   const mobileLinks = document.querySelectorAll('.mobile-nav__links a');
   mobileLinks.forEach(link => {
@@ -75,18 +84,77 @@ function initNavigation() {
     });
   }
 
+  // 뉴스 전체보기 / 홈으로 돌아가기 버튼 리스너
+  const viewAllBtn = document.getElementById('view-all-news-btn');
+  if (viewAllBtn) {
+    viewAllBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchUserSection('news-all');
+    });
+  }
+
+  const backToHomeNewsBtn = document.getElementById('back-to-home-news-btn');
+  if (backToHomeNewsBtn) {
+    backToHomeNewsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchUserSection('main');
+    });
+  }
+
   // Keyboard escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeMobileNav();
   });
+
+  // popstate 이벤트 리스너 추가 (뒤로가기/앞으로가기 처리)
+  window.addEventListener('popstate', () => {
+    const hash = window.location.hash.substring(1) || 'main';
+    switchUserSection(hash, false);
+  });
+
+  // 초기 로드 시 해시가 있으면 해당 섹션으로 이동
+  const initialHash = window.location.hash.substring(1);
+  const allowedSections = ['main', 'patch', 'ranking', 'support', 'system-intro', 'admin-guide', 'news-all'];
+  if (allowedSections.includes(initialHash)) {
+    switchUserSection(initialHash, false);
+  } else {
+    switchUserSection('main', false);
+  }
 }
 
 /**
  * 일반 유저 화면의 섹션 전환 (SPA)
  */
-function switchUserSection(sectionId) {
+function switchUserSection(sectionId, updateHistory = true) {
+  // 스크롤 위치 최상단으로 즉시 강제 초기화 (scroll-behavior: smooth 무시)
+  window.scrollTo({ top: 0, behavior: 'auto' });
+
+  // 드래그 및 텍스트 선택 상태 해제
+  if (window.getSelection) {
+    window.getSelection().removeAllRanges();
+  } else if (document.selection) {
+    document.selection.empty();
+  }
+
+  // 포커스 상태 해제 (링크나 버튼이 계속 눌려있는 것 같은 현상 방지)
+  if (document.activeElement && document.activeElement !== document.body) {
+    document.activeElement.blur();
+  }
+
+  // FAQ 아코디언 상태 리셋 (다른 페이지 이동 시 모두 닫기)
+  document.querySelectorAll('.faq-item').forEach(el => {
+    el.classList.remove('is-active');
+  });
+
+  // 브라우저 주소창 해시 및 히스토리 업데이트
+  if (updateHistory) {
+    if (window.location.hash !== '#' + sectionId) {
+      history.pushState({ sectionId }, '', '#' + sectionId);
+    }
+  }
+
   // 관리자 모드가 켜져있다면 해제하고 일반 복귀
-  if (document.body.classList.contains('is-admin')) {
+  if (document.body.classList.contains('is-admin') && typeof deactivateAdminMode === 'function') {
     deactivateAdminMode();
   }
 
@@ -101,11 +169,11 @@ function switchUserSection(sectionId) {
     }
   });
 
-  if (sectionId === 'news') {
+  if (sectionId === 'main') {
     if (hero) hero.style.display = '';
     if (featuresGrid) featuresGrid.style.display = '';
-    const newsSec = document.getElementById('news');
-    if (newsSec) newsSec.style.display = '';
+    const mainSec = document.getElementById('main');
+    if (mainSec) mainSec.style.display = '';
   } else {
     if (hero) hero.style.display = 'none';
     if (featuresGrid) featuresGrid.style.display = 'none';

@@ -431,3 +431,98 @@
   color: white;
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ═══════════════════════════════════════════════════
+   SHARED BADGES (STATUS & PROBABILITY)
+   ═══════════════════════════════════════════════════ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.status-badge--danger {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.status-badge--warning {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.status-badge--safe {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Light Theme Status Badges (High Contrast) */
+.light-theme .status-badge--danger,
+html.light-theme .status-badge--danger,
+.light-theme span.status-badge--danger,
+.light-theme td .status-badge--danger {
+  color: #b91c1c !important;
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+.light-theme .status-badge--warning,
+html.light-theme .status-badge--warning,
+.light-theme span.status-badge--warning,
+.light-theme td .status-badge--warning {
+  color: #b45309 !important;
+  background: #fef3c7 !important;
+  border-color: #fcd34d !important;
+}
+.light-theme .status-badge--safe,
+html.light-theme .status-badge--safe,
+.light-theme span.status-badge--safe,
+.light-theme td .status-badge--safe {
+  color: #15803d !important;
+  background: #dcfce7 !important;
+  border-color: #86efac !important;
+}
+
+/* Probability Badges */
+.probability {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.probability--high {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+}
+.probability--medium {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+}
+.probability--low {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+}
+
+/* Light Theme Probability Badges (High Contrast) */
+.light-theme .probability--high,
+html.light-theme .probability--high,
+.light-theme span.probability--high {
+  color: #b91c1c !important;
+  background: #fee2e2 !important;
+}
+.light-theme .probability--medium,
+html.light-theme .probability--medium,
+.light-theme span.probability--medium {
+  color: #b45309 !important;
+  background: #fef3c7 !important;
+}
+.light-theme .probability--low,
+html.light-theme .probability--low,
+.light-theme span.probability--low {
+  color: #15803d !important;
+  background: #dcfce7 !important;
+}
+

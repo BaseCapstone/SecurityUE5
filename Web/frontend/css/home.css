@@ -384,7 +384,7 @@
   padding: var(--space-3xl) 0;
   background: var(--bg-secondary);
 }
-.content:not(#news) {
+.content:not(#main) {
   margin-top: var(--header-total);
   min-height: calc(100vh - var(--header-total));
 }
@@ -879,6 +879,24 @@
 .rank-badge--2 { background: #cbd5e1; color: #475569; }
 .rank-badge--3 { background: #d97706; color: white; }
 
+/* Light Theme Rank Medals Override */
+.light-theme .rank-badge--1 {
+  background: #eab308;
+  color: #713f12;
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.3);
+}
+.light-theme .rank-badge--2 {
+  background: #94a3b8;
+  color: #f8fafc;
+  box-shadow: 0 2px 8px rgba(148, 163, 184, 0.3);
+}
+.light-theme .rank-badge--3 {
+  background: #b45309;
+  color: #fef3c7;
+  box-shadow: 0 2px 8px rgba(180, 83, 9, 0.3);
+}
+
+
 .score-gauge-wrap {
   display: flex;
   align-items: center;
@@ -1082,4 +1100,40 @@
 /* Slider transition improvement */
 .hero {
   transition: background 0.8s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════
+   PREMIUM GAMING CARD EFFECTS
+   ═══════════════════════════════════════════════════ */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--border-radius);
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 40%, rgba(229, 45, 39, 0.4) 50%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
+.card:hover::before {
+  opacity: 1;
+}
+
+.feature-card::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+.feature-card:hover::after {
+  opacity: 1;
 }

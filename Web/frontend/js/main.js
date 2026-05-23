@@ -4,6 +4,8 @@
    ═══════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  initThemeToggle();
+  initSoundSystem();
   initHeroSlider();
   initNavigation();
   initLoginModal();
@@ -13,6 +15,29 @@ document.addEventListener('DOMContentLoaded', () => {
   initFaqAccordion();
   fetchPublicStats();
 });
+
+/**
+ * 다크/라이트 테마 토글 제어
+ */
+function initThemeToggle() {
+  const toggleBtn = document.getElementById('theme-toggle');
+  if (!toggleBtn) return;
+
+  toggleBtn.addEventListener('click', () => {
+    document.documentElement.classList.toggle('light-theme');
+    const isLight = document.documentElement.classList.contains('light-theme');
+    localStorage.setItem('lyra_theme', isLight ? 'light' : 'dark');
+    
+    // 슬라이더 그라데이션 리셋 트리거
+    const hero = document.getElementById('hero');
+    if (hero) {
+      const gradientEl = hero.querySelector('.hero__gradient');
+      if (gradientEl) {
+        gradientEl.style.background = 'var(--grad-hero-overlay)';
+      }
+    }
+  });
+}
 
 /**
  * 백엔드 통계 API를 호출하여 홈 화면 하단 및 관리자 통계 카드 데이터를 동기화합니다.
@@ -108,7 +133,7 @@ async function loadRankingData() {
               </div>
             </div>
           </td>
-          <td style="font-family: var(--font-mono); color: var(--text-secondary); font-weight: 500;">${player.total_logs}회</td>
+          <td style="color: var(--text-secondary); font-weight: 500;">${player.total_logs}회</td>
           <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
         `;
         tbody.appendChild(tr);

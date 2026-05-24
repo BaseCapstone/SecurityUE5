@@ -13,15 +13,23 @@ except ImportError:
 
 
 BASE_DIR = Path(__file__).resolve().parents[1]
+PROJECT_DIR = BASE_DIR.parent
 AI_DIR = BASE_DIR / "ai"
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
 if str(AI_DIR) not in sys.path:
     sys.path.insert(0, str(AI_DIR))
 
 try:
-    from predict import predict_anomaly
-except ImportError as exc:
-    predict_anomaly = None
-    PREDICT_IMPORT_ERROR = exc
+    from AI_Server.ai.predict import predict_anomaly
+except ImportError:
+    try:
+        from predict import predict_anomaly
+    except ImportError as fallback_exc:
+        predict_anomaly = None
+        PREDICT_IMPORT_ERROR = fallback_exc
+    else:
+        PREDICT_IMPORT_ERROR = None
 else:
     PREDICT_IMPORT_ERROR = None
 
@@ -79,7 +87,16 @@ def _frame_from_event(event: dict[str, Any]) -> list[float]:
     ]
 
 
-def _extract_raw_frames(payload: dict[str, Any]) -> list[Any]:
+def _extract_raw_frames(payload: Any) -> list[Any]:
+    if isinstance(payload, list):
+        return payload
+
+    if not isinstance(payload, dict):
+        raise HTTPException(
+            status_code=422,
+            detail="Request body must be a list of frames or an object containing frames.",
+        )
+
     if isinstance(payload.get("frames"), list):
         return payload["frames"]
     if isinstance(payload.get("sequence"), list):
@@ -97,7 +114,7 @@ def _extract_raw_frames(payload: dict[str, Any]) -> list[Any]:
     )
 
 
-def normalize_frames(payload: dict[str, Any]) -> list[list[float]]:
+def normalize_frames(payload: Any) -> list[list[float]]:
     raw_frames = _extract_raw_frames(payload)
 
     if len(raw_frames) != SEQUENCE_LENGTH:
@@ -128,7 +145,15 @@ def normalize_frames(payload: dict[str, Any]) -> list[list[float]]:
     return frames
 
 
-def build_result(payload: dict[str, Any], prediction: dict[str, Any]) -> dict[str, Any]:
+def build_result(payload: Any, prediction: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {
+            "player_id": None,
+            "log_id": None,
+            "session_id": None,
+            "prediction": prediction,
+        }
+
     return {
         "player_id": _first_present(payload, ("player_id", "playerId", "user_id", "userId")),
         "log_id": _first_present(payload, ("log_id", "logId", "id")),
@@ -148,7 +173,7 @@ def health_check() -> dict[str, Any]:
 
 
 @app.post("/api/analyze")
-def receive_game_log(payload: dict[str, Any] = Body(...)) -> dict[str, Any]:
+def receive_game_log(payload: Any = Body(...)) -> dict[str, Any]:
     if predict_anomaly is None:
         raise HTTPException(
             status_code=503,

@@ -1,6 +1,11 @@
-from MovementAnomalyRNN import MovementAnomalyRNN
-from model_storage import get_latest_model_path
 import torch
+
+try:
+    from .MovementAnomalyRNN import MovementAnomalyRNN
+    from .model_storage import get_latest_model_path
+except ImportError:
+    from MovementAnomalyRNN import MovementAnomalyRNN
+    from model_storage import get_latest_model_path
 
 
 LABEL_NAMES = ["speedHack", "godMode", "eSP", "aim"]

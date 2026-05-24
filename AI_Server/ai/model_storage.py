@@ -5,6 +5,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 MODEL_DIR = BASE_DIR / "models"
 MODEL_PREFIX = "movement_anomaly_rnn"
 MODEL_SUFFIX = ".pt"
+DEFAULT_MODEL_PATH = MODEL_DIR / f"{MODEL_PREFIX}{MODEL_SUFFIX}"
 
 
 def _model_number(path: Path) -> int | None:
@@ -49,9 +50,12 @@ def get_next_model_path() -> Path:
 
 def get_latest_model_path() -> Path:
     model_paths = get_saved_model_paths()
-    if not model_paths:
-        raise FileNotFoundError(
-            f"No model file found in {MODEL_DIR}. Train the model first."
-        )
+    if model_paths:
+        return model_paths[-1]
 
-    return model_paths[-1]
+    if DEFAULT_MODEL_PATH.exists():
+        return DEFAULT_MODEL_PATH
+
+    raise FileNotFoundError(
+        f"No model file found in {MODEL_DIR}. Train the model first."
+    )

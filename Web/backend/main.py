@@ -85,6 +85,10 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
+class DetectionRequestSchema(BaseModel):
+    nickname: str  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
+
+
 # ═══════════════════════════════════════════════════
 # DB 세션 & JWT 인증 의존성
 # ═══════════════════════════════════════════════════
@@ -449,6 +453,102 @@ async def save_game_log(
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user.id}
+
+@app.post("/api/detect/analyze")
+async def analyze_hack_detection(
+    payload: DetectionRequestSchema,
+    db: Session = Depends(get_db)
+):
+    """
+    호스트 요청을 받아 컴퓨터 시리얼번호(사용자 닉네임)로 로그를 분석하고,
+    검출률 및 스피드핵, ESP, 무적핵, 에임핵 탐지 비율을 퍼센트 리스트로 반환합니다.
+    """
+    nickname = payload.nickname
+    
+    # 1. 닉네임(username 또는 name)으로 유저 검색 (대소문자 구분 없음)
+    user = db.query(User).filter(
+        (func.lower(User.username) == nickname.lower()) | 
+        (func.lower(User.name) == nickname.lower())
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 닉네임의 사용자를 찾을 수 없습니다.")
+
+    # 2. 해당 유저의 모든 게임 로그 가져오기
+    logs = db.query(GameLog).filter(GameLog.user_id == user.id).all()
+    
+    total_packets = 0
+    speed_hack_count = 0
+    esp_count = 0
+    god_mode_count = 0
+    aim_count = 0
+    detected_packets = 0
+
+    for log in logs:
+        try:
+            raw = log.event_data
+            if isinstance(raw, str):
+                evt_data = json.loads(raw)
+            else:
+                evt_data = raw
+            
+            # 이벤트 데이터가 리스트 형태일 수도 있으므로 맞춰서 처리
+            events = evt_data if isinstance(evt_data, list) else [evt_data]
+            
+            for evt in events:
+                total_packets += 1
+                
+                is_speed = (evt.get('SpeedHack') == 1 or (evt.get('Speed') is not None and evt.get('Speed') > 1000))
+                is_esp = (evt.get('ESP') == 1)
+                is_god = (evt.get('GodMode') == 1)
+                is_aim = (evt.get('Aim') == 1)
+                
+                if is_speed:
+                    speed_hack_count += 1
+                if is_esp:
+                    esp_count += 1
+                if is_god:
+                    god_mode_count += 1
+                if is_aim:
+                    aim_count += 1
+                    
+                if is_speed or is_esp or is_god or is_aim:
+                    detected_packets += 1
+        except Exception:
+            pass
+
+    # 3. 퍼센트 계산
+    overall_detection_rate = 0.0
+    speed_pct = 0.0
+    esp_pct = 0.0
+    god_pct = 0.0
+    aim_pct = 0.0
+
+    if total_packets > 0:
+        overall_detection_rate = round((detected_packets / total_packets) * 100.0, 2)
+        speed_pct = round((speed_hack_count / total_packets) * 100.0, 2)
+        esp_pct = round((esp_count / total_packets) * 100.0, 2)
+        god_pct = round((god_mode_count / total_packets) * 100.0, 2)
+        aim_pct = round((aim_count / total_packets) * 100.0, 2)
+
+    # 스피드, esp, god모드, 에임핵 순서 리스트
+    hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
+
+    return {
+        "nickname": nickname,
+        "username": user.username,
+        "name": user.name,
+        "total_packets_analyzed": total_packets,
+        "overall_detection_rate": overall_detection_rate,
+        "hack_percentages_list": hack_percentages_list,
+        "breakdown": {
+            "speed_hack": speed_pct,
+            "esp": esp_pct,
+            "god_mode": god_pct,
+            "aim_hack": aim_pct
+        }
+    }
+
 
 # ═══════════════════════════════════════════════════
 # 관리자 전용 API (role='admin' 필수)

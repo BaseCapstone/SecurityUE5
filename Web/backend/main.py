@@ -88,6 +88,18 @@ class LoginSchema(BaseModel):
 class DetectionRequestSchema(BaseModel):
     nickname: str  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
 
+class HackDetails(BaseModel):
+    speed: float  # 스피드핵 비율 (%)
+    esp: float    # ESP 비율 (%)
+    god: float    # 무적핵 비율 (%)
+    aim: float    # 에임핵 비율 (%)
+
+class HackReportSchema(BaseModel):
+    nickname: str          # 컴퓨터 시리얼번호 (닉네임)
+    detection_rate: float  # 검출률 (%)
+    hacks: HackDetails     # 핵별 정보 딕셔너리
+
+
 
 # ═══════════════════════════════════════════════════
 # DB 세션 & JWT 인증 의존성
@@ -548,6 +560,39 @@ async def analyze_hack_detection(
             "aim_hack": aim_pct
         }
     }
+
+@app.post("/api/detect/report")
+async def report_hack_detection(
+    payload: HackReportSchema
+):
+    """
+    컴퓨터 시리얼번호(닉네임), 검출률(%), 그리고 스피드핵, ESP, 무적핵, 에임핵 비율이
+    포함된 딕셔너리를 받아와서 처리하고, 각각의 비율을 순서대로 담은 퍼센트 리스트를 반환합니다.
+    """
+    nickname = payload.nickname
+    detection_rate = payload.detection_rate
+    
+    # 딕셔너리(객체)에서 각각의 핵 비율 값 추출
+    speed_pct = payload.hacks.speed
+    esp_pct = payload.hacks.esp
+    god_pct = payload.hacks.god
+    aim_pct = payload.hacks.aim
+    
+    # 스피드, esp, god모드, 에임핵 순서의 퍼센트 리스트
+    hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
+    
+    return {
+        "nickname": nickname,
+        "detection_rate": detection_rate,
+        "hack_percentages_list": hack_percentages_list,
+        "hacks_dict": {
+            "speed": speed_pct,
+            "esp": esp_pct,
+            "god": god_pct,
+            "aim": aim_pct
+        }
+    }
+
 
 
 # ═══════════════════════════════════════════════════

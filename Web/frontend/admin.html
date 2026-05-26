@@ -207,47 +207,8 @@
                       <th>조치</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td class="admin-table__id">#10472</td>
-                      <td>ShadowHunter</td>
-                      <td><span class="probability probability--high">92.4%</span></td>
-                      <td><span class="status-badge status-badge--danger">위험</span></td>
-                      <td>에임봇 패턴 감지</td>
-                      <td><button class="btn btn--primary btn--sm" onclick="adminBanUser('#10472')">제재</button></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#10891</td>
-                      <td>NightWolf99</td>
-                      <td><span class="probability probability--high">87.1%</span></td>
-                      <td><span class="status-badge status-badge--danger">위험</span></td>
-                      <td>비정상 이동 속도</td>
-                      <td><button class="btn btn--primary btn--sm" onclick="adminBanUser('#10891')">제재</button></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#11203</td>
-                      <td>ProGamer_KR</td>
-                      <td><span class="probability probability--medium">63.8%</span></td>
-                      <td><span class="status-badge status-badge--warning">주의</span></td>
-                      <td>벽투시 의심 행동</td>
-                      <td><button class="btn btn--outline btn--sm" onclick="adminWatchUser('#11203')">감시</button></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#11587</td>
-                      <td>xXDestroyerXx</td>
-                      <td><span class="probability probability--medium">51.2%</span></td>
-                      <td><span class="status-badge status-badge--warning">주의</span></td>
-                      <td>비정상 킬/데스 비율</td>
-                      <td><button class="btn btn--outline btn--sm" onclick="adminWatchUser('#11587')">감시</button></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#12044</td>
-                      <td>SnipeKing</td>
-                      <td><span class="probability probability--low">28.5%</span></td>
-                      <td><span class="status-badge status-badge--safe">정상</span></td>
-                      <td>높은 헤드샷 비율</td>
-                      <td><button class="btn btn--ghost btn--sm">해제</button></td>
-                    </tr>
+                  <tbody id="admin-user-tbody">
+                    <!-- Javascript에서 동적 삽입 -->
                   </tbody>
                 </table>
               </div>
@@ -259,84 +220,8 @@
                 <h3 class="admin-panel__title">📋 최근 탐지 로그</h3>
               </div>
               <ul class="admin-log" id="admin-log">
-                <li class="admin-log__item admin-log__item--danger">
-                  <span class="admin-log__time">18:24</span>
-                  <span class="admin-log__msg"><strong>ShadowHunter</strong> — 에임봇 패턴 재감지 (3회차)</span>
-                </li>
-                <li class="admin-log__item admin-log__item--warning">
-                  <span class="admin-log__time">18:19</span>
-                  <span class="admin-log__msg"><strong>ProGamer_KR</strong> — 벽투시 의심 행동 기록</span>
-                </li>
-                <li class="admin-log__item admin-log__item--danger">
-                  <span class="admin-log__time">18:12</span>
-                  <span class="admin-log__msg"><strong>NightWolf99</strong> — 속도핵 패턴 탐지</span>
-                </li>
-                <li class="admin-log__item admin-log__item--info">
-                  <span class="admin-log__time">18:05</span>
-                  <span class="admin-log__msg"><strong>SnipeKing</strong> — 감시 대상 등록</span>
-                </li>
-                <li class="admin-log__item admin-log__item--success">
-                  <span class="admin-log__time">17:58</span>
-                  <span class="admin-log__msg"><strong>CheaterX</strong> — 영구 제재 완료</span>
-                </li>
-                <li class="admin-log__item admin-log__item--info">
-                  <span class="admin-log__time">17:45</span>
-                  <span class="admin-log__msg">AI 모델 v3.0 업데이트 적용 완료</span>
-                </li>
-                <li class="admin-log__item admin-log__item--warning">
-                  <span class="admin-log__time">17:32</span>
-                  <span class="admin-log__msg"><strong>xXDestroyerXx</strong> — 비정상 킬/데스 비율 감지</span>
-                </li>
+                <!-- Javascript에서 동적 삽입 -->
               </ul>
-            </div>
-
-            <!-- 서버 상태 -->
-            <div class="admin-panel">
-              <div class="admin-panel__header">
-                <h3 class="admin-panel__title">🖥️ 서버 상태</h3>
-              </div>
-              <div class="admin-server-status">
-                <div class="server-item">
-                  <div class="server-item__name">
-                    <span class="server-dot server-dot--online"></span>
-                    KR-Seoul-01
-                  </div>
-                  <div class="server-item__bar">
-                    <div class="server-item__fill" style="width: 72%;"></div>
-                  </div>
-                  <span class="server-item__value">72%</span>
-                </div>
-                <div class="server-item">
-                  <div class="server-item__name">
-                    <span class="server-dot server-dot--online"></span>
-                    KR-Seoul-02
-                  </div>
-                  <div class="server-item__bar">
-                    <div class="server-item__fill" style="width: 58%;"></div>
-                  </div>
-                  <span class="server-item__value">58%</span>
-                </div>
-                <div class="server-item">
-                  <div class="server-item__name">
-                    <span class="server-dot server-dot--online"></span>
-                    KR-Busan-01
-                  </div>
-                  <div class="server-item__bar">
-                    <div class="server-item__fill" style="width: 45%;"></div>
-                  </div>
-                  <span class="server-item__value">45%</span>
-                </div>
-                <div class="server-item">
-                  <div class="server-item__name">
-                    <span class="server-dot server-dot--warning"></span>
-                    JP-Tokyo-01
-                  </div>
-                  <div class="server-item__bar">
-                    <div class="server-item__fill server-item__fill--warning" style="width: 89%;"></div>
-                  </div>
-                  <span class="server-item__value">89%</span>
-                </div>
-              </div>
             </div>
           </div>
         </div><!-- end data-page="dashboard" -->
@@ -348,7 +233,7 @@
               <div class="admin-panel__header" style="flex-wrap: wrap; gap: 16px;">
                 <div style="display: flex; align-items: center; gap: 16px;">
                   <h3 class="admin-panel__title">👥 전체 사용자 목록</h3>
-                  <span style="color: #64748b; font-size: 13px;">총 15,847명</span>
+                  <span id="admin-total-users-count" style="color: #64748b; font-size: 13px;">총 15,847명</span>
                 </div>
                 <div class="admin-search-box">
                   <input type="text" id="user-search-input" placeholder="닉네임 또는 ID 검색..." />
@@ -368,54 +253,7 @@
                     </tr>
                   </thead>
                   <tbody id="all-users-tbody">
-                    <tr>
-                      <td class="admin-table__id">#10001</td>
-                      <td>BladeRunner</td>
-                      <td>2025.08.15</td>
-                      <td>2026.04.26</td>
-                      <td><span class="probability probability--low">95점</span></td>
-                      <td><span class="status-badge status-badge--safe">정상</span></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#10045</td>
-                      <td>StarPlayer_KR</td>
-                      <td>2025.09.02</td>
-                      <td>2026.04.25</td>
-                      <td><span class="probability probability--low">91점</span></td>
-                      <td><span class="status-badge status-badge--safe">정상</span></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#10472</td>
-                      <td>ShadowHunter</td>
-                      <td>2025.11.20</td>
-                      <td>2026.04.26</td>
-                      <td><span class="probability probability--high">12점</span></td>
-                      <td><span class="status-badge status-badge--danger">제재</span></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#10891</td>
-                      <td>NightWolf99</td>
-                      <td>2026.01.05</td>
-                      <td>2026.04.26</td>
-                      <td><span class="probability probability--high">8점</span></td>
-                      <td><span class="status-badge status-badge--danger">제재</span></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#11203</td>
-                      <td>ProGamer_KR</td>
-                      <td>2026.02.14</td>
-                      <td>2026.04.26</td>
-                      <td><span class="probability probability--medium">52점</span></td>
-                      <td><span class="status-badge status-badge--warning">주의</span></td>
-                    </tr>
-                    <tr>
-                      <td class="admin-table__id">#12044</td>
-                      <td>SnipeKing</td>
-                      <td>2026.03.01</td>
-                      <td>2026.04.26</td>
-                      <td><span class="probability probability--low">78점</span></td>
-                      <td><span class="status-badge status-badge--safe">정상</span></td>
-                    </tr>
+                    <!-- Javascript에서 동적 삽입 -->
                   </tbody>
                 </table>
               </div>
@@ -426,32 +264,32 @@
         <!-- ═══ PAGE: 통계 ═══ -->
         <div data-page="stats" style="display: none;">
           <div class="admin-stats">
-            <div class="admin-stat-card admin-stat-card--red">
-              <div class="admin-stat-card__icon">📊</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">1,203</span>
-                <span class="admin-stat-card__label">금월 총 탐지 건수</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--blue">
-              <div class="admin-stat-card__icon">🎯</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">892</span>
-                <span class="admin-stat-card__label">에임봇 탐지</span>
-              </div>
-            </div>
             <div class="admin-stat-card admin-stat-card--orange">
               <div class="admin-stat-card__icon">💨</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">198</span>
-                <span class="admin-stat-card__label">속도핵 탐지</span>
+                <span class="admin-stat-card__value" id="stats-speed-pct">0.0%</span>
+                <span class="admin-stat-card__label">스피드핵 탐지 비율</span>
+              </div>
+            </div>
+            <div class="admin-stat-card admin-stat-card--red">
+              <div class="admin-stat-card__icon">🛡️</div>
+              <div class="admin-stat-card__info">
+                <span class="admin-stat-card__value" id="stats-god-pct">0.0%</span>
+                <span class="admin-stat-card__label">갓모드 탐지 비율</span>
               </div>
             </div>
             <div class="admin-stat-card admin-stat-card--green">
               <div class="admin-stat-card__icon">👁️</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">113</span>
-                <span class="admin-stat-card__label">벽투시 탐지</span>
+                <span class="admin-stat-card__value" id="stats-esp-pct">0.0%</span>
+                <span class="admin-stat-card__label">ESP 탐지 비율</span>
+              </div>
+            </div>
+            <div class="admin-stat-card admin-stat-card--blue">
+              <div class="admin-stat-card__icon">🎯</div>
+              <div class="admin-stat-card__info">
+                <span class="admin-stat-card__value" id="stats-aim-pct">0.0%</span>
+                <span class="admin-stat-card__label">에임핵 탐지 비율</span>
               </div>
             </div>
           </div>
@@ -460,38 +298,36 @@
               <div class="admin-panel__header">
                 <h3 class="admin-panel__title">📈 주간 탐지 추이</h3>
               </div>
-              <div style="padding: 24px; color: #94a3b8;">
                 <div style="display: flex; align-items: flex-end; gap: 12px; height: 180px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:60%;"></div>
+                    <div id="chart-bar-mon" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">월</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:45%;"></div>
+                    <div id="chart-bar-tue" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">화</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:80%;"></div>
+                    <div id="chart-bar-wed" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">수</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:55%;"></div>
+                    <div id="chart-bar-thu" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">목</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:90%;"></div>
+                    <div id="chart-bar-fri" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">금</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:100%;"></div>
+                    <div id="chart-bar-sat" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">토</span>
                   </div>
                   <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:75%;"></div>
+                    <div id="chart-bar-sun" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
                     <span style="font-size:11px;">일</span>
                   </div>
                 </div>
-              </div>
             </div>
           </div>
         </div><!-- end data-page="stats" -->
@@ -504,46 +340,7 @@
                 <h3 class="admin-panel__title">📋 전체 탐지 로그</h3>
               </div>
               <ul class="admin-log" id="admin-log-full" style="max-height: 600px;">
-                <li class="admin-log__item admin-log__item--danger">
-                  <span class="admin-log__time">18:24</span>
-                  <span class="admin-log__msg"><strong>ShadowHunter</strong> — 에임봇 패턴 재감지 (3회차)</span>
-                </li>
-                <li class="admin-log__item admin-log__item--warning">
-                  <span class="admin-log__time">18:19</span>
-                  <span class="admin-log__msg"><strong>ProGamer_KR</strong> — 벽투시 의심 행동 기록</span>
-                </li>
-                <li class="admin-log__item admin-log__item--danger">
-                  <span class="admin-log__time">18:12</span>
-                  <span class="admin-log__msg"><strong>NightWolf99</strong> — 속도핵 패턴 탐지</span>
-                </li>
-                <li class="admin-log__item admin-log__item--info">
-                  <span class="admin-log__time">18:05</span>
-                  <span class="admin-log__msg"><strong>SnipeKing</strong> — 감시 대상 등록</span>
-                </li>
-                <li class="admin-log__item admin-log__item--success">
-                  <span class="admin-log__time">17:58</span>
-                  <span class="admin-log__msg"><strong>CheaterX</strong> — 영구 제재 완료</span>
-                </li>
-                <li class="admin-log__item admin-log__item--info">
-                  <span class="admin-log__time">17:45</span>
-                  <span class="admin-log__msg">AI 모델 v3.0 업데이트 적용 완료</span>
-                </li>
-                <li class="admin-log__item admin-log__item--warning">
-                  <span class="admin-log__time">17:32</span>
-                  <span class="admin-log__msg"><strong>xXDestroyerXx</strong> — 비정상 킬/데스 비율 감지</span>
-                </li>
-                <li class="admin-log__item admin-log__item--success">
-                  <span class="admin-log__time">16:50</span>
-                  <span class="admin-log__msg"><strong>HackMaster</strong> — 7일 정지 처리</span>
-                </li>
-                <li class="admin-log__item admin-log__item--danger">
-                  <span class="admin-log__time">16:22</span>
-                  <span class="admin-log__msg"><strong>GhostAim</strong> — 에임봇 + 속도핵 복합 탐지</span>
-                </li>
-                <li class="admin-log__item admin-log__item--info">
-                  <span class="admin-log__time">15:40</span>
-                  <span class="admin-log__msg">서버 KR-Seoul-01 점검 완료</span>
-                </li>
+                <!-- Javascript에서 동적 삽입 -->
               </ul>
             </div>
           </div>
@@ -603,32 +400,31 @@
         <p class="admin-modal__subtitle" id="admin-user-id">#00000</p>
       </div>
       <div class="admin-modal__content">
-        <!-- Stats Framework (Placeholders) -->
         <div class="admin-modal__section">
           <h3 class="admin-modal__section-title">📊 플레이 수치 분석 (의심 지표)</h3>
           <div class="admin-stats" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0;">
             <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">42.5%</span>
-                <span class="admin-stat-card__label">헤드샷 비율 (비정상 높음)</span>
+                <span class="admin-stat-card__value" id="modal-speed-pct">0.0%</span>
+                <span class="admin-stat-card__label">스피드핵 비율</span>
               </div>
             </div>
             <div class="admin-stat-card admin-stat-card--orange" style="padding: 12px;">
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">1.8x</span>
-                <span class="admin-stat-card__label">평균 이동 속도 대비</span>
+                <span class="admin-stat-card__value" id="modal-god-pct">0.0%</span>
+                <span class="admin-stat-card__label">무적핵 (갓모드) 비율</span>
               </div>
             </div>
             <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value">12.4</span>
-                <span class="admin-stat-card__label">K/D (비정상 높음)</span>
+                <span class="admin-stat-card__value" id="modal-esp-pct">0.0%</span>
+                <span class="admin-stat-card__label">ESP 비율</span>
               </div>
             </div>
             <div class="admin-stat-card admin-stat-card--green" style="padding: 12px;">
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-user-score">85점</span>
-                <span class="admin-stat-card__label">최종 보안 점수</span>
+                <span class="admin-stat-card__value" id="modal-aim-pct">0.0%</span>
+                <span class="admin-stat-card__label">에임핵 비율</span>
               </div>
             </div>
           </div>

@@ -35,10 +35,15 @@ function initGameLaunch() {
       animateProgress();
     } catch (error) {
       console.error('Game token request failed:', error);
-      showToast(error.message || '게임 세션 준비에 실패했습니다.', 'error');
       cancelLaunch();
+      if (error.message && (error.message.includes('핵 사용 의심') || error.message.includes('제재'))) {
+        openBanModal();
+      } else {
+        showToast(error.message || '게임 세션 준비에 실패했습니다.', 'error');
+      }
     }
   }
+
 
   function updateLaunchUserFromSession() {
     const username = sessionStorage.getItem('username') || 'Player';
@@ -149,6 +154,27 @@ function initGameLaunch() {
     }, 200);
   }
 
+  function openBanModal() {
+    const banModal = document.getElementById('ban-modal');
+    if (banModal) {
+      banModal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      
+      const closeBtn = document.getElementById('ban-modal-close');
+      const confirmBtn = document.getElementById('ban-modal-confirm-btn');
+      
+      const closeHandler = () => {
+        banModal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      };
+      
+      if (closeBtn) closeBtn.onclick = closeHandler;
+      if (confirmBtn) confirmBtn.onclick = closeHandler;
+    } else {
+      showToast('핵 사용 의심 대상자로 지정되어 게임을 플레이할 수 없습니다.', 'error');
+    }
+  }
+
   gameStartBtns.forEach(btn => {
     btn.addEventListener('click', startLaunch);
   });
@@ -161,3 +187,4 @@ function initGameLaunch() {
     }
   });
 }
+

@@ -38,6 +38,7 @@ class User(Base):
     role = Column(String(20), default="user", nullable=False)  # "user" 또는 "admin"
     created_at = Column(DateTime, default=func.now())
     last_login = Column(DateTime, nullable=True)
+    is_banned = Column(Integer, default=0, nullable=False)  # 0: 정상, 1: 제재
 
     # 관계 설정
     game_logs = relationship("GameLog", back_populates="user")

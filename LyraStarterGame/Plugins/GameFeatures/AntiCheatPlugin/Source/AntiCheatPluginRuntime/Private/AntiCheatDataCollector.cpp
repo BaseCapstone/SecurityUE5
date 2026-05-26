@@ -20,6 +20,12 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "GenericPlatform/GenericPlatformHttp.h"
+#include "HttpModule.h"
+#include "Interfaces/IHttpRequest.h"
+#include "Interfaces/IHttpResponse.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 UAntiCheatDataCollector::UAntiCheatDataCollector()
 {
@@ -49,6 +55,8 @@ void UAntiCheatDataCollector::BeginPlay()
     if (!GameLogEndpoint.IsEmpty())
     {
         AWSEndpointURL = FGenericPlatformHttp::UrlDecode(GameLogEndpoint);
+        GameStatusEndpoint = AWSEndpointURL;
+        GameStatusEndpoint.ReplaceInline(TEXT("/api/logs"), TEXT("/api/game/status"));
     }
 
     if (LinkedUserID.IsEmpty())
@@ -58,10 +66,20 @@ void UAntiCheatDataCollector::BeginPlay()
 
     UE_LOG(LogTemp, Warning, TEXT("[AntiCheat] Launch args loaded. UserID=%s Token=%s Endpoint=%s"), *LinkedUserID, GameAuthToken.IsEmpty() ? TEXT("missing") : TEXT("present"), *AWSEndpointURL);
 
-    // 0.1ÃÊ¸¶´Ù µ¥ÀÌÅÍ ¼öÁı ½ÇÇà
     if (GetWorld())
     {
+        // 0.1ì´ˆë§ˆë‹¤ ë°ì´í„° ìˆ˜ì§‘ ì‹¤í–‰
         GetWorld()->GetTimerManager().SetTimer(DataTimerHandle, this, &UAntiCheatDataCollector::CollectAndlog, 0.1f, true, 1.0f);
+        
+        // 5ì´ˆë§ˆë‹¤ ë°ì´í„° ë°±ì—”ë“œì— ë°´ ì—¬ë¶€ í™•ì¸
+        GetWorld()->GetTimerManager().SetTimer(
+            BanCheckTimerHandle,
+            this,
+            &UAntiCheatDataCollector::CheckBanStatus,
+            5.0f,
+            true,
+            2.0f
+        );
     }
 }
 
@@ -70,6 +88,7 @@ void UAntiCheatDataCollector::EndPlay(const EEndPlayReason::Type EndPlayReason)
     if (GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(DataTimerHandle);
+        GetWorld()->GetTimerManager().ClearTimer(BanCheckTimerHandle);
     }
     Super::EndPlay(EndPlayReason);
 }
@@ -78,18 +97,18 @@ void UAntiCheatDataCollector::CollectAndlog()
 {
     if (!GetWorld() || GetWorld()->bIsTearingDown) return;
 
-    // 1. ¼öÁı±â°¡ ºÙ¾îÀÖ´Â Ä³¸¯ÅÍ(Pawn) °¡Á®¿À±â
+    // 1. ìˆ˜ì§‘ê¸°ê°€ ë¶™ì–´ìˆëŠ” ìºë¦­í„°(Pawn) ê°€ì ¸ì˜¤ê¸°
     AActor* Owner = GetOwner();
     if (!Owner) return;
 
     APawn* PawnOwner = Cast<APawn>(Owner);
     if (!PawnOwner) return;
 
-    // 2. ÀÌ Ä³¸¯ÅÍ¸¦ Á¶Á¾ÇÏ´Â ÄÁÆ®·Ñ·¯(PC) °¡Á®¿À±â
+    // 2. ì´ ìºë¦­í„°ë¥¼ ì¡°ì¢…í•˜ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬(PC) ê°€ì ¸ì˜¤ê¸°
     APlayerController* PC = Cast<APlayerController>(PawnOwner->GetController());
     if (!PC) return;
 
-    // °ÔÀÓ ´ë±â½Ã°£ / Á¤»ó ¹«Àû »óÅÂ / ¸ÅÄ¡ ÀüÈÄ¿¡´Â ·Î±× ¼öÁı ¹× Àü¼Û ±İÁö
+    // ê²Œì„ ëŒ€ê¸°ì‹œê°„ / ì •ìƒ ë¬´ì  ìƒíƒœ / ë§¤ì¹˜ ì „í›„ì—ëŠ” ë¡œê·¸ ìˆ˜ì§‘ ë° ì „ì†¡ ê¸ˆì§€
     if (!ShouldCollectTrainingLog(PawnOwner))
     {
         PacketBuffer.Reset();
@@ -111,8 +130,8 @@ void UAntiCheatDataCollector::CollectAndlog()
     }
 
     // ==============================================================
-    // ÇÙ ÄÄÆ÷³ÍÆ®´Â ¸ğµâ¿¡ ÀÇÇØ ÄÁÆ®·Ñ·¯(PC)¿¡ ºÙ¾îÀÖ½À´Ï´Ù.
-    // µû¶ó¼­ Owner°¡ ¾Æ´Ñ PC¿¡¼­ Ã£¾Æ¾ß ÇÕ´Ï´Ù.
+    // í•µ ì»´í¬ë„ŒíŠ¸ëŠ” ëª¨ë“ˆì— ì˜í•´ ì»¨íŠ¸ë¡¤ëŸ¬(PC)ì— ë¶™ì–´ìˆìŠµë‹ˆë‹¤.
+    // ë”°ë¼ì„œ Ownerê°€ ì•„ë‹Œ PCì—ì„œ ì°¾ì•„ì•¼ í•©ë‹ˆë‹¤.
     // ==============================================================
     int32 CurrentSpeedHack = 0;
     int32 CurrentAim = 0;
@@ -135,7 +154,7 @@ void UAntiCheatDataCollector::CollectAndlog()
         CurrentGodMode == 1 ||
         CurrentESP == 1;
 
-    // 3. µ¥ÀÌÅÍ ÆĞÅ¶ ±¸¼º (±âÁ¸ µ¿ÀÏ)
+    // 3. ë°ì´í„° íŒ¨í‚· êµ¬ì„± (ê¸°ì¡´ ë™ì¼)
     FAntiCheatDataPacket DataPacket{};
     DataPacket.CurrentHP = 0.0f;
     DataPacket.UserID = LinkedUserID;
@@ -200,7 +219,7 @@ void UAntiCheatDataCollector::CollectAndlog()
         DataPacket.bIsTargetVisible = !GetWorld()->LineTraceSingleByChannel(Hit, Owner->GetActorLocation(), BestTarget->GetActorLocation(), ECC_Visibility, Params);
     }
 
-    // ÇÙ Á¾·ùº° È°¼º »óÅÂ ÀúÀå
+    // í•µ ì¢…ë¥˜ë³„ í™œì„± ìƒíƒœ ì €ì¥
     DataPacket.SpeedHack = CurrentSpeedHack;
     DataPacket.Aim = CurrentAim;
     DataPacket.GodMode = CurrentGodMode;
@@ -208,18 +227,18 @@ void UAntiCheatDataCollector::CollectAndlog()
 
     PacketBuffer.Add(DataPacket);
 
-    // ¹öÆÛ Àü¼Û (AWS)
+    // ë²„í¼ ì „ì†¡ (AWS)
     if (PacketBuffer.Num() >= MaxBufferSize) // MaxBufferSize(30)
     {
         if (DataSender)
         {
-            DataSender->SendDataToAWS(PacketBuffer, AWSEndpointURL, GameAuthToken); // AWSEndpointURL º¯¼ö°¡ Çì´õ¿¡ ÀÖ¾î¾ß ÇÔ
+            DataSender->SendDataToAWS(PacketBuffer, AWSEndpointURL, GameAuthToken); // AWSEndpointURL ë³€ìˆ˜ê°€ í—¤ë”ì— ìˆì–´ì•¼ í•¨
         }
         PacketBuffer.Reset();
     }
 
-    // ½Ç½Ã°£ µğ¹ö±× ·Î±× Ãâ·Â (Realtime Data)
-    // ÇÔ¼ö ¸Ç ¸¶Áö¸·¿¡ À§Ä¡ÇØ¾ß Áß°£¿¡ return µÇÁö ¾Ê°í ¹«Á¶°Ç È­¸é¿¡ ¶å´Ï´Ù!
+    // ì‹¤ì‹œê°„ ë””ë²„ê·¸ ë¡œê·¸ ì¶œë ¥ (Realtime Data)
+    // í•¨ìˆ˜ ë§¨ ë§ˆì§€ë§‰ì— ìœ„ì¹˜í•´ì•¼ ì¤‘ê°„ì— return ë˜ì§€ ì•Šê³  ë¬´ì¡°ê±´ í™”ë©´ì— ëœ¹ë‹ˆë‹¤!
     // ==============================================================
     if (GEngine)
     {
@@ -282,21 +301,21 @@ bool UAntiCheatDataCollector::ShouldCollectTrainingLog(const APawn* PawnOwner)
         return false;
     }
 
-    // ¸ÅÄ¡°¡ ¾ÆÁ÷ ½ÃÀÛµÇÁö ¾Ê¾Ò°Å³ª ÀÌ¹Ì ³¡³µÀ¸¸é ¼öÁıÇÏÁö ¾ÊÀ½
+    // ë§¤ì¹˜ê°€ ì•„ì§ ì‹œì‘ë˜ì§€ ì•Šì•˜ê±°ë‚˜ ì´ë¯¸ ëë‚¬ìœ¼ë©´ ìˆ˜ì§‘í•˜ì§€ ì•ŠìŒ
     if (!GameState->HasMatchStarted() || GameState->HasMatchEnded())
     {
         LogCollectionStartTime = -1.0f;
         return false;
     }
 
-    // Lyra ´ë±â½Ã°£ Á¤»ó ¹«Àû ÅÂ±×°¡ ³²¾Æ ÀÖÀ¸¸é ¼öÁıÇÏÁö ¾ÊÀ½
+    // Lyra ëŒ€ê¸°ì‹œê°„ ì •ìƒ ë¬´ì  íƒœê·¸ê°€ ë‚¨ì•„ ìˆìœ¼ë©´ ìˆ˜ì§‘í•˜ì§€ ì•ŠìŒ
     if (HasLyraDamageImmunity(PawnOwner))
     {
         LogCollectionStartTime = -1.0f;
         return false;
     }
 
-    // ¹«Àû ÅÂ±×°¡ »ç¶óÁø Á÷ÈÄ 0.5~1ÃÊ Á¤µµ¸¸ ¾ÈÁ¤È­ ´ë±â
+    // ë¬´ì  íƒœê·¸ê°€ ì‚¬ë¼ì§„ ì§í›„ 0.5~1ì´ˆ ì •ë„ë§Œ ì•ˆì •í™” ëŒ€ê¸°
     if (LogCollectionStartTime < 0.0f)
     {
         LogCollectionStartTime = World->GetTimeSeconds() + PostImmunityGraceSeconds;
@@ -308,4 +327,115 @@ bool UAntiCheatDataCollector::ShouldCollectTrainingLog(const APawn* PawnOwner)
     }
 
     return true;
+}
+
+void UAntiCheatDataCollector::CheckBanStatus()
+{
+    if (bBanAlreadyHandled) return;
+    if (GameAuthToken.IsEmpty()) return;
+    if (GameStatusEndpoint.IsEmpty()) return;
+
+    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request =
+        FHttpModule::Get().CreateRequest();
+
+    Request->SetURL(GameStatusEndpoint);
+    Request->SetVerb(TEXT("GET"));
+    Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+    Request->SetHeader(
+        TEXT("Authorization"),
+        FString::Printf(TEXT("Bearer %s"), *GameAuthToken)
+    );
+
+    Request->OnProcessRequestComplete().BindUObject(
+        this,
+        &UAntiCheatDataCollector::OnBanStatusResponse
+    );
+
+    Request->ProcessRequest();
+}
+
+void UAntiCheatDataCollector::OnBanStatusResponse(
+    FHttpRequestPtr Request,
+    FHttpResponsePtr Response,
+    bool bWasSuccessful
+)
+{
+    if (bBanAlreadyHandled) return;
+    if (!bWasSuccessful || !Response.IsValid()) return;
+
+    int32 StatusCode = Response->GetResponseCode();
+    FString Body = Response->GetContentAsString();
+
+    if (StatusCode == 403)
+    {
+        HandleBannedAccount(TEXT("ì œì¬ëœ ê³„ì •ì…ë‹ˆë‹¤."));
+        return;
+    }
+
+    if (!EHttpResponseCodes::IsOk(StatusCode))
+    {
+        return;
+    }
+
+    TSharedPtr<FJsonObject> JsonObject;
+    TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(Body);
+
+    if (!FJsonSerializer::Deserialize(Reader, JsonObject) || !JsonObject.IsValid())
+    {
+        return;
+    }
+
+    bool bBanned = false;
+    if (JsonObject->TryGetBoolField(TEXT("banned"), bBanned) && bBanned)
+    {
+        FString Message = TEXT("ì œì¬ëœ ê³„ì •ì…ë‹ˆë‹¤.");
+        JsonObject->TryGetStringField(TEXT("message"), Message);
+
+        HandleBannedAccount(Message);
+    }
+}
+
+void UAntiCheatDataCollector::HandleBannedAccount(const FString& Message)
+{
+    if (bBanAlreadyHandled) return;
+
+    bBanAlreadyHandled = true;
+
+    UWorld* World = GetWorld();
+    if (!World || World->bIsTearingDown)
+    {
+        return;
+    }
+
+    World->GetTimerManager().ClearTimer(DataTimerHandle);
+    World->GetTimerManager().ClearTimer(BanCheckTimerHandle);
+
+    PacketBuffer.Reset();
+
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(
+            -1,
+            3.0f,
+            FColor::Red,
+            Message
+        );
+    }
+
+    FTimerHandle QuitTimerHandle;
+
+    World->GetTimerManager().SetTimer(
+        QuitTimerHandle,
+        [this]()
+        {
+            UKismetSystemLibrary::QuitGame(
+                GetWorld(),
+                nullptr,
+                EQuitPreference::Quit,
+                false
+            );
+        },
+        3.0f,
+        false
+    );
 }

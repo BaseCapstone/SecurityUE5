@@ -1,8 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "HttpFwd.h"
 #include "AntiCheatDataCollector.generated.h"
-
 class APawn;
 
 USTRUCT(BlueprintType)
@@ -71,6 +71,23 @@ protected:
 private: 
 	// 주기적인 데이터 수집을 제어하는 타이머 핸들
 	FTimerHandle DataTimerHandle;
+
+	// 주기적인 밴 여부를 제어하는 타이머 핸들
+	FTimerHandle BanCheckTimerHandle;
+
+	bool bBanAlreadyHandled = false;
+
+	FString GameStatusEndpoint = TEXT("http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/game/status");
+
+	void CheckBanStatus();
+
+	void OnBanStatusResponse(
+		FHttpRequestPtr Request,
+		FHttpResponsePtr Response,
+		bool bWasSuccessful
+	);
+
+	void HandleBannedAccount(const FString& Message);
 
 	// 에임봇 탐지를 위해 이전 수집 시점의 회전값을 임시로 저장하는 변수
 	FRotator LastControlRotation;

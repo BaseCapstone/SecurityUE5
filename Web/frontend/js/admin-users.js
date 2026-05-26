@@ -35,7 +35,11 @@ async function initUserManagement() {
         let statusBadge = 'status-badge--safe';
         let statusText = '정상';
         
-        if (scoreNum < 30) {
+        if (user.is_banned) {
+          scoreClass = 'probability--high';
+          statusBadge = 'status-badge--danger';
+          statusText = '제재됨';
+        } else if (scoreNum < 30) {
           scoreClass = 'probability--high';
           statusBadge = 'status-badge--danger';
           statusText = '위험';
@@ -48,6 +52,16 @@ async function initUserManagement() {
         const dateOnly = user.created_at ? user.created_at.split(' ')[0] : '-';
         const lastLoginOnly = user.last_login ? user.last_login.split(' ')[0] : '-';
 
+        // 제재 버튼 렌더링 (관리자 계정은 버튼 비활성)
+        let banBtnHtml = '';
+        if (user.role === 'admin') {
+          banBtnHtml = '<span style="color:#64748b; font-size:12px;">관리자</span>';
+        } else if (user.is_banned) {
+          banBtnHtml = `<button class="btn btn--outline btn--sm ban-toggle-btn" data-user-id="${user.id}">해제</button>`;
+        } else {
+          banBtnHtml = `<button class="btn btn--primary btn--sm ban-toggle-btn" data-user-id="${user.id}" style="background:var(--accent-red);border-color:var(--accent-red);">제재</button>`;
+        }
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="admin-table__id">#${user.id}</td>
@@ -56,6 +70,7 @@ async function initUserManagement() {
           <td>${lastLoginOnly}</td>
           <td><span class="probability ${scoreClass}">${scoreNum}점</span></td>
           <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
+          <td>${banBtnHtml}</td>
         `;
         tbody.appendChild(tr);
 
@@ -63,13 +78,16 @@ async function initUserManagement() {
           element: tr,
           id: `#${user.id}`,
           idDisplay: `#${user.id}`,
+          rawId: user.id,
           nickname: (user.name || user.username).toLowerCase(),
           nicknameDisplay: user.name || user.username,
           date: dateOnly,
           lastLogin: lastLoginOnly,
           score: scoreNum,
           scoreDisplay: `${scoreNum}점`,
-          status: statusText
+          status: statusText,
+          is_banned: user.is_banned,
+          role: user.role
         });
       });
       
@@ -140,9 +158,22 @@ async function initUserManagement() {
   const modalClose = document.getElementById('admin-modal-close');
   if(modal && modalClose) {
     userData.forEach(data => {
-      data.element.addEventListener('click', () => {
+      data.element.addEventListener('click', (e) => {
+        // 제재 버튼 클릭 시 모달 열리지 않도록
+        if (e.target.closest('.ban-toggle-btn')) {
+          return;
+        }
         openAdminUserModal(data);
       });
+
+      // 제재 버튼 클릭 이벤트 바인딩
+      const banBtn = data.element.querySelector('.ban-toggle-btn');
+      if (banBtn) {
+        banBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          adminBanUser(data.rawId, banBtn);
+        });
+      }
     });
 
     modalClose.addEventListener('click', () => {

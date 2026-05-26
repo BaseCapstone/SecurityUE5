@@ -185,30 +185,59 @@ function switchAdminPage(pageName) {
 }
 
 /**
- * 유저 제재 처리 (프로토타입 — 토스트 알림만 표시)
+ * 유저 제재 처리 (백엔드 연동)
  */
-function adminBanUser(userId) {
-  const row = event.target.closest('tr');
-  if (row) {
-    const statusBadge = row.querySelector('.status-badge');
-    if (statusBadge) {
-      statusBadge.className = 'status-badge status-badge--safe';
-      statusBadge.textContent = '제재됨';
-    }
+async function adminBanUser(userId, btnElement) {
+  const token = sessionStorage.getItem('token');
+  if (!token) return;
 
-    const btn = row.querySelector('.btn');
-    if (btn) {
-      btn.textContent = '완료';
-      btn.disabled = true;
-      btn.classList.remove('btn--primary');
-      btn.classList.add('btn--ghost');
-      btn.style.opacity = '0.5';
-    }
+  btnElement.textContent = '처리 중...';
+  btnElement.disabled = true;
 
-    addAdminLog('success', `${userId} 유저에 대한 제재가 완료되었습니다.`);
+  try {
+    const response = await fetch(`/api/admin/users/${userId}/ban`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const row = btnElement.closest('tr');
+      
+      if (row) {
+        const statusBadge = row.querySelector('.status-badge');
+        if (data.is_banned) {
+          if (statusBadge) {
+            statusBadge.className = 'status-badge status-badge--danger';
+            statusBadge.textContent = '제재됨';
+          }
+          btnElement.textContent = '해제';
+          btnElement.className = 'btn btn--outline btn--sm ban-toggle-btn';
+          btnElement.style = '';
+        } else {
+          if (statusBadge) {
+            statusBadge.className = 'status-badge status-badge--safe';
+            statusBadge.textContent = '정상';
+          }
+          btnElement.textContent = '제재';
+          btnElement.className = 'btn btn--primary btn--sm ban-toggle-btn';
+          btnElement.style = 'background:var(--accent-red);border-color:var(--accent-red);';
+        }
+      }
+      
+      btnElement.disabled = false;
+      addAdminLog('success', data.message);
+      showToast(data.message, 'success');
+    } else {
+      const errorData = await response.json();
+      showToast(errorData.detail || '제재 처리에 실패했습니다.', 'error');
+      btnElement.textContent = '오류';
+    }
+  } catch (error) {
+    console.error('Ban toggle failed:', error);
+    showToast('네트워크 오류가 발생했습니다.', 'error');
+    btnElement.textContent = '오류';
   }
-
-  showToast(`${userId} 유저가 제재되었습니다.`, 'success');
 }
 
 /**

@@ -596,6 +596,19 @@ async def report_hack_detection(
 
 
 # ═══════════════════════════════════════════════════
+# 게임 클라이언트용 제재 상태 확인 API
+# ═══════════════════════════════════════════════════
+
+@app.get("/api/game/status")
+async def get_game_status(
+    current_user: User = Depends(get_current_game_user),
+):
+    """게임 클라이언트가 주기적으로 호출하여 제재 상태를 확인합니다."""
+    if current_user.is_banned:
+        return {"banned": True, "message": "제재된 계정입니다."}
+    return {"banned": False, "message": ""}
+
+# ═══════════════════════════════════════════════════
 # 관리자 전용 API (role='admin' 필수)
 # ═══════════════════════════════════════════════════
 
@@ -623,7 +636,8 @@ async def get_all_users(
             "role": u.role,
             "created_at": str(u.created_at),
             "last_login": str(u.last_login) if u.last_login else None,
-            "game_logs_count": log_count
+            "game_logs_count": log_count,
+            "is_banned": bool(u.is_banned)
         })
     
     return {"users": result, "total": len(result)}
@@ -657,6 +671,30 @@ async def get_user_logs_for_admin(
         })
     
     return {"user_id": user_id, "logs": result, "total": len(result)}
+
+@app.post("/api/admin/users/{user_id}/ban")
+async def toggle_user_ban(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """관리자 전용 — 유저 제재/해제를 토글합니다."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+    if user.role == "admin":
+        raise HTTPException(status_code=400, detail="관리자 계정은 제재할 수 없습니다.")
+    
+    user.is_banned = 0 if user.is_banned else 1
+    db.commit()
+    db.refresh(user)
+    
+    action = "제재" if user.is_banned else "해제"
+    return {
+        "message": f"{user.username} 유저가 {action}되었습니다.",
+        "user_id": user.id,
+        "is_banned": bool(user.is_banned)
+    }
 
 # ═══════════════════════════════════════════════════
 # 서버 시작 시 테이블 자동 생성

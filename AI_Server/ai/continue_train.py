@@ -62,7 +62,7 @@ def continue_train_model(
 def main():
     parser = argparse.ArgumentParser(description="Continue training the latest LSTM model.")
     parser.add_argument("--data", default=str(DEFAULT_DATA_PATH))
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--epochs", type=int, default=30)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--feature-dim", type=int, default=15)

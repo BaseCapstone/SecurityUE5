@@ -16,9 +16,10 @@ def predict_anomaly(x, feature_dim, num_labels=4, device="cpu"):
         logits = model(x)
         probs = torch.sigmoid(logits).squeeze(0)
         # 0.2 이하 정상 0.2 초과 0.5 이하 의심 0.5 초과 0.7 이하 위험 0.7 초과 확실
-        weights = [16 / 18, 18 / 18, 12 / 18, 16 / 18]
+        weights = [16 / 18, 18 / 18, 9 / 18, 16 / 18]
         weighted_score = [probs[index].item() * weights[index] for index in range(num_labels)]
         predictions = "정상"
+        print(weighted_score) 
         for index in range(num_labels):
             if weighted_score[index] > 0.7:
                 predictions = "확신"

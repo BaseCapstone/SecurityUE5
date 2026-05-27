@@ -552,54 +552,54 @@ async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
 
 EXTERNAL_DOMAIN_URL = "https://vw93ues8p2k3qu-8000.proxy.runpod.net/api/analyze"
 
-# 외부 도메인으로 로그를 포워딩하는 비동기 함수 (user_id 추가)
+# 외부 도메인 전송 비동기 함수
 async def forward_log_to_external(log_id: int, user_id: int, frames: list):
     async with httpx.AsyncClient() as client:
         try:
-            # 요구사항에 맞게 payload 구조 수정
+            # 💡 frames 자리에 순수 파이썬 리스트가 매핑되어, 
+            # 겉모습은 전형적인 JSON 배열 [{...}, {...}] 형태로 전송됩니다.
             payload = {
                 "log_id": log_id,
-                "user_id": user_id,  # 💡 추가된 유저 ID
-                "frames": frames
+                "user_id": user_id,
+                "frames": frames  
             }
-            # 외부 도메인으로 POST 요청 전송
             response = await client.post(EXTERNAL_DOMAIN_URL, json=payload, timeout=5.0)
             response.raise_for_status()
         except Exception as e:
-            print(f" [경고] 외부 도메인으로 로그 전송 실패 (Log ID: {log_id}, User ID: {user_id}): {e}")
+            print(f" [경고] 외부 도메인 전송 실패 (Log ID: {log_id}): {e}")
 
 
 @app.post("/api/logs", status_code=status.HTTP_201_CREATED)
 async def save_game_log(
     background_tasks: BackgroundTasks,
-    log_data: list = Body(...),
-    current_user: User = Depends(get_current_user),
+    log_data: list = Body(...), # 💡 Lyra가 보낸 json 리스트 형태의 로그인 event_data
+    current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
     db: Session = Depends(get_db)
 ):
-    """게임 로그를 저장하고, 동시에 유저 ID를 포함하여 외부 분석 도메인으로 포워딩합니다."""
+    """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
     try:
         if not log_data:
             raise HTTPException(status_code=400, detail="로그 데이터가 비어 있습니다.")
 
+        # 1. 메인 DB 저장용: 텍스트 형태로 저장해야 하므로 문자열화(json.dumps) 진행
         event_data_json = json.dumps(log_data)
         
-        # 1. 메인 DB에 로그 저장
         new_log = GameLog(
             user_id=current_user.id,
             event_data=event_data_json
         )
         db.add(new_log)
         db.commit()
-        
-        # MySQL에서 생성된 고유 log_id 동기화
-        db.refresh(new_log) 
+        db.refresh(new_log) # 생성된 고유 log_id 확보
 
-        # 2. 백그라운드 태스크에 외부 전송 작업 등록 (current_user.id 인자 추가)
+        # 2. 외부 도메인 전송용: GET API 참고 사항 반영
+        # event_data_json(문자열)을 넣으면 외부 서버에서 "frames": "[{\\"x\\":1,...}]" 처럼 쌍따옴표가 깨집니다.
+        # 따라서 최초에 들어온 원본 'log_data(파이썬 list)'를 그대로 실어 보냅니다.
         background_tasks.add_task(
             forward_log_to_external, 
             new_log.log_id, 
-            current_user.id,  # 💡 함수에 유저 ID 전달
-            log_data
+            current_user.id, 
+            log_data # 💡 텍스트가 아닌 JSON 리스트 형태 그대로 전달
         )
 
     except HTTPException:

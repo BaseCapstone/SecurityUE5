@@ -12,6 +12,24 @@ from typing import Optional
 
 app = FastAPI()
 
+# 실시간 서버 가동률(Uptime) 계산용 글로벌 변수 및 미들웨어
+TOTAL_REQUESTS = 0
+ERROR_5XX_COUNT = 0
+
+@app.middleware("http")
+async def track_uptime_middleware(request, call_next):
+    global TOTAL_REQUESTS, ERROR_5XX_COUNT
+    # 정적 파일이나 단순 상태 확인 등을 모두 포함하여 실제 트래픽 기반으로 가동률 계산
+    TOTAL_REQUESTS += 1
+    try:
+        response = await call_next(request)
+        if response.status_code >= 500:
+            ERROR_5XX_COUNT += 1
+        return response
+    except Exception:
+        ERROR_5XX_COUNT += 1
+        raise
+
 # CORS 설정 (프론트엔드와 포트가 다를 수 있으므로)
 app.add_middleware(
     CORSMiddleware,
@@ -86,7 +104,8 @@ class LoginSchema(BaseModel):
     password: str
 
 class DetectionRequestSchema(BaseModel):
-    nickname: str  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
+    nickname: Optional[str] = None  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
+    player_id: Optional[str] = None
 
 class HackDetails(BaseModel):
     speed: float  # 스피드핵 비율 (%)
@@ -95,7 +114,8 @@ class HackDetails(BaseModel):
     aim: float    # 에임핵 비율 (%)
 
 class HackReportSchema(BaseModel):
-    nickname: str          # 컴퓨터 시리얼번호 (닉네임)
+    nickname: Optional[str] = None          # 컴퓨터 시리얼번호 (닉네임)
+    player_id: Optional[str] = None
     detection_rate: float  # 검출률 (%)
     hacks: HackDetails     # 핵별 정보 딕셔너리
 
@@ -105,7 +125,8 @@ class AIPredictionDetailSchema(BaseModel):
     predictions: str       # 정상, 의심, 위험, 확신
 
 class AIPredictionReportSchema(BaseModel):
-    player_id: str         # 컴퓨터 일련번호 (username과 동일)
+    player_id: Optional[str] = None         # 컴퓨터 일련번호 (username과 동일)
+    nickname: Optional[str] = None          # 닉네임 호환용 필드
     log_id: str            # 몇번째 로그인지
     prediction: AIPredictionDetailSchema
 
@@ -331,9 +352,9 @@ async def get_user_game_data(
 
 @app.get("/api/public/stats")
 async def get_public_stats(db: Session = Depends(get_db)):
-    # 1. 누적 보호 유저 (기본 15840 + DB 유저 수)
-    user_count = db.query(User).count()
-    total_users = 15840 + user_count
+    # 1. 누적 보호 유저 (기본 하드코딩 제거, 실제 플레이어 유저 수)
+    user_count = db.query(User).filter(User.role != "admin").count()
+    total_users = user_count
     
     # 2. 실시간 검출/차단 로그 수 분석 (AI 예측 결과를 기준으로 집계)
     hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신"])).count()
@@ -373,18 +394,25 @@ async def get_public_stats(db: Session = Depends(get_db)):
             elif last_pred.predictions == "의심":
                 warning_count += 1
 
-    # 최근 10분 내 로그인 유저 수
+    # 최근 10분 내 로그인 유저 수 (어드민 포함 실제 로그인 유저)
     ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
     recent_login_count = db.query(User).filter(User.last_login >= ten_minutes_ago).count()
     
-    # 하드코딩 사양에 맞춰 동적 베이스 수치 연산
-    banned_count = 1203 + hack_log_count
-    current_online = 247 + recent_login_count
-    suspicious_count = 5 + warning_count
-    monthly_banned = 38 + danger_count
+    # 실제 수치 연산 (베이스 수치 제거)
+    kst_now = datetime.utcnow() + timedelta(hours=9)
+    start_of_month = datetime(kst_now.year, kst_now.month, 1) - timedelta(hours=9) # 이번 달 시작일 (UTC)
+
+    # 금월 제재 수 (이번 달에 차단 기록된 내역)
+    monthly_banned = db.query(SanctionHistory).filter(
+        SanctionHistory.action == "ban",
+        SanctionHistory.created_at >= start_of_month
+    ).count()
+
+    current_online = max(1, recent_login_count)  # 어드민 접속 상태이므로 최소 1 보장
+    suspicious_count = warning_count
+    blocked_count = monthly_banned # 금월 차단 수
     
     # KST 오늘 기준 AI 탐지 차단 수 계산
-    kst_now = datetime.utcnow() + timedelta(hours=9)
     kst_today_midnight = datetime(kst_now.year, kst_now.month, kst_now.day)
     utc_today_start = kst_today_midnight - timedelta(hours=9)
     
@@ -433,13 +461,21 @@ async def get_public_stats(db: Session = Depends(get_db)):
     if evaluated_count > 0:
         detection_accuracy_val = f"{round((correct_count / evaluated_count) * 100.0, 1)}%"
     else:
-        detection_accuracy_val = "99.7%"
+        detection_accuracy_val = "100.0%"
+
+    # 실시간 가동률 계산
+    global TOTAL_REQUESTS, ERROR_5XX_COUNT
+    if TOTAL_REQUESTS > 0:
+        uptime_ratio = (TOTAL_REQUESTS - ERROR_5XX_COUNT) / TOTAL_REQUESTS
+        server_uptime_val = f"{round(uptime_ratio * 100.0, 2)}%"
+    else:
+        server_uptime_val = "100.00%"
 
     return {
         "detection_accuracy": detection_accuracy_val,
         "total_protected_users": total_users,
-        "blocked_count": banned_count,
-        "server_uptime": "99.99%",
+        "blocked_count": blocked_count,
+        "server_uptime": server_uptime_val,
         "online_users": current_online,
         "suspicious_users": suspicious_count,
         "banned_users": monthly_banned,
@@ -550,7 +586,9 @@ async def analyze_hack_detection(
     호스트 요청을 받아 컴퓨터 시리얼번호(사용자 닉네임)로 로그를 분석하고,
     검출률 및 스피드핵, ESP, 무적핵, 에임핵 탐지 비율을 퍼센트 리스트로 반환합니다.
     """
-    nickname = payload.nickname
+    nickname = payload.nickname or payload.player_id
+    if not nickname:
+        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
     
     # 1. 닉네임(username 또는 name)으로 유저 검색 (대소문자 구분 없음)
     user = db.query(User).filter(
@@ -644,7 +682,10 @@ async def report_hack_detection(
     컴퓨터 시리얼번호(닉네임), 검출률(%), 그리고 스피드핵, ESP, 무적핵, 에임핵 비율이
     포함된 딕셔너리를 받아와서 처리하고, 각각의 비율을 순서대로 담은 퍼센트 리스트를 반환합니다.
     """
-    nickname = payload.nickname
+    nickname = payload.nickname or payload.player_id
+    if not nickname:
+        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
+        
     detection_rate = payload.detection_rate
     
     # 딕셔너리(객체)에서 각각의 핵 비율 값 추출
@@ -676,8 +717,12 @@ async def report_ai_prediction(
     """
     AI 모델 예측 결과를 딕셔너리 형태로 받아와 DB에 저장합니다.
     """
+    player_id = payload.player_id or payload.nickname
+    if not player_id:
+        raise HTTPException(status_code=422, detail="player_id 또는 nickname이 필요합니다.")
+        
     new_prediction = AIPrediction(
-        player_id=payload.player_id,
+        player_id=player_id,
         log_id=payload.log_id,
         probability=payload.prediction.probability,
         predicted_label=payload.prediction.predicted_label,
@@ -715,7 +760,7 @@ async def report_ai_prediction(
     
     return {
         "message": "AI 예측 결과가 등록되었습니다.",
-        "player_id": payload.player_id,
+        "player_id": player_id,
         "log_id": payload.log_id,
         "predictions": payload.prediction.predictions,
         "hack_percentages_list": hack_percentages_list
@@ -833,6 +878,37 @@ async def get_user_sanctions(
             "created_at": str(s.created_at)
         })
     return {"user_id": user_id, "sanctions": result}
+
+@app.get("/api/admin/settings")
+async def get_admin_settings(
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """관리자 전용 — 시스템 설정 상태와 리소스 및 DB 상태 반환"""
+    db_name_type = "MySQL"
+    db_path = str(engine.url)
+    if "sqlite" in str(engine.url):
+        db_name_type = "SQLite (로컬 백업)"
+        db_path = "./security_ue5.db"
+    
+    total_users = db.query(User).filter(User.role != "admin").count()
+    total_logs = db.query(GameLog).count()
+    total_preds = db.query(AIPrediction).count()
+    total_sanctions = db.query(SanctionHistory).count()
+    
+    return {
+        "db_type": db_name_type,
+        "db_path": db_path,
+        "total_users": total_users,
+        "total_logs": total_logs,
+        "total_predictions": total_preds,
+        "total_sanctions": total_sanctions,
+        "ai_model_version": "v3.0",
+        "last_update": "2026.05.27",
+        "auto_ban_threshold": "90%",
+        "realtime_alert": "활성화",
+        "log_retention_days": "90일"
+    }
 
 @app.get("/api/admin/predictions")
 async def get_predictions(

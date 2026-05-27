@@ -21,11 +21,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/base.css?v=1.0.8">
-  <link rel="stylesheet" href="css/layout.css?v=1.0.8">
-  <link rel="stylesheet" href="css/components.css?v=1.0.8">
-  <link rel="stylesheet" href="css/admin.css?v=1.0.8">
-  <link rel="stylesheet" href="css/admin-users.css?v=1.0.8">
+  <link rel="stylesheet" href="css/base.css?v=1.1.0">
+  <link rel="stylesheet" href="css/layout.css?v=1.1.0">
+  <link rel="stylesheet" href="css/components.css?v=1.1.0">
+  <link rel="stylesheet" href="css/admin.css?v=1.1.0">
+  <link rel="stylesheet" href="css/admin-users.css?v=1.1.0">
 
   <style>
     /* 관리자 페이지 특화 스타일 */
@@ -357,7 +357,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
                   <div>
                     <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">AI 탐지 모델</div>
-                    <div style="color: #64748b; font-size: 13px;">현재 버전: v3.0 | 마지막 업데이트: 2026.04.15</div>
+                    <div style="color: #64748b; font-size: 13px;" id="settings-ai-version">현재 버전: v3.0 | 마지막 업데이트: 2026.04.15</div>
                   </div>
                   <button class="btn btn--outline btn--sm" style="border-color: rgba(255,255,255,0.2); color: #cbd5e1;">업데이트 확인</button>
                 </div>
@@ -366,22 +366,24 @@
                     <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">자동 제재 임계값</div>
                     <div style="color: #64748b; font-size: 13px;">핵 의심 확률 90% 이상 시 자동 제재</div>
                   </div>
-                  <span style="color: #fca5a5; font-family: var(--font-mono); font-weight: 700;">90%</span>
+                  <span style="color: #fca5a5; font-family: var(--font-mono); font-weight: 700;" id="settings-auto-ban">90%</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
                   <div>
                     <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">알림 설정</div>
                     <div style="color: #64748b; font-size: 13px;">위험 등급 유저 탐지 시 실시간 알림</div>
                   </div>
-                  <span style="color: #4ade80; font-weight: 700;">활성화</span>
+                  <span style="color: #4ade80; font-weight: 700;" id="settings-alert">활성화</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
                   <div>
                     <div style="color: #e2e8f0; font-weight: 600; margin-bottom: 4px;">로그 보존 기간</div>
                     <div style="color: #64748b; font-size: 13px;">탐지 로그 자동 삭제 주기</div>
                   </div>
-                  <span style="color: #cbd5e1; font-family: var(--font-mono); font-weight: 700;">90일</span>
+                  <span style="color: #cbd5e1; font-family: var(--font-mono); font-weight: 700;" id="settings-retention">90일</span>
                 </div>
+
+
               </div>
             </div>
           </div>
@@ -395,55 +397,68 @@
   <div class="admin-modal-overlay" id="admin-user-modal">
     <div class="admin-modal">
       <button class="admin-modal__close" id="admin-modal-close" aria-label="닫기">&times;</button>
-      <div class="admin-modal__header">
+      <div class="admin-modal__header" style="border-bottom: none; padding-bottom: 0;">
         <h2 class="admin-modal__title" id="admin-user-title">사용자 상세 정보</h2>
         <p class="admin-modal__subtitle" id="admin-user-id">#00000</p>
       </div>
-      <div class="admin-modal__content">
-        <div class="admin-modal__section">
-          <h3 class="admin-modal__section-title">📊 플레이 수치 분석 (의심 지표)</h3>
-          <div class="admin-stats" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0;">
-            <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="modal-speed-pct">0.0%</span>
-                <span class="admin-stat-card__label">스피드핵 비율</span>
+
+      <!-- Modal Tabs -->
+      <div class="admin-modal__tabs" style="display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); margin: 12px 24px 0 24px;">
+        <button class="admin-modal__tab active" data-modal-tab="logs" style="background: none; border: none; padding: 10px 16px; color: var(--text-primary); border-bottom: 2px solid var(--accent-red); font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.2s; outline: none;">📊 플레이 분석 & 로그</button>
+        <button class="admin-modal__tab" data-modal-tab="sanctions" style="background: none; border: none; padding: 10px 16px; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; outline: none;">🚫 제재 상태 & 이력</button>
+      </div>
+
+      <div class="admin-modal__content" style="padding-top: 16px;">
+        <!-- Tab 1: Logs & Metrics -->
+        <div id="modal-tab-view-logs">
+          <div class="admin-modal__section" style="margin-top: 0;">
+            <h3 class="admin-modal__section-title">📊 플레이 수치 분석 (의심 지표)</h3>
+            <div class="admin-stats" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0;">
+              <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
+                <div class="admin-stat-card__info">
+                  <span class="admin-stat-card__value" id="modal-speed-pct">0.0%</span>
+                  <span class="admin-stat-card__label">스피드핵 비율</span>
+                </div>
               </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--orange" style="padding: 12px;">
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="modal-god-pct">0.0%</span>
-                <span class="admin-stat-card__label">무적핵 (갓모드) 비율</span>
+              <div class="admin-stat-card admin-stat-card--orange" style="padding: 12px;">
+                <div class="admin-stat-card__info">
+                  <span class="admin-stat-card__value" id="modal-god-pct">0.0%</span>
+                  <span class="admin-stat-card__label">무적핵 (갓모드) 비율</span>
+                </div>
               </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="modal-esp-pct">0.0%</span>
-                <span class="admin-stat-card__label">ESP 비율</span>
+              <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
+                <div class="admin-stat-card__info">
+                  <span class="admin-stat-card__value" id="modal-esp-pct">0.0%</span>
+                  <span class="admin-stat-card__label">ESP 비율</span>
+                </div>
               </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--green" style="padding: 12px;">
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="modal-aim-pct">0.0%</span>
-                <span class="admin-stat-card__label">에임핵 비율</span>
+              <div class="admin-stat-card admin-stat-card--green" style="padding: 12px;">
+                <div class="admin-stat-card__info">
+                  <span class="admin-stat-card__value" id="modal-aim-pct">0.0%</span>
+                  <span class="admin-stat-card__label">에임핵 비율</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Flex Container for Logs and Ban Status -->
-        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px;">
-          <div class="admin-modal__section" style="flex: 2; min-width: 280px; margin-top: 0;">
+          <div class="admin-modal__section" style="margin-top: 16px;">
             <h3 class="admin-modal__section-title">📋 최근 탐지 및 의심 행동 로그</h3>
-            <ul class="admin-log" id="admin-user-log-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
+            <ul class="admin-log" id="admin-user-log-list" style="max-height: 250px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
               <!-- Javascript에서 동적 삽입 -->
             </ul>
           </div>
-          <div class="admin-modal__section" style="flex: 1; min-width: 180px; margin-top: 0; display: flex; flex-direction: column; gap: 8px;">
-            <h3 class="admin-modal__section-title" style="margin-bottom: 0;">🚫 제재 상태 및 기록</h3>
-            <div id="admin-user-ban-status-card" style="height: 110px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 6px;">
+        </div>
+
+        <!-- Tab 2: Sanction Status & History -->
+        <div id="modal-tab-view-sanctions" style="display: none;">
+          <div class="admin-modal__section" style="margin-top: 0;">
+            <h3 class="admin-modal__section-title">🚫 현재 제재 상태</h3>
+            <div id="admin-user-ban-status-card" style="min-height: 140px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 8px;">
               <!-- Javascript에서 동적 삽입 -->
             </div>
-            <div style="font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-top: 4px;">📋 과거 제재 이력</div>
-            <ul id="admin-user-sanction-history" style="height: 100px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto; list-style: none; margin: 0; display: flex; flex-direction: column; gap: 4px;">
+          </div>
+          <div class="admin-modal__section" style="margin-top: 16px;">
+            <h3 class="admin-modal__section-title">📋 과거 제재 이력</h3>
+            <ul id="admin-user-sanction-history" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto; list-style: none; margin: 0; display: flex; flex-direction: column; gap: 4px;">
               <!-- Javascript에서 동적 삽입 -->
             </ul>
           </div>
@@ -460,10 +475,10 @@
   <div id="toast-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 1100; display: flex; flex-direction: column; gap: 8px;"></div>
 
   <!-- Scripts -->
-  <script src="js/utils.js?v=1.0.8"></script>
-  <script src="js/effects.js?v=1.0.8"></script>
-  <script src="js/admin.js?v=1.0.8"></script>
-  <script src="js/admin-users.js?v=1.0.8"></script>
+  <script src="js/utils.js?v=1.1.2"></script>
+  <script src="js/effects.js?v=1.1.2"></script>
+  <script src="js/admin.js?v=1.1.2"></script>
+  <script src="js/admin-users.js?v=1.1.2"></script>
   
   <script>
     // 퍼블릭 통계 데이터 수동 동기화 호출

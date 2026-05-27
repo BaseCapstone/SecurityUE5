@@ -182,6 +182,42 @@ function switchAdminPage(pageName) {
     targetPage.style.display = 'block';
     targetPage.style.animation = 'adminFadeIn 0.3s ease';
   }
+
+  // 설정 페이지인 경우 백엔드에서 실시간 설정 및 DB 리소스 조회
+  if (pageName === 'settings') {
+    fetchAdminSettings();
+  }
+}
+
+/**
+ * 백엔드에서 실시간 DB 리소스 상태 및 시스템 설정을 받아와 화면에 바인딩합니다.
+ */
+async function fetchAdminSettings() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/admin/settings', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // 기존 하드코딩 설정 항목 동적 바인딩
+      const aiVersionEl = document.getElementById('settings-ai-version');
+      const autoBanEl = document.getElementById('settings-auto-ban');
+      const alertEl = document.getElementById('settings-alert');
+      const retentionEl = document.getElementById('settings-retention');
+
+      if (aiVersionEl) aiVersionEl.textContent = `현재 버전: ${data.ai_model_version} | 마지막 업데이트: ${data.last_update}`;
+      if (autoBanEl) autoBanEl.textContent = data.auto_ban_threshold;
+      if (alertEl) alertEl.textContent = data.realtime_alert;
+      if (retentionEl) retentionEl.textContent = data.log_retention_days;
+    }
+  } catch (err) {
+    console.error('Failed to fetch admin settings:', err);
+  }
 }
 
 /**

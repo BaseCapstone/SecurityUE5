@@ -242,6 +242,11 @@ window.handleDashboardUnban = async (event, userId, username) => {
 };
 
 async function openAdminUserModal(data) {
+  // Reset modal tab to logs on open
+  if (typeof tabsSwitch === 'function') {
+    tabsSwitch('logs');
+  }
+
   const modal = document.getElementById('admin-user-modal');
   document.getElementById('admin-user-title').textContent = data.nicknameDisplay;
   const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.scoreDisplay})` : '';
@@ -473,3 +478,43 @@ async function openAdminUserModal(data) {
     logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
   }
 }
+
+/**
+ * 모달 내 탭 전환 제어 함수
+ */
+function tabsSwitch(target) {
+  const tabs = document.querySelectorAll('[data-modal-tab]');
+  tabs.forEach(t => {
+    if (t.dataset.modalTab === target) {
+      t.classList.add('active');
+      t.style.color = 'var(--text-primary)';
+      t.style.borderBottomColor = 'var(--accent-red)';
+      t.style.fontWeight = '700';
+    } else {
+      t.classList.remove('active');
+      t.style.color = 'var(--text-muted)';
+      t.style.borderBottomColor = 'transparent';
+      t.style.fontWeight = '600';
+    }
+  });
+
+  const logsView = document.getElementById('modal-tab-view-logs');
+  const sanctionsView = document.getElementById('modal-tab-view-sanctions');
+  if (target === 'logs') {
+    if (logsView) logsView.style.display = 'block';
+    if (sanctionsView) sanctionsView.style.display = 'none';
+  } else {
+    if (logsView) logsView.style.display = 'none';
+    if (sanctionsView) sanctionsView.style.display = 'block';
+  }
+}
+
+// DOM 로드 완료 후 탭 클릭 이벤트 바인딩
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.querySelectorAll('[data-modal-tab]');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabsSwitch(tab.dataset.modalTab);
+    });
+  });
+});

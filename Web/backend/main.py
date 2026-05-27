@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header
+from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
@@ -9,6 +9,7 @@ import jwt
 from datetime import datetime, timedelta
 import json
 from typing import Optional
+import httpx
 
 app = FastAPI()
 
@@ -549,25 +550,57 @@ async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
 
     return {"log": log_data}
 
+EXTERNAL_DOMAIN_URL = "https://vw93ues8p2k3qu-8000.proxy.runpod.net/api/analyze"
+
+# 외부 도메인으로 로그를 포워딩하는 비동기 함수 (user_id 추가)
+async def forward_log_to_external(log_id: int, user_id: int, frames: list):
+    async with httpx.AsyncClient() as client:
+        try:
+            # 요구사항에 맞게 payload 구조 수정
+            payload = {
+                "log_id": log_id,
+                "user_id": user_id,  # 💡 추가된 유저 ID
+                "frames": frames
+            }
+            # 외부 도메인으로 POST 요청 전송
+            response = await client.post(EXTERNAL_DOMAIN_URL, json=payload, timeout=5.0)
+            response.raise_for_status()
+        except Exception as e:
+            print(f" [경고] 외부 도메인으로 로그 전송 실패 (Log ID: {log_id}, User ID: {user_id}): {e}")
+
+
 @app.post("/api/logs", status_code=status.HTTP_201_CREATED)
 async def save_game_log(
+    background_tasks: BackgroundTasks,
     log_data: list = Body(...),
-    current_user: User = Depends(get_current_game_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """게임 로그를 저장합니다. 인증된 유저면 user_id를 함께 저장합니다."""
+    """게임 로그를 저장하고, 동시에 유저 ID를 포함하여 외부 분석 도메인으로 포워딩합니다."""
     try:
         if not log_data:
             raise HTTPException(status_code=400, detail="로그 데이터가 비어 있습니다.")
 
         event_data_json = json.dumps(log_data)
         
+        # 1. 메인 DB에 로그 저장
         new_log = GameLog(
             user_id=current_user.id,
             event_data=event_data_json
         )
         db.add(new_log)
         db.commit()
+        
+        # MySQL에서 생성된 고유 log_id 동기화
+        db.refresh(new_log) 
+
+        # 2. 백그라운드 태스크에 외부 전송 작업 등록 (current_user.id 인자 추가)
+        background_tasks.add_task(
+            forward_log_to_external, 
+            new_log.log_id, 
+            current_user.id,  # 💡 함수에 유저 ID 전달
+            log_data
+        )
 
     except HTTPException:
         raise

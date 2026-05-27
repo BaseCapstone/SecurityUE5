@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, func, text, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text, func, text, ForeignKey, Float
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
 
 # .env 파일 로드
@@ -36,11 +36,13 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(20), default="user", nullable=False)  # "user" 또는 "admin"
+    is_banned = Column(Integer, default=0, nullable=False)     # 0: 정상, 1: 제재됨
     created_at = Column(DateTime, default=func.now())
     last_login = Column(DateTime, nullable=True)
 
     # 관계 설정
     game_logs = relationship("GameLog", back_populates="user")
+
 
 class GameLog(Base):
     __tablename__ = "game_logs"
@@ -51,3 +53,23 @@ class GameLog(Base):
 
     # 관계 설정
     user = relationship("User", back_populates="game_logs")
+
+class AIPrediction(Base):
+    __tablename__ = "ai_predictions"
+    prediction_id = Column(Integer, primary_key=True, autoincrement=True)
+    player_id = Column(String(50), nullable=False)  # 컴퓨터 일련번호 (username)
+    log_id = Column(String(50), nullable=False)     # 로그 번호
+    probability = Column(Float, nullable=False)     # 핵사용확률
+    predicted_label = Column(String(50), nullable=False)  # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
+    predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신, 핵)
+    created_at = Column(DateTime, default=func.now())
+
+class SanctionHistory(Base):
+    __tablename__ = "sanction_history"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action = Column(String(50), nullable=False)  # "ban", "unban"
+    reason = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=func.now())
+
+

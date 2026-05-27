@@ -182,6 +182,42 @@ function switchAdminPage(pageName) {
     targetPage.style.display = 'block';
     targetPage.style.animation = 'adminFadeIn 0.3s ease';
   }
+
+  // 설정 페이지인 경우 백엔드에서 실시간 설정 및 DB 리소스 조회
+  if (pageName === 'settings') {
+    fetchAdminSettings();
+  }
+}
+
+/**
+ * 백엔드에서 실시간 DB 리소스 상태 및 시스템 설정을 받아와 화면에 바인딩합니다.
+ */
+async function fetchAdminSettings() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/admin/settings', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // 기존 하드코딩 설정 항목 동적 바인딩
+      const aiVersionEl = document.getElementById('settings-ai-version');
+      const autoBanEl = document.getElementById('settings-auto-ban');
+      const alertEl = document.getElementById('settings-alert');
+      const retentionEl = document.getElementById('settings-retention');
+
+      if (aiVersionEl) aiVersionEl.textContent = `현재 버전: ${data.ai_model_version} | 마지막 업데이트: ${data.last_update}`;
+      if (autoBanEl) autoBanEl.textContent = data.auto_ban_threshold;
+      if (alertEl) alertEl.textContent = data.realtime_alert;
+      if (retentionEl) retentionEl.textContent = data.log_retention_days;
+    }
+  } catch (err) {
+    console.error('Failed to fetch admin settings:', err);
+  }
 }
 
 /**
@@ -301,10 +337,137 @@ function initAdminLogo() {
   }
 }
 
+async function fetchAdminPredictions() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/admin/predictions', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      // 1. 통계 페이지 퍼센트 업데이트
+      const speedPctEl = document.getElementById('stats-speed-pct');
+      const godPctEl = document.getElementById('stats-god-pct');
+      const espPctEl = document.getElementById('stats-esp-pct');
+      const aimPctEl = document.getElementById('stats-aim-pct');
+      
+      if (speedPctEl) speedPctEl.textContent = `${data.label_percentages['스피드핵'] || 0.0}%`;
+      if (godPctEl) godPctEl.textContent = `${data.label_percentages['갓모드'] || 0.0}%`;
+      if (espPctEl) espPctEl.textContent = `${data.label_percentages['ESP'] || 0.0}%`;
+      if (aimPctEl) aimPctEl.textContent = `${data.label_percentages['에임핵'] || 0.0}%`;
+
+      // 2. 전체 탐지 로그 페이지 (#admin-log-full) 업데이트
+      const adminLogFull = document.getElementById('admin-log-full');
+      if (adminLogFull) {
+        adminLogFull.innerHTML = '';
+        if (data.predictions.length === 0) {
+          adminLogFull.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 예측 로그가 없습니다.</span></li>';
+        } else {
+          data.predictions.forEach(p => {
+            const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            let type = 'info';
+            if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
+              type = 'danger';
+            } else if (p.predictions === '의심') {
+              type = 'warning';
+            } else if (p.predictions === '정상') {
+              type = 'success';
+            }
+
+            const li = document.createElement('li');
+            li.className = `admin-log__item admin-log__item--${type}`;
+            li.innerHTML = `
+              <span class="admin-log__time">${time}</span>
+              <span class="admin-log__msg">
+                <strong>${p.player_id}</strong> — AI 분석: <strong>${p.predictions}</strong> (확률: ${(p.probability * 100).toFixed(1)}%, 탐지핵: ${p.predicted_label}, 로그번호: #${p.log_id})
+              </span>
+            `;
+            adminLogFull.appendChild(li);
+          });
+        }
+      }
+
+      // 3. 메인 대시보드 최근 로그 (#admin-log) 업데이트 (상위 7개)
+      const adminLogDash = document.getElementById('admin-log');
+      if (adminLogDash) {
+        adminLogDash.innerHTML = '';
+        const limitList = data.predictions.slice(0, 7);
+        if (limitList.length === 0) {
+          adminLogDash.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">최근 탐지 로그가 없습니다.</span></li>';
+        } else {
+          limitList.forEach(p => {
+            const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            let type = 'info';
+            if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
+              type = 'danger';
+            } else if (p.predictions === '의심') {
+              type = 'warning';
+            } else if (p.predictions === '정상') {
+              type = 'success';
+            }
+
+            const li = document.createElement('li');
+            li.className = `admin-log__item admin-log__item--${type}`;
+            li.innerHTML = `
+              <span class="admin-log__time">${time}</span>
+              <span class="admin-log__msg"><strong>${p.player_id}</strong> — ${p.predicted_label} 감지 (${p.predictions}, ${(p.probability * 100).toFixed(1)}%)</span>
+            `;
+            adminLogDash.appendChild(li);
+          });
+        }
+      }
+
+      // 4. 주간 탐지 추이 차트 업데이트 (요일별 분류)
+      const dayCounts = { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 };
+      const dayMap = {
+        1: 'mon', // 월
+        2: 'tue', // 화
+        3: 'wed', // 수
+        4: 'thu', // 목
+        5: 'fri', // 금
+        6: 'sat', // 토
+        0: 'sun'  // 일
+      };
+
+      data.predictions.forEach(p => {
+        const dateStr = p.created_at ? p.created_at.replace(' ', 'T') : '';
+        if (dateStr) {
+          const d = new Date(dateStr);
+          const dayIndex = d.getDay();
+          const dayKey = dayMap[dayIndex];
+          if (dayKey) {
+            dayCounts[dayKey]++;
+          }
+        }
+      });
+
+      const maxCount = Math.max(...Object.values(dayCounts));
+      const dayKeys = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+      dayKeys.forEach(dayKey => {
+        const barEl = document.getElementById(`chart-bar-${dayKey}`);
+        if (barEl) {
+          const count = dayCounts[dayKey];
+          const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
+          barEl.style.height = `${pct}%`;
+          barEl.title = `탐지 건수: ${count}건`;
+        }
+      });
+    }
+  } catch (e) {
+    console.error("Failed to fetch admin predictions:", e);
+  }
+}
+
 // DOM 로드 후 초기화
 document.addEventListener('DOMContentLoaded', () => {
   initAdminRefresh();
   initUserManagement();
   initAdminLogo();
   checkAdminSession();
+  fetchAdminPredictions();
 });
+

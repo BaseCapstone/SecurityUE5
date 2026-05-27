@@ -3,12 +3,20 @@ import json
 
 BASE_URL = "http://localhost:8000"
 
-def test_detect_endpoint(nickname):
+def test_detect_endpoint(player_id, log_id):
     url = f"{BASE_URL}/api/detect/analyze"
-    payload = {"nickname": nickname}
+    payload = {
+        "player_id": player_id,
+        "log_id": log_id,
+        "prediction": {
+            "probability": 0.418,
+            "predicted_label": "ESP",
+            "predictions": "의심"
+        }
+    }
     headers = {"Content-Type": "application/json"}
     
-    print(f"\n--- Testing API for nickname: {nickname} ---")
+    print(f"\n--- Testing API for player_id={player_id}, log_id={log_id} ---")
     try:
         response = requests.post(url, json=payload, headers=headers)
         print(f"Status Code: {response.status_code}")
@@ -47,11 +55,7 @@ def test_report_endpoint():
         print(f"Connection error: {e}")
 
 if __name__ == "__main__":
-    # Test with normal user, user with warning, user with hacks (danger), and non-existent user
-    test_detect_endpoint("testuser01")
-    test_detect_endpoint("user_warning")
-    test_detect_endpoint("user_danger")
-    test_detect_endpoint("invalid_nickname")
+    test_detect_endpoint(player_id=6, log_id=500)
     
     # Test the new report endpoint accepting dictionary format
     test_report_endpoint()

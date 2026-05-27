@@ -233,7 +233,7 @@
               <div class="admin-panel__header" style="flex-wrap: wrap; gap: 16px;">
                 <div style="display: flex; align-items: center; gap: 16px;">
                   <h3 class="admin-panel__title">👥 전체 사용자 목록</h3>
-                  <span id="admin-total-users-count" style="color: #64748b; font-size: 13px;">총 15,847명</span>
+                  <span id="admin-total-users-count" style="color: #64748b; font-size: 13px;">총 -명</span>
                 </div>
                 <div class="admin-search-box">
                   <input type="text" id="user-search-input" placeholder="닉네임 또는 ID 검색..." />
@@ -429,12 +429,20 @@
             </div>
           </div>
         </div>
-        <!-- User Logs -->
-        <div class="admin-modal__section">
-          <h3 class="admin-modal__section-title">📋 최근 탐지 및 의심 행동 로그</h3>
-          <ul class="admin-log" id="admin-user-log-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px;">
-            <!-- Javascript에서 동적 삽입 -->
-          </ul>
+        <!-- Flex Container for Logs and Ban Status -->
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px;">
+          <div class="admin-modal__section" style="flex: 2; min-width: 280px; margin-top: 0;">
+            <h3 class="admin-modal__section-title">📋 최근 탐지 및 의심 행동 로그</h3>
+            <ul class="admin-log" id="admin-user-log-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
+              <!-- Javascript에서 동적 삽입 -->
+            </ul>
+          </div>
+          <div class="admin-modal__section" style="flex: 1; min-width: 180px; margin-top: 0;">
+            <h3 class="admin-modal__section-title">🚫 제재 상태 및 기록</h3>
+            <div id="admin-user-ban-status-card" style="height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 10px;">
+              <!-- Javascript에서 동적 삽입 -->
+            </div>
+          </div>
         </div>
       </div>
       <div class="admin-modal__footer">

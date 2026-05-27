@@ -258,6 +258,24 @@ async function openAdminUserModal(data) {
   if (espEl) espEl.textContent = '0.0%';
   if (aimEl) aimEl.textContent = '0.0%';
 
+  // 우측 제재 상태 카드 데이터 바인딩
+  const banStatusCard = document.getElementById('admin-user-ban-status-card');
+  if (banStatusCard) {
+    if (data.isBanned === 1) {
+      banStatusCard.innerHTML = `
+        <span style="font-size: 40px; filter: drop-shadow(0 0 10px rgba(229,45,39,0.3));">🚫</span>
+        <span style="font-size: 16px; font-weight: 700; color: var(--accent-red);">강력 제재 중</span>
+        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4; word-break: keep-all;">불법 프로그램 의심 대상자로 지정되어 게임 플레이 및 접속이 즉각 차단되었습니다.</p>
+      `;
+    } else {
+      banStatusCard.innerHTML = `
+        <span style="font-size: 40px; filter: drop-shadow(0 0 10px rgba(74,222,128,0.3));">✅</span>
+        <span style="font-size: 16px; font-weight: 700; color: #4ade80;">정상 상태</span>
+        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4; word-break: keep-all;">보안 우회나 핵 감지 이력이 검출되지 않은 정상 활동 플레이어입니다.</p>
+      `;
+    }
+  }
+
   try {
     const response = await fetch('/api/detect/analyze', {
       method: 'POST',
@@ -350,7 +368,18 @@ async function openAdminUserModal(data) {
       }
 
       result.logs.forEach(log => {
-        const time = new Date(log.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+        // 한국 표준시(KST) 및 날짜 시간 출력
+        const dateObj = new Date(log.created_at.replace(' ', 'T') + 'Z');
+        const time = dateObj.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
         
         let events = Array.isArray(log.event_data) ? log.event_data : [log.event_data];
         
@@ -377,7 +406,7 @@ async function openAdminUserModal(data) {
             const li = document.createElement('li');
             li.className = `admin-log__item admin-log__item--${type}`;
             li.innerHTML = `
-              <span class="admin-log__time">${time}</span>
+              <span class="admin-log__time" style="font-size: 11px; white-space: nowrap; color: #94a3b8;">${time}</span>
               <span class="admin-log__msg">${msg}</span>
             `;
             logList.appendChild(li);

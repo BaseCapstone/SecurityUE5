@@ -70,6 +70,12 @@ async function fetchPublicStats() {
       if (adminSuspiciousEl) adminSuspiciousEl.textContent = data.suspicious_users;
       if (adminBannedEl) adminBannedEl.textContent = data.banned_users;
 
+      // 움직이는 티커 바 업데이트
+      const todayBlockedEls = document.querySelectorAll('.ticker-today-blocked');
+      const avgScoreEls = document.querySelectorAll('.ticker-avg-score');
+      todayBlockedEls.forEach(el => el.textContent = `${data.today_blocked}건`);
+      avgScoreEls.forEach(el => el.textContent = `${data.average_score}점`);
+
       // Count Up 애니메이션 다시 시작
       initCountUpAnimations();
     }

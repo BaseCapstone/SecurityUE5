@@ -338,14 +338,34 @@ async def get_public_stats(db: Session = Depends(get_db)):
     # 2. 실시간 검출/차단 로그 수 분석 (AI 예측 결과를 기준으로 집계)
     hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신"])).count()
             
-    # 3. 유저 AI 판정 기반 상태 집계
+    # 3. 유저 AI 판정 기반 상태 집계 및 평균 보안 점수 계산
     danger_count = 0
     warning_count = 0
+    total_score = 0
+    user_with_score_count = 0
+    
     all_users = db.query(User).filter(User.role != "admin").all()
     for u in all_users:
+        # AI 예측 로그를 기반으로 보안 점수 계산
+        preds = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).all()
+        score = 100
+        for p in preds:
+            if p.predictions == "의심":
+                score -= 5
+            elif p.predictions == "위험":
+                score -= 15
+            elif p.predictions == "확신":
+                score -= 30
+        if score < 0:
+            score = 0
+            
+        total_score += score
+        user_with_score_count += 1
+        
         if u.is_banned == 1:
             danger_count += 1
             continue
+            
         last_pred = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).order_by(AIPrediction.created_at.desc()).first()
         if last_pred:
             if last_pred.predictions in ["위험", "확신"]:
@@ -363,6 +383,21 @@ async def get_public_stats(db: Session = Depends(get_db)):
     suspicious_count = 5 + warning_count
     monthly_banned = 38 + danger_count
     
+    # KST 오늘 기준 AI 탐지 차단 수 계산
+    kst_now = datetime.utcnow() + timedelta(hours=9)
+    kst_today_midnight = datetime(kst_now.year, kst_now.month, kst_now.day)
+    utc_today_start = kst_today_midnight - timedelta(hours=9)
+    
+    today_blocked = db.query(AIPrediction).filter(
+        AIPrediction.predictions.in_(["의심", "위험", "확신"]),
+        AIPrediction.created_at >= utc_today_start
+    ).count()
+    
+    if user_with_score_count > 0:
+        average_score = round(total_score / user_with_score_count, 1)
+    else:
+        average_score = 100.0
+    
     return {
         "detection_accuracy": "99.7%",
         "total_protected_users": total_users,
@@ -370,7 +405,9 @@ async def get_public_stats(db: Session = Depends(get_db)):
         "server_uptime": "99.99%",
         "online_users": current_online,
         "suspicious_users": suspicious_count,
-        "banned_users": monthly_banned
+        "banned_users": monthly_banned,
+        "today_blocked": today_blocked,
+        "average_score": average_score
     }
 
 @app.get("/api/public/ranking")
@@ -381,22 +418,32 @@ async def get_public_ranking(db: Session = Depends(get_db)):
     for u in users:
         if u.role == "admin":
             continue
-        log_count = db.query(GameLog).filter(GameLog.user_id == u.id).count()
-        score = 100 - (log_count * 2)
+            
+        preds = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).all()
+        score = 100
+        for p in preds:
+            if p.predictions == "의심":
+                score -= 5
+            elif p.predictions == "위험":
+                score -= 15
+            elif p.predictions == "확신":
+                score -= 30
         if score < 0:
             score = 0
             
+        # 검증된 게임 수는 AI 검사가 완료된 고유 log_id 개수로 연동
+        total_logs = db.query(AIPrediction.log_id).filter(AIPrediction.player_id == u.username).distinct().count()
         masked_username = mask_string(u.username)
         
         ranking_list.append({
             "username": masked_username,
             "score": score,
-            "total_logs": log_count,
+            "total_logs": total_logs,
             "status": "정상" if score >= 70 else ("주의" if score >= 30 else "제재")
         })
         
-    # 정렬: 스코어 내림차순 -> 로그 수 오름차순
-    ranking_list.sort(key=lambda x: (-x["score"], x["total_logs"]))
+    # 정렬: 스코어 내림차순 -> 검증된 로그 수 내림차순
+    ranking_list.sort(key=lambda x: (-x["score"], -x["total_logs"]))
     
     # 상위 10명만 노출
     top_ranking = ranking_list[:10]

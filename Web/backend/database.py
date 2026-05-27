@@ -63,4 +63,13 @@ class AIPrediction(Base):
     predicted_label = Column(String(50), nullable=False)  # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
     predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신)
     created_at = Column(DateTime, default=func.now())
+
+class SanctionHistory(Base):
+    __tablename__ = "sanction_history"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action = Column(String(50), nullable=False)  # "ban", "unban"
+    reason = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=func.now())
+
 

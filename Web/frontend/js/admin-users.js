@@ -351,7 +351,61 @@ async function openAdminUserModal(data) {
   const logList = document.getElementById('admin-user-log-list');
   logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
   
+  const sanctionHistoryList = document.getElementById('admin-user-sanction-history');
+  if (sanctionHistoryList) {
+    sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: #64748b; padding: 4px;">데이터를 불러오는 중...</li>';
+  }
+  
   modal.classList.add('is-active');
+
+  // Fetch sanction history
+  if (sanctionHistoryList) {
+    fetch(`/api/admin/users/${userId}/sanctions`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(result => {
+      if (!result) {
+        sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: var(--accent-red); padding: 4px;">불러오기 실패</li>';
+        return;
+      }
+      sanctionHistoryList.innerHTML = '';
+      if (result.sanctions.length === 0) {
+        sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: #64748b; padding: 4px;">제재 이력이 없습니다.</li>';
+      } else {
+        result.sanctions.forEach(s => {
+          const actionText = s.action === 'ban' ? '제재' : '해제';
+          const badgeClass = s.action === 'ban' ? 'color: var(--accent-red);' : 'color: var(--accent-cyan);';
+          
+          // Parse date properly supporting SQLite format
+          const dateObj = new Date(s.created_at.replace(' ', 'T') + 'Z');
+          const dateText = dateObj.toLocaleDateString('ko-KR', {
+            month: '2-digit',
+            day: '2-digit'
+          }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const li = document.createElement('li');
+          li.style.cssText = 'font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 2px;';
+          li.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-weight: 700; ${badgeClass}">[${actionText}]</span>
+              <span style="color: #64748b; font-size: 11px;">${dateText}</span>
+            </div>
+            <div style="color: #cbd5e1; font-size: 11px; word-break: break-all;">${s.reason || ''}</div>
+          `;
+          sanctionHistoryList.appendChild(li);
+        });
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: var(--accent-red); padding: 4px;">서버 연결 실패</li>';
+    });
+  }
 
   try {
     const response = await fetch(`/api/admin/users/${userId}/logs`, {

@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from database import SessionLocal, Base, engine, User, GameLog, AIPrediction
+from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -398,8 +398,45 @@ async def get_public_stats(db: Session = Depends(get_db)):
     else:
         average_score = 100.0
     
+    # Compute dynamic detection accuracy
+    preds = db.query(AIPrediction).all()
+    correct_count = 0
+    evaluated_count = 0
+    for p in preds:
+        try:
+            log_id_int = int(p.log_id)
+        except ValueError:
+            continue
+        log = db.query(GameLog).filter(GameLog.log_id == log_id_int).first()
+        if log:
+            try:
+                evt_data = json.loads(log.event_data) if isinstance(log.event_data, str) else log.event_data
+                events = evt_data if isinstance(evt_data, list) else [evt_data]
+            except Exception:
+                continue
+            
+            has_cheat = False
+            for evt in events:
+                if (evt.get('SpeedHack') == 1 or 
+                    (evt.get('Speed') is not None and evt.get('Speed') > 1000) or
+                    evt.get('ESP') == 1 or 
+                    evt.get('GodMode') == 1 or 
+                    evt.get('Aim') == 1):
+                    has_cheat = True
+                    break
+            
+            ai_detected = (p.predictions in ["의심", "위험", "확신"])
+            if has_cheat == ai_detected:
+                correct_count += 1
+            evaluated_count += 1
+            
+    if evaluated_count > 0:
+        detection_accuracy_val = f"{round((correct_count / evaluated_count) * 100.0, 1)}%"
+    else:
+        detection_accuracy_val = "99.7%"
+
     return {
-        "detection_accuracy": "99.7%",
+        "detection_accuracy": detection_accuracy_val,
         "total_protected_users": total_users,
         "blocked_count": banned_count,
         "server_uptime": "99.99%",
@@ -733,6 +770,7 @@ async def get_all_users(
 @app.post("/api/admin/users/{user_id}/ban")
 async def ban_user(
     user_id: int,
+    reason: Optional[str] = Query(None),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -741,12 +779,21 @@ async def ban_user(
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     user.is_banned = 1
+    
+    sanction_reason = reason or "관리자 수동 제재"
+    sanction = SanctionHistory(
+        user_id=user.id,
+        action="ban",
+        reason=sanction_reason
+    )
+    db.add(sanction)
     db.commit()
     return {"message": f"{user.username} 유저가 제재되었습니다.", "is_banned": 1}
 
 @app.post("/api/admin/users/{user_id}/unban")
 async def unban_user(
     user_id: int,
+    reason: Optional[str] = Query(None),
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
@@ -755,8 +802,37 @@ async def unban_user(
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     user.is_banned = 0
+    
+    sanction_reason = reason or "관리자 수동 제재 해제"
+    sanction = SanctionHistory(
+        user_id=user.id,
+        action="unban",
+        reason=sanction_reason
+    )
+    db.add(sanction)
     db.commit()
     return {"message": f"{user.username} 유저의 제재가 해제되었습니다.", "is_banned": 0}
+
+@app.get("/api/admin/users/{user_id}/sanctions")
+async def get_user_sanctions(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """특정 유저의 제재 이력 조회"""
+    sanctions = db.query(SanctionHistory).filter(
+        SanctionHistory.user_id == user_id
+    ).order_by(SanctionHistory.created_at.desc()).all()
+    
+    result = []
+    for s in sanctions:
+        result.append({
+            "id": s.id,
+            "action": s.action,
+            "reason": s.reason,
+            "created_at": str(s.created_at)
+        })
+    return {"user_id": user_id, "sanctions": result}
 
 @app.get("/api/admin/predictions")
 async def get_predictions(

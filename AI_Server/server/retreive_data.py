@@ -144,20 +144,41 @@ def normalize_frames(payload: Any) -> list[list[float]]:
 
     return frames
 
+def extract_user_id(payload):
+    if isinstance(payload, list):
+        logs = payload
+    elif isinstance(payload, dict):
+        logs = (
+            payload.get("frames")
+            or payload.get("sequence")
+            or payload.get("event_data")
+            or payload.get("log", {}).get("event_data")
+        )
+    else:
+        return None
 
-def build_result(payload: Any, prediction: dict[str, Any]) -> dict[str, Any]:
-    if not isinstance(payload, dict):
+    if not isinstance(logs, list) or len(logs) == 0:
+        return None
+
+    first_log = logs[0]
+    if not isinstance(first_log, dict):
+        return None
+
+    return first_log.get("userId") or first_log.get("user_id")
+
+def build_result(payload: Any, prediction: dict[str, Any], log_id: str = None) -> dict[str, Any]:
+    
+    if not isinstance(payload, list):
         return {
-            "player_id": None,
-            "log_id": None,
-            "session_id": None,
+            "player_id": extract_user_id(payload),
+            "log_id": log_id,
+
             "prediction": prediction,
         }
 
     return {
-        "player_id": _first_present(payload, ("player_id", "playerId", "user_id", "userId")),
-        "log_id": _first_present(payload, ("log_id", "logId", "id")),
-        "session_id": _first_present(payload, ("session_id", "sessionId", "match_id", "matchId")),
+        "player_id": extract_user_id(payload),
+        "log_id": log_id,
         "prediction": prediction,
     }
 
@@ -179,7 +200,9 @@ def receive_game_log(payload: Any = Body(...)) -> dict[str, Any]:
             status_code=503,
             detail=f"Prediction module could not be loaded: {PREDICT_IMPORT_ERROR}",
         )
-
+    # payload is {log_id:..., frames: [{}, {}, ...]
+    log_id = payload.get("log_id")
+    payload = payload.get("frames")
     frames = normalize_frames(payload)
     x = torch.tensor(frames, dtype=torch.float32).unsqueeze(0)
     try:
@@ -195,8 +218,14 @@ def receive_game_log(payload: Any = Body(...)) -> dict[str, Any]:
             detail=f"Prediction failed: {exc}",
         ) from exc
 
-    result = build_result(payload, prediction)
-    forward_result = send_analysis_result(result)
+    result = build_result(payload, prediction, log_id)
+    if result["prediction"]["predicted_label"] != "정상":
+        forward_result = send_analysis_result(result)
+    else:
+        raise HTTPException(
+            status_code=422,
+            detail="Anomaly detected: " + result["prediction"]["predicted_label"],
+        )
 
     return {
         "ok": True,

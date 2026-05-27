@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 import jwt
 from datetime import datetime, timedelta
 import json
-from typing import Optional
+from typing import Optional, Union
 import httpx
 
 app = FastAPI()
@@ -104,9 +104,16 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
+class AIPredictionDetailSchema(BaseModel):
+    probability: float     # 핵사용확률
+    predicted_label: str   # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
+    predictions: str       # 정상, 의심, 위험, 확신, 핵
+
 class DetectionRequestSchema(BaseModel):
     nickname: Optional[str] = None  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
-    player_id: Optional[str] = None
+    player_id: Optional[Union[int, str]] = None
+    log_id: Optional[int] = None
+    prediction: Optional[AIPredictionDetailSchema] = None
 
 class HackDetails(BaseModel):
     speed: float  # 스피드핵 비율 (%)
@@ -119,11 +126,6 @@ class HackReportSchema(BaseModel):
     player_id: Optional[str] = None
     detection_rate: float  # 검출률 (%)
     hacks: HackDetails     # 핵별 정보 딕셔너리
-
-class AIPredictionDetailSchema(BaseModel):
-    probability: float     # 핵사용확률
-    predicted_label: str   # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
-    predictions: str       # 정상, 의심, 위험, 확신
 
 class AIPredictionReportSchema(BaseModel):
     player_id: Optional[str] = None         # 컴퓨터 일련번호 (username과 동일)
@@ -358,7 +360,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
     total_users = user_count
     
     # 2. 실시간 검출/차단 로그 수 분석 (AI 예측 결과를 기준으로 집계)
-    hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신"])).count()
+    hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신", "핵"])).count()
             
     # 3. 유저 AI 판정 기반 상태 집계 및 평균 보안 점수 계산
     danger_count = 0
@@ -376,7 +378,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
                 score -= 5
             elif p.predictions == "위험":
                 score -= 15
-            elif p.predictions == "확신":
+            elif p.predictions in ["확신", "핵"]:
                 score -= 30
         if score < 0:
             score = 0
@@ -390,7 +392,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
             
         last_pred = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).order_by(AIPrediction.created_at.desc()).first()
         if last_pred:
-            if last_pred.predictions in ["위험", "확신"]:
+            if last_pred.predictions in ["위험", "확신", "핵"]:
                 danger_count += 1
             elif last_pred.predictions == "의심":
                 warning_count += 1
@@ -418,7 +420,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
     utc_today_start = kst_today_midnight - timedelta(hours=9)
     
     today_blocked = db.query(AIPrediction).filter(
-        AIPrediction.predictions.in_(["의심", "위험", "확신"]),
+        AIPrediction.predictions.in_(["의심", "위험", "확신", "핵"]),
         AIPrediction.created_at >= utc_today_start
     ).count()
     
@@ -454,7 +456,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
                     has_cheat = True
                     break
             
-            ai_detected = (p.predictions in ["의심", "위험", "확신"])
+            ai_detected = (p.predictions in ["의심", "위험", "확신", "핵"])
             if has_cheat == ai_detected:
                 correct_count += 1
             evaluated_count += 1
@@ -500,7 +502,7 @@ async def get_public_ranking(db: Session = Depends(get_db)):
                 score -= 5
             elif p.predictions == "위험":
                 score -= 15
-            elif p.predictions == "확신":
+            elif p.predictions in ["확신", "핵"]:
                 score -= 30
         if score < 0:
             score = 0
@@ -616,33 +618,49 @@ async def analyze_hack_detection(
     db: Session = Depends(get_db)
 ):
     """
-    호스트 요청을 받아 컴퓨터 시리얼번호(사용자 닉네임)로 로그를 분석하고,
-    검출률 및 스피드핵, ESP, 무적핵, 에임핵 탐지 비율을 퍼센트 리스트로 반환합니다.
+    payload는 dict 형태
+    예시 payload = {'player_id': 6, 'log_id': 500, 'prediction': {'probability': 0.418, 'predicted_label': 'ESP', 'predictions': '의심'}}
+
+    여기서 player_id를 사용하여 유저를 조회하고 nickname을 추출
+    log_id는 로그 조회에 사용, 대시보드엔 표시 X
+    prediction은 마찬가지로 dict 형태로 받아서 분석결과를 반환
+    probability는 확률 (0~1 사이 소수점 3자리까지의 값)
+    predicted_label은 예측된 핵 종류 (예: 'ESP', '스피드핵', '갓모드', '에임핵')
+    predictions는 '정상', '의심', '위험', '핵' 중 하나의 문자열로 핵 사용 여부를 나타냄
+
+    기존 방식 (nickname 기반 조회)도 하위 호환으로 지원합니다.
     """
-    nickname = payload.nickname or payload.player_id
-    if not nickname:
-        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
-    
-    # 1. 닉네임(username 또는 name)으로 유저 검색 (대소문자 구분 없음)
-    user = db.query(User).filter(
-        (func.lower(User.username) == nickname.lower()) | 
-        (func.lower(User.name) == nickname.lower())
-    ).first()
-    
-    if not user:
-        raise HTTPException(status_code=404, detail="해당 닉네임의 사용자를 찾을 수 없습니다.")
+    # 만약 prediction 객체가 있다면, 새로운 payload 형식으로 처리합니다.
+    if payload.prediction is not None:
+        if payload.player_id is None:
+            raise HTTPException(status_code=422, detail="player_id가 필요합니다.")
+        try:
+            user_id = int(payload.player_id)
+        except ValueError:
+            raise HTTPException(status_code=422, detail="player_id는 숫자여야 합니다.")
+            
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="해당 ID의 사용자를 찾을 수 없습니다.")
+            
+        nickname = user.name or user.username
+        
+        if payload.log_id is None:
+            raise HTTPException(status_code=422, detail="log_id가 필요합니다.")
+            
+        # log_id로 로그 조회
+        log = db.query(GameLog).filter(GameLog.log_id == payload.log_id).first()
+        if not log:
+            raise HTTPException(status_code=404, detail="해당 로그를 찾을 수 없습니다.")
+            
+        # 단일 로그에 대해 패킷 이벤트 분석
+        total_packets = 0
+        speed_hack_count = 0
+        esp_count = 0
+        god_mode_count = 0
+        aim_count = 0
+        detected_packets = 0
 
-    # 2. 해당 유저의 모든 게임 로그 가져오기
-    logs = db.query(GameLog).filter(GameLog.user_id == user.id).all()
-    
-    total_packets = 0
-    speed_hack_count = 0
-    esp_count = 0
-    god_mode_count = 0
-    aim_count = 0
-    detected_packets = 0
-
-    for log in logs:
         try:
             raw = log.event_data
             if isinstance(raw, str):
@@ -650,7 +668,6 @@ async def analyze_hack_detection(
             else:
                 evt_data = raw
             
-            # 이벤트 데이터가 리스트 형태일 수도 있으므로 맞춰서 처리
             events = evt_data if isinstance(evt_data, list) else [evt_data]
             
             for evt in events:
@@ -675,7 +692,113 @@ async def analyze_hack_detection(
         except Exception:
             pass
 
-    # 3. 퍼센트 계산
+        overall_detection_rate = 0.0
+        speed_pct = 0.0
+        esp_pct = 0.0
+        god_pct = 0.0
+        aim_pct = 0.0
+
+        if total_packets > 0:
+            overall_detection_rate = round((detected_packets / total_packets) * 100.0, 2)
+            speed_pct = round((speed_hack_count / total_packets) * 100.0, 2)
+            esp_pct = round((esp_count / total_packets) * 100.0, 2)
+            god_pct = round((god_mode_count / total_packets) * 100.0, 2)
+            aim_pct = round((aim_count / total_packets) * 100.0, 2)
+
+        hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
+
+        # AI 예측 결과를 DB에 저장 (player_id는 기존 대시보드 호환을 위해 username 저장)
+        new_prediction = AIPrediction(
+            player_id=user.username,
+            log_id=str(payload.log_id),
+            probability=round(payload.prediction.probability, 3),
+            predicted_label=payload.prediction.predicted_label,
+            predictions=payload.prediction.predictions
+        )
+        try:
+            db.add(new_prediction)
+            db.commit()
+            db.refresh(new_prediction)
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
+
+        return {
+            "nickname": nickname,
+            "username": user.username,
+            "name": user.name,
+            "prediction": {
+                "probability": round(payload.prediction.probability, 3),
+                "predicted_label": payload.prediction.predicted_label,
+                "predictions": payload.prediction.predictions
+            },
+            "total_packets_analyzed": total_packets,
+            "overall_detection_rate": overall_detection_rate,
+            "hack_percentages_list": hack_percentages_list,
+            "breakdown": {
+                "speed_hack": speed_pct,
+                "esp": esp_pct,
+                "god_mode": god_pct,
+                "aim_hack": aim_pct
+            }
+        }
+
+    # 기존 방식의 페이로드 처리 (대시보드 상세 모달 조회 등)
+    nickname = payload.nickname or payload.player_id
+    if not nickname:
+        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
+    
+    # 1. 닉네임(username 또는 name)으로 유저 검색 (대소문자 구분 없음)
+    user = db.query(User).filter(
+        (func.lower(User.username) == str(nickname).lower()) | 
+        (func.lower(User.name) == str(nickname).lower())
+    ).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 닉네임의 사용자를 찾을 수 없습니다.")
+
+    # 2. 해당 유저의 모든 게임 로그 가져오기
+    logs = db.query(GameLog).filter(GameLog.user_id == user.id).all()
+    
+    total_packets = 0
+    speed_hack_count = 0
+    esp_count = 0
+    god_mode_count = 0
+    aim_count = 0
+    detected_packets = 0
+
+    for log in logs:
+        try:
+            raw = log.event_data
+            if isinstance(raw, str):
+                evt_data = json.loads(raw)
+            else:
+                evt_data = raw
+            
+            events = evt_data if isinstance(evt_data, list) else [evt_data]
+            
+            for evt in events:
+                total_packets += 1
+                
+                is_speed = (evt.get('SpeedHack') == 1 or (evt.get('Speed') is not None and evt.get('Speed') > 1000))
+                is_esp = (evt.get('ESP') == 1)
+                is_god = (evt.get('GodMode') == 1)
+                is_aim = (evt.get('Aim') == 1)
+                
+                if is_speed:
+                    speed_hack_count += 1
+                if is_esp:
+                    esp_count += 1
+                if is_god:
+                    god_mode_count += 1
+                if is_aim:
+                    aim_count += 1
+                    
+                if is_speed or is_esp or is_god or is_aim:
+                    detected_packets += 1
+        except Exception:
+            pass
+
     overall_detection_rate = 0.0
     speed_pct = 0.0
     esp_pct = 0.0
@@ -689,7 +812,6 @@ async def analyze_hack_detection(
         god_pct = round((god_mode_count / total_packets) * 100.0, 2)
         aim_pct = round((aim_count / total_packets) * 100.0, 2)
 
-    # 스피드, esp, god모드, 에임핵 순서 리스트
     hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
 
     return {
@@ -952,7 +1074,7 @@ async def get_predictions(
     predictions_list = db.query(AIPrediction).order_by(AIPrediction.created_at.desc()).limit(100).all()
     
     total = len(predictions_list)
-    status_counts = {"정상": 0, "의심": 0, "위험": 0, "확신": 0}
+    status_counts = {"정상": 0, "의심": 0, "위험": 0, "확신": 0, "핵": 0}
     label_counts = {"스피드핵": 0, "갓모드": 0, "ESP": 0, "에임핵": 0}
     
     for p in predictions_list:

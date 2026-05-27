@@ -370,7 +370,7 @@ async function fetchAdminPredictions() {
           data.predictions.forEach(p => {
             const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             let type = 'info';
-            if (p.predictions === '위험' || p.predictions === '확신') {
+            if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
               type = 'danger';
             } else if (p.predictions === '의심') {
               type = 'warning';
@@ -402,7 +402,7 @@ async function fetchAdminPredictions() {
           limitList.forEach(p => {
             const time = new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             let type = 'info';
-            if (p.predictions === '위험' || p.predictions === '확신') {
+            if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
               type = 'danger';
             } else if (p.predictions === '의심') {
               type = 'warning';

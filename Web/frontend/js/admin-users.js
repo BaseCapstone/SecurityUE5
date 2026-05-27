@@ -38,7 +38,7 @@ async function initUserManagement() {
           scoreClass = 'probability--high';
           statusBadge = 'status-badge--danger';
           statusText = '제재됨';
-        } else if (user.ai_status === '위험' || user.ai_status === '확신') {
+        } else if (user.ai_status === '위험' || user.ai_status === '확신' || user.ai_status === '핵') {
           scoreClass = 'probability--high';
           statusBadge = 'status-badge--danger';
           statusText = user.ai_status;
@@ -84,7 +84,7 @@ async function initUserManagement() {
         userData.push(rowData);
 
         // 2. 실시간 의심 유저 모니터링 목록에 추가
-        const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신'].includes(user.ai_status);
+        const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신', '핵'].includes(user.ai_status);
         if (isSuspicious && user.role !== 'admin') {
           const trSusp = document.createElement('tr');
           trSusp.style.cursor = 'pointer';

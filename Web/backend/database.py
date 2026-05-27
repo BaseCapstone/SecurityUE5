@@ -61,7 +61,7 @@ class AIPrediction(Base):
     log_id = Column(String(50), nullable=False)     # 로그 번호
     probability = Column(Float, nullable=False)     # 핵사용확률
     predicted_label = Column(String(50), nullable=False)  # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
-    predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신)
+    predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신, 핵)
     created_at = Column(DateTime, default=func.now())
 
 class SanctionHistory(Base):

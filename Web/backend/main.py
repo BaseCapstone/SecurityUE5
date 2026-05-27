@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
-from database import SessionLocal, Base, engine, User, GameLog
+from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 import jwt
 from datetime import datetime, timedelta
 import json
+import httpx
 from typing import Literal, Optional
 
 app = FastAPI()
@@ -106,7 +107,7 @@ class LoginSchema(BaseModel):
 class DetectionPredictionSchema(BaseModel):
     probability: float = Field(..., ge=0.0, le=1.0)
     predicted_label: str
-    predictions: Literal["정상", "의심", "위험", "핵"]
+    predictions: Literal["정상", "의심", "위험", "확신"]
 
     @field_validator("probability")
     @classmethod
@@ -129,6 +130,16 @@ class HackReportSchema(BaseModel):
     player_id: Optional[str] = None
     detection_rate: float  # 검출률 (%)
     hacks: HackDetails     # 핵별 정보 딕셔너리
+
+class AIPredictionDetailSchema(BaseModel):
+    probability: float = Field(..., ge=0.0, le=1.0)
+    predicted_label: str   # 예측된 핵 종류 (예: 'ESP', '스피드핵', '갓모드', '에임핵')
+    predictions: Literal["정상", "의심", "위험", "확신"]
+
+    @field_validator("probability")
+    @classmethod
+    def round_probability(cls, value: float) -> float:
+        return round(value, 3)
 
 class AIPredictionReportSchema(BaseModel):
     player_id: Optional[str] = None         # 컴퓨터 일련번호 (username과 동일)
@@ -649,18 +660,28 @@ async def analyze_hack_detection(
     if not user:
         raise HTTPException(status_code=404, detail="해당 player_id의 사용자를 찾을 수 없습니다.")
 
-    # log = db.query(GameLog).filter(
-    #     GameLog.log_id == payload.log_id,
-    #     GameLog.user_id == user.id
-    # ).first()
-    # if not log:
-    #     raise HTTPException(status_code=404, detail="해당 사용자의 로그를 찾을 수 없습니다.")
-
     prediction = payload.prediction
     probability = round(prediction.probability, 3)
     probability_pct = round(probability * 100.0, 2)
     predicted_label = prediction.predicted_label.strip()
     status_label = prediction.predictions
+
+    # 대시보드(/api/admin/predictions, /api/public/stats 등)가 AIPrediction 테이블을 읽으므로
+    # AI 서버가 보낸 결과를 즉시 저장한다.
+    new_prediction = AIPrediction(
+        player_id=user.username,
+        log_id=str(payload.log_id),
+        probability=probability,
+        predicted_label=predicted_label,
+        predictions=status_label
+    )
+    try:
+        db.add(new_prediction)
+        db.commit()
+        db.refresh(new_prediction)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
 
     label_map = {
         "스피드핵": "speed_hack",
@@ -690,9 +711,11 @@ async def analyze_hack_detection(
     ]
 
     return {
+        "prediction_id": new_prediction.prediction_id,
         "nickname": user.name,
         "username": user.username,
         "player_id": user.id,
+        "log_id": payload.log_id,
         "overall_detection_rate": 0.0 if status_label == "정상" else probability_pct,
         "hack_percentages_list": hack_percentages_list,
         "prediction_result": {
@@ -703,7 +726,8 @@ async def analyze_hack_detection(
             "predictions": status_label,
             "is_hack_detected": status_label != "정상"
         },
-        "breakdown": breakdown
+        "breakdown": breakdown,
+        "created_at": str(new_prediction.created_at)
     }
 
 @app.post("/api/detect/report")

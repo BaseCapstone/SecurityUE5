@@ -47,3 +47,6 @@ DerivedDataCache/
 # C# / Automation build outputs
 /LyraStarterGame/Build/Scripts/obj/
 /LyraStarterGame/Build/Scripts/bin/
+AI_Server/data/output2.jsonl
+AI_Server/models/movement_anomaly_rnn_1.pt
+AI_Server/models/movement_anomaly_rnn_2.pt

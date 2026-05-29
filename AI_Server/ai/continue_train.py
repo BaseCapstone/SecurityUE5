@@ -16,7 +16,7 @@ DEFAULT_DATA_PATH = BASE_DIR / "data" / "output2.jsonl"
 
 def continue_train_model(
     train_loader,
-    epochs=10,
+    epochs=20,
     device="cpu",
     feature_dim=15,
     num_labels=4,

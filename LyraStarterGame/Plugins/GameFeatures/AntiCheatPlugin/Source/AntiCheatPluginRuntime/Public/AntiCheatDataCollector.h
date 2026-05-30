@@ -1,47 +1,47 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "HttpFwd.h"
 #include "AntiCheatDataCollector.generated.h"
-
 class APawn;
 
 USTRUCT(BlueprintType)
-// ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ ÆÐÅ¶ ±¸Á¶Ã¼
+// í”Œë ˆì´ì–´ ë°ì´í„° íŒ¨í‚· êµ¬ì¡°ì²´
 struct FAntiCheatDataPacket
 {
 	GENERATED_BODY()
 
-	// ÇÃ·¹ÀÌ¾î °íÀ¯ ½Äº°ÀÚ
+	// í”Œë ˆì´ì–´ ê³ ìœ  ì‹ë³„ìž
 	UPROPERTY() FString UserID; 
 
-	// µ¥ÀÌÅÍ ¼öÁý ½Ã°£
+	// ë°ì´í„° ìˆ˜ì§‘ ì‹œê°„
 	UPROPERTY() float Timestamp;
 	
-	// ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ¿ùµå ÁÂÇ¥
+	// í˜„ìž¬ í”Œë ˆì´ì–´ì˜ ì›”ë“œ ì¢Œí‘œ
 	UPROPERTY() FVector Location;         
 	
-	// ÇöÀç ÀÌµ¿ ¼Óµµ
+	// í˜„ìž¬ ì´ë™ ì†ë„
 	UPROPERTY() float Speed;              
 	
-	// ÇöÀç ½Ã¼± ¹× Ä³¸¯ÅÍ È¸Àü°ª
+	// í˜„ìž¬ ì‹œì„  ë° ìºë¦­í„° íšŒì „ê°’
 	UPROPERTY() FRotator Rotation;        
 	
-	// ÀÌÀü ¼öÁý ÁÖ±â ´ëºñ È¸Àü º¯È­·®(¿¡ÀÓº¿ Æ¯À¯ÀÇ ÀÎ°£ÀÇ ÇÑ°è¸¦ ¹þ¾î³­ ¼ø°£ÀûÀÎ È­¸é ÀüÈ¯)
+	// ì´ì „ ìˆ˜ì§‘ ì£¼ê¸° ëŒ€ë¹„ íšŒì „ ë³€í™”ëŸ‰(ì—ìž„ë´‡ íŠ¹ìœ ì˜ ì¸ê°„ì˜ í•œê³„ë¥¼ ë²—ì–´ë‚œ ìˆœê°„ì ì¸ í™”ë©´ ì „í™˜)
 	UPROPERTY() FRotator DeltaRotation;   
 	
-	// ÇöÀç Ã¼·Â
+	// í˜„ìž¬ ì²´ë ¥
 	UPROPERTY() float CurrentHP;          
 	
-	// Á¶ÁØ ÁßÀÎ Å¸ÄÏ°úÀÇ °Å¸®
+	// ì¡°ì¤€ ì¤‘ì¸ íƒ€ì¼“ê³¼ì˜ ê±°ë¦¬
 	UPROPERTY() float TargetDistance;     
 	
-	// ÇÃ·¹ÀÌ¾îÀÇ ½Ã¼± Á¤¸é°ú Å¸°Ù °£ÀÇ °¢µµ Â÷ÀÌ(Á¤»óÀûÀÎ ½Ã¾ß ¹ÛÀÇ ÀûÀ» Á¤È®È÷ Á¶ÁØÇÏ°í ÀÖ´ÂÁö Å½Áö)
+	// í”Œë ˆì´ì–´ì˜ ì‹œì„  ì •ë©´ê³¼ íƒ€ê²Ÿ ê°„ì˜ ê°ë„ ì°¨ì´(ì •ìƒì ì¸ ì‹œì•¼ ë°–ì˜ ì ì„ ì •í™•ížˆ ì¡°ì¤€í•˜ê³  ìžˆëŠ”ì§€ íƒì§€)
 	UPROPERTY() float TargetAngle;        
 	
-	// Å¸°ÙÀÌ º® µî Àå¾Ö¹°¿¡ °¡·ÁÁöÁö ¾Ê°í ½Ã¾ß¿¡ º¸ÀÌ´ÂÁö ¿©ºÎ(º® µÚÀÇ ÀûÀ» ÃßÃ´)
+	// íƒ€ê²Ÿì´ ë²½ ë“± ìž¥ì• ë¬¼ì— ê°€ë ¤ì§€ì§€ ì•Šê³  ì‹œì•¼ì— ë³´ì´ëŠ”ì§€ ì—¬ë¶€(ë²½ ë’¤ì˜ ì ì„ ì¶”ì²™)
 	UPROPERTY() bool bIsTargetVisible;   
 
-	// ÇÙ »ç¿ë ¿©ºÎ (0: Á¤»ó, 1: ÇÙ »ç¿ë)
+	// í•µ ì‚¬ìš© ì—¬ë¶€ (0: ì •ìƒ, 1: í•µ ì‚¬ìš©)
 	UPROPERTY()
 	int32 SpeedHack = 0;
 	UPROPERTY()
@@ -52,55 +52,72 @@ struct FAntiCheatDataPacket
 	int32 ESP = 0;
 };
 
-// ÇÃ·¹ÀÌ¾î Ä³¸¯ÅÍ ¶Ç´Â ÄÁÆ®·Ñ·¯¿¡ ºÎÂøµÇ¾î ¾ÈÆ¼Ä¡Æ® µ¥ÀÌÅÍ¸¦ ÁÖ±âÀûÀ¸·Î ¼öÁýÇÏ´Â ÄÄÆ÷³ÍÆ®
+// í”Œë ˆì´ì–´ ìºë¦­í„° ë˜ëŠ” ì»¨íŠ¸ë¡¤ëŸ¬ì— ë¶€ì°©ë˜ì–´ ì•ˆí‹°ì¹˜íŠ¸ ë°ì´í„°ë¥¼ ì£¼ê¸°ì ìœ¼ë¡œ ìˆ˜ì§‘í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
 UCLASS( ClassGroup=(AntiCheat), meta=(BlueprintSpawnableComponent) )
 class ANTICHEATPLUGINRUNTIME_API UAntiCheatDataCollector : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	// ±âº» »ý¼ºÀÚ: ÄÄÆ÷³ÍÆ® ÃÊ±âÈ­ ¹× Æ½ È°¼ºÈ­ ¿©ºÎ µî ¼³Á¤
+	// ê¸°ë³¸ ìƒì„±ìž: ì»´í¬ë„ŒíŠ¸ ì´ˆê¸°í™” ë° í‹± í™œì„±í™” ì—¬ë¶€ ë“± ì„¤ì •
 	UAntiCheatDataCollector();
 
 protected:
-	// °ÔÀÓ ½ÃÀÛ ½Ã È£ÃâµÇ¸ç, µ¥ÀÌÅÍ ¼öÁýÀ» À§ÇÑ Å¸ÀÌ¸Ó¸¦ ÃÊ±âÈ­ÇÏ°í ½ÇÇà
+	// ê²Œìž„ ì‹œìž‘ ì‹œ í˜¸ì¶œë˜ë©°, ë°ì´í„° ìˆ˜ì§‘ì„ ìœ„í•œ íƒ€ì´ë¨¸ë¥¼ ì´ˆê¸°í™”í•˜ê³  ì‹¤í–‰
 	virtual void BeginPlay() override;
 	
-	// Å¸ÀÌ¸Ó Á¤Áö¸¦ À§ÇÑ EndPlay ¿À¹ö¶óÀÌµå
+	// íƒ€ì´ë¨¸ ì •ì§€ë¥¼ ìœ„í•œ EndPlay ì˜¤ë²„ë¼ì´ë“œ
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 private: 
-	// ÁÖ±âÀûÀÎ µ¥ÀÌÅÍ ¼öÁýÀ» Á¦¾îÇÏ´Â Å¸ÀÌ¸Ó ÇÚµé
+	// ì£¼ê¸°ì ì¸ ë°ì´í„° ìˆ˜ì§‘ì„ ì œì–´í•˜ëŠ” íƒ€ì´ë¨¸ í•¸ë“¤
 	FTimerHandle DataTimerHandle;
 
-	// ¿¡ÀÓº¿ Å½Áö¸¦ À§ÇØ ÀÌÀü ¼öÁý ½ÃÁ¡ÀÇ È¸Àü°ªÀ» ÀÓ½Ã·Î ÀúÀåÇÏ´Â º¯¼ö
+	// ì£¼ê¸°ì ì¸ ë°´ ì—¬ë¶€ë¥¼ ì œì–´í•˜ëŠ” íƒ€ì´ë¨¸ í•¸ë“¤
+	FTimerHandle BanCheckTimerHandle;
+
+	bool bBanAlreadyHandled = false;
+
+	FString GameStatusEndpoint = TEXT("http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/game/status");
+
+	void CheckBanStatus();
+
+	void OnBanStatusResponse(
+		FHttpRequestPtr Request,
+		FHttpResponsePtr Response,
+		bool bWasSuccessful
+	);
+
+	void HandleBannedAccount(const FString& Message);
+
+	// ì—ìž„ë´‡ íƒì§€ë¥¼ ìœ„í•´ ì´ì „ ìˆ˜ì§‘ ì‹œì ì˜ íšŒì „ê°’ì„ ìž„ì‹œë¡œ ì €ìž¥í•˜ëŠ” ë³€ìˆ˜
 	FRotator LastControlRotation;
 
-	// Ã¹ ¼öÁý ½Ã DeltaRotationÀÌ ºñÁ¤»óÀûÀ¸·Î Æ¢´Â °ÍÀ» ¹æÁö
+	// ì²« ìˆ˜ì§‘ ì‹œ DeltaRotationì´ ë¹„ì •ìƒì ìœ¼ë¡œ íŠ€ëŠ” ê²ƒì„ ë°©ì§€
 	bool bHasLastControlRotation = false;
 
-	// ½ÇÁ¦ ·Î±× ¼öÁýÀ» ½ÃÀÛÇØµµ µÇ´Â ¿ùµå ½Ã°£
+	// ì‹¤ì œ ë¡œê·¸ ìˆ˜ì§‘ì„ ì‹œìž‘í•´ë„ ë˜ëŠ” ì›”ë“œ ì‹œê°„
 	float LogCollectionStartTime = -1.0f;
 
-	// Á¤»ó ¹«Àû ÅÂ±×°¡ »ç¶óÁø µÚ ¾à°£¸¸ ´õ ±â´Ù¸± ½Ã°£
-	// ³Ê¹« ±æ°Ô ÀâÁö ¸» °Í. 0.5~1.0ÃÊ Á¤µµ¸é ÃæºÐ
+	// ì •ìƒ ë¬´ì  íƒœê·¸ê°€ ì‚¬ë¼ì§„ ë’¤ ì•½ê°„ë§Œ ë” ê¸°ë‹¤ë¦´ ì‹œê°„
+	// ë„ˆë¬´ ê¸¸ê²Œ ìž¡ì§€ ë§ ê²ƒ. 0.5~1.0ì´ˆ ì •ë„ë©´ ì¶©ë¶„
 	UPROPERTY(EditAnywhere, Category = "AntiCheat")
 	float PostImmunityGraceSeconds = 1.0f;
 
-	// ÇöÀç PawnÀÌ Lyra ´ë±â½Ã°£ ¹«Àû »óÅÂÀÎÁö È®ÀÎ
+	// í˜„ìž¬ Pawnì´ Lyra ëŒ€ê¸°ì‹œê°„ ë¬´ì  ìƒíƒœì¸ì§€ í™•ì¸
 	bool HasLyraDamageImmunity(const APawn* PawnOwner) const;
 
-	// ÇöÀç ½ÃÁ¡¿¡ ÇÐ½À¿ë ·Î±×¸¦ ¼öÁýÇØµµ µÇ´ÂÁö °Ë»ç
+	// í˜„ìž¬ ì‹œì ì— í•™ìŠµìš© ë¡œê·¸ë¥¼ ìˆ˜ì§‘í•´ë„ ë˜ëŠ”ì§€ ê²€ì‚¬
 	bool ShouldCollectTrainingLog(const APawn* PawnOwner);
 
-	// ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ »óÅÂ¸¦ FAntiCheatDataPacket¿¡ ´ã¾Æ ·Î±×·Î ±â·ÏÇÏ°Å³ª ¼­¹ö·Î Àü¼Û
+	// í˜„ìž¬ í”Œë ˆì´ì–´ì˜ ìƒíƒœë¥¼ FAntiCheatDataPacketì— ë‹´ì•„ ë¡œê·¸ë¡œ ê¸°ë¡í•˜ê±°ë‚˜ ì„œë²„ë¡œ ì „ì†¡
 	UFUNCTION()
 	void CollectAndlog();
 
-	// HTTP Åë½ÅÀ» ´ã´çÇÒ Sender °´Ã¼
+	// HTTP í†µì‹ ì„ ë‹´ë‹¹í•  Sender ê°ì²´
 	UPROPERTY()
 	TObjectPtr<class UAntiCheatDataSender> DataSender;
 
-	// AWS·Î º¸³»±â Àü µ¥ÀÌÅÍ¸¦ ÀÓ½Ã·Î ½×¾ÆµÑ ¹è¿­ (¹öÆÛ)
+	// AWSë¡œ ë³´ë‚´ê¸° ì „ ë°ì´í„°ë¥¼ ìž„ì‹œë¡œ ìŒ“ì•„ë‘˜ ë°°ì—´ (ë²„í¼)
 	TArray<FAntiCheatDataPacket> PacketBuffer;
 
 	// DB user id and short-lived game JWT passed by the web launcher.
@@ -108,9 +125,9 @@ private:
 	FString GameAuthToken;
 	FString GameLogEndpoint;
 
-	// ¸î °³°¡ ½×ÀÌ¸é º¸³¾ °ÍÀÎÁö (ÇöÀç: 0.1ÃÊ x 30°³ = 3ÃÊ ´ÜÀ§·Î Àü¼Û)
+	// ëª‡ ê°œê°€ ìŒ“ì´ë©´ ë³´ë‚¼ ê²ƒì¸ì§€ (í˜„ìž¬: 0.1ì´ˆ x 30ê°œ = 3ì´ˆ ë‹¨ìœ„ë¡œ ì „ì†¡)
 	const int32 MaxBufferSize = 30;
 
-	// AWS API Gateway ¶Ç´Â EC2 ¼­¹ö URL ÁÖ¼Ò ÀÔ·Â
+	// AWS API Gateway ë˜ëŠ” EC2 ì„œë²„ URL ì£¼ì†Œ ìž…ë ¥
 	FString AWSEndpointURL = TEXT("http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/logs");
 };

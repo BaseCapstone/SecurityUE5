@@ -21,6 +21,10 @@
 	],
 	"Plugins": [
 		{
+			"Name": "AntiCheatPlugin",
+			"Enabled": true
+		},
+		{
 			"Name": "ActorPalette",
 			"Enabled": true
 		},

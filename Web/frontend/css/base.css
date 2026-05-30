@@ -1,0 +1,439 @@
+/* ═══════════════════════════════════════════════════
+   LYRA SHIELD — Game Portal Theme
+   Inspired by Korean FPS Game Sites
+   ═══════════════════════════════════════════════════ */
+
+/* ─── CSS Variables / Design Tokens ─── */
+:root {
+  /* Colors - Dark Sci-Fi Game Portal */
+  --bg-primary: #0a0e17;        /* Deep slate-black */
+  --bg-secondary: #0f1322;      /* Dark navy-charcoal */
+  --bg-tertiary: #171c2e;       /* Medium navy-slate */
+  --bg-dark: #080b12;           /* Pure dark */
+  --bg-darker: #05070a;         /* Pure dark background for footers */
+  --bg-card: #151a2d;           /* Slate-blue card background */
+  --bg-glass: rgba(15, 19, 34, 0.85);
+  --bg-glass-hover: rgba(21, 26, 45, 0.95);
+
+  /* Accent Colors */
+  --accent-red: #e52d27;
+  --accent-red-dark: #c41e1a;
+  --accent-red-glow: rgba(229, 45, 39, 0.4);
+  --accent-blue: #2563eb;
+  --accent-cyan: #06b6d4;
+  --accent-gold: #f59e0b;
+  --accent-green: #10b981;
+  --accent-orange: #f97316;
+  --accent-purple: #8b5cf6;
+  --accent-navy: #f8fafc;       /* Updated to match dark theme primary text */
+
+  /* Gradients */
+  --grad-nav: linear-gradient(180deg, #0f1322 0%, #0a0e17 100%);
+  --grad-hero: linear-gradient(135deg, #09090e 0%, #111124 50%, #1a0b2e 100%); /* Cool dark gradient */
+  --grad-hero-overlay: linear-gradient(to right, rgba(10, 14, 23, 0.88) 0%, rgba(10, 14, 23, 0.5) 50%, rgba(10, 14, 23, 0.7) 100%);
+  --grad-hero-accent: linear-gradient(135deg, #ff6b35 0%, #e52d27 50%, #d63384 100%);
+  --grad-game-btn: linear-gradient(135deg, #e52d27 0%, #c41e1a 100%);
+  --grad-card-hover: linear-gradient(135deg, rgba(229, 45, 39, 0.08) 0%, rgba(37, 99, 235, 0.08) 100%);
+
+  /* Text */
+  --text-primary: #f8fafc;      /* Crisp white */
+  --text-secondary: #cbd5e1;    /* Soft light grey */
+  --text-muted: #64748b;        /* Cool slate grey */
+  --text-light: #f1f5f9;        /* Light grey */
+  --text-nav: #cbd5e1;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08); /* Translucent light border */
+  --border-card: rgba(255, 255, 255, 0.06);
+  --border-nav: rgba(255, 255, 255, 0.1);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-red-glow: 0 4px 20px rgba(229, 45, 39, 0.3);
+
+  /* Typography */
+  --font-main: 'Noto Sans KR', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Orbitron', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  /* Sizing */
+  --top-bar-h: 64px;
+  --nav-bar-h: 52px;
+  --ticker-h: 32px;
+  --header-total: calc(var(--top-bar-h) + var(--nav-bar-h) + var(--ticker-h));
+  --container-max: 1280px;
+  --border-radius: 10px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 14px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Reset & Base ─── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-red);
+}
+
+/* ─── Light Sci-Fi / Cyberpunk Theme ─── */
+.light-theme {
+  /* Colors */
+  --bg-primary: #ecf1f6;        /* Clean icy silver gray background */
+  --bg-secondary: #dee5ed;      /* Slightly darker silver gray */
+  --bg-tertiary: #cbd5e0;       /* Medium silver-blue gray */
+  --bg-dark: #1e293b;           /* Dark slate - kept dark for UI elements where weight is needed */
+  --bg-darker: #0b0f19;         /* Keeps footer dark/sophisticated */
+  --bg-card: rgba(255, 255, 255, 0.65); /* Translucent white card */
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass-hover: rgba(255, 255, 255, 0.85);
+
+  /* Accent Colors */
+  --accent-red: #e52d27;
+  --accent-red-dark: #c41e1a;
+  --accent-red-glow: rgba(229, 45, 39, 0.2);
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-gold: #d97706;
+  --accent-green: #10b981;
+  --accent-orange: #ea580c;
+  --accent-purple: #7c3aed;
+  --accent-navy: #0f172a;
+
+  /* Gradients */
+  --grad-nav: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(236, 241, 246, 0.95) 100%);
+  --grad-hero: linear-gradient(135deg, #dee5ed 0%, #cbd5e0 50%, #94a3b8 100%);
+  --grad-hero-overlay: linear-gradient(to right, rgba(236, 241, 246, 0.88) 0%, rgba(236, 241, 246, 0.4) 50%, rgba(236, 241, 246, 0.6) 100%);
+  --grad-card-hover: linear-gradient(135deg, rgba(229, 45, 39, 0.04) 0%, rgba(59, 130, 246, 0.04) 100%);
+
+  /* Text */
+  --text-primary: #0a0f1d;      /* Deep slate-black text */
+  --text-secondary: #334155;    /* Muted slate text */
+  --text-muted: #64748b;        /* Cool gray text */
+  --text-light: #f8fafc;
+  --text-nav: #475569;
+
+  /* Borders */
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-card: rgba(15, 23, 42, 0.06);
+  --border-nav: rgba(15, 23, 42, 0.06);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.1);
+  --shadow-card: 0 4px 20px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 10px 30px rgba(15, 23, 42, 0.1);
+  --shadow-red-glow: 0 4px 20px rgba(229, 45, 39, 0.15);
+}
+
+/* ─── Light Sci-Fi / Cyberpunk Theme Overrides ─── */
+.light-theme .top-bar {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+.light-theme .nav-link {
+  color: var(--text-nav) !important;
+}
+.light-theme .nav-link:hover,
+.light-theme .nav-link.active {
+  color: var(--accent-red) !important;
+  background: rgba(15, 23, 42, 0.04) !important;
+}
+
+.light-theme .mobile-nav {
+  background: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 10px 0 30px rgba(15, 23, 42, 0.05) !important;
+  border-right: 2px solid var(--accent-red) !important;
+}
+.light-theme .mobile-nav__links a {
+  color: var(--text-nav) !important;
+}
+.light-theme .mobile-nav__links a:hover {
+  color: var(--accent-red) !important;
+  background: rgba(229, 45, 39, 0.06) !important;
+}
+.light-theme .mobile-nav__close {
+  color: var(--text-nav) !important;
+}
+
+.light-theme .stats-bar {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+.light-theme .stat-item__value {
+  color: var(--text-primary) !important;
+}
+.light-theme .stat-item__label {
+  color: var(--text-secondary) !important;
+}
+
+.light-theme .ranking-table th {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+}
+.light-theme .ranking-table td {
+  color: var(--text-primary) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.06) !important;
+}
+.light-theme .ranking-table tr:hover {
+  background: rgba(229, 45, 39, 0.03) !important;
+}
+
+.light-theme .ranking-rules .rules-card {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-card) !important;
+  border-left: 4px solid var(--accent-red) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.light-theme .ranking-rules .rules-card h4 {
+  color: var(--accent-red-dark) !important;
+}
+.light-theme .ranking-rules .rules-card p,
+.light-theme .ranking-rules .rules-card li {
+  color: var(--text-secondary) !important;
+}
+
+.light-theme .faq-item:hover {
+  border-color: rgba(229, 45, 39, 0.25) !important;
+}
+.light-theme .faq-answer {
+  background: rgba(15, 23, 42, 0.02) !important;
+  color: var(--text-secondary) !important;
+}
+
+.light-theme .hero.hero--dark .hero__title-line:not(.hero__title-line--accent) {
+  color: var(--text-primary) !important;
+}
+.light-theme .hero.hero--dark .hero__desc {
+  color: var(--text-secondary) !important;
+}
+.light-theme .hero.hero--dark .btn--ghost {
+  color: var(--text-secondary) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
+}
+.light-theme .hero.hero--dark .btn--ghost:hover {
+  background: rgba(15, 23, 42, 0.05) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Global Transitions for Theme Toggle */
+body, header, nav, section, div, span, a, button, table, td, th, input, .card, .features-grid, .stats-bar, .hero, .hero__gradient {
+  transition: background var(--transition-slow), border-color var(--transition-slow), background-color var(--transition-slow), color var(--transition-slow), box-shadow var(--transition-slow), backdrop-filter var(--transition-slow);
+}
+
+/* Premium Sci-Fi Background Grids */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--transition-slow);
+}
+.light-theme::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Theme Toggle Button Style */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base) !important;
+}
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: scale(1.1) rotate(25deg);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+.theme-toggle:active {
+  transform: scale(0.9) rotate(45deg);
+}
+.light-theme .theme-toggle {
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--text-secondary);
+}
+.light-theme .theme-toggle:hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--text-primary);
+  box-shadow: 0 0 12px rgba(15, 23, 42, 0.08);
+}
+.theme-toggle .theme-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: transform 0.5s ease;
+}
+.theme-toggle:hover .theme-icon {
+  transform: scale(1.1);
+}
+.light-theme .theme-icon--sun {
+  display: none !important;
+}
+.light-theme .theme-icon--moon {
+  display: block !important;
+}
+.theme-icon--sun {
+  display: block;
+}
+.theme-icon--moon {
+  display: none;
+}
+
+/* Sound Toggle Button Style */
+.sound-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-right: 8px;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base) !important;
+}
+.sound-toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+.sound-toggle:active {
+  transform: scale(0.9);
+}
+.light-theme .sound-toggle {
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--text-secondary);
+}
+.light-theme .sound-toggle:hover {
+  background: rgba(15, 23, 42, 0.08);
+  color: var(--text-primary);
+  box-shadow: 0 0 12px rgba(15, 23, 42, 0.08);
+}
+.sound-toggle .sound-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  transition: transform 0.3s ease;
+}
+.sound-toggle:hover .sound-icon {
+  transform: scale(1.1);
+}
+.sound-toggle .sound-icon--on {
+  display: none;
+}
+.sound-toggle .sound-icon--off {
+  display: block;
+}
+.sound-toggle.sound-toggle--enabled .sound-icon--on {
+  display: block;
+}
+.sound-toggle.sound-toggle--enabled .sound-icon--off {
+  display: none;
+}
+
+
+/* ═══════════════════════════════════════════════════
+   BUTTONS

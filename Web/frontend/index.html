@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Lyra Anti-Cheat Security System - 실시간 핵 탐지 및 보안 관리 플랫폼">
+  <title>LYRA SHIELD | Anti-Cheat Security Platform</title>
+
+  <script>
+    if (localStorage.getItem('lyra_theme') === 'light') {
+      document.documentElement.classList.add('light-theme');
+    }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/base.css?v=1.0.8">
+  <link rel="stylesheet" href="css/layout.css?v=1.0.8">
+  <link rel="stylesheet" href="css/components.css?v=1.0.8">
+  <link rel="stylesheet" href="css/home.css?v=1.0.8">
+  <link rel="stylesheet" href="css/responsive.css?v=1.0.8">
+</head>
+
+<body>
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- TOP BAR -->
+  <!-- ═══════════════════════════════════════════ -->
+  <header class="top-bar" id="top-bar">
+    <div class="top-bar__left">
+      <button class="top-bar__menu-btn" id="menu-toggle" aria-label="메뉴 열기">
+        <span></span><span></span><span></span>
+      </button>
+      <a href="#main" class="top-bar__logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" fill="currentColor" opacity="0.3" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <span class="logo-text__main">LYRA SHIELD</span>
+          <span class="logo-text__sub">ANTI-CHEAT SECURITY</span>
+        </div>
+      </a>
+    </div>
+    <div class="top-bar__right">
+      <button class="theme-toggle" id="theme-toggle" aria-label="테마 변경">
+        <svg class="theme-icon theme-icon--sun" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 2.293a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16 10a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1zM14 15.707a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.293 15.707a1 1 0 011.414 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4 10a1 1 0 011-1H3a1 1 0 110 2h1a1 1 0 01-1-1zm1.293-5.707a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 6a4 4 0 100 8 4 4 0 000-8z" clip-rule="evenodd" />
+        </svg>
+        <svg class="theme-icon theme-icon--moon" viewBox="0 0 20 20" fill="currentColor">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+        </svg>
+      </button>
+      <button class="sound-toggle" id="sound-toggle" aria-label="사운드 설정">
+        <svg class="sound-icon sound-icon--on" viewBox="0 0 24 24">
+          <path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zm-3 0L6 8H2v8h4l5 4.77V3.23zM16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+        </svg>
+        <svg class="sound-icon sound-icon--off" viewBox="0 0 24 24">
+          <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+        </svg>
+      </button>
+      <button class="btn btn--ghost" id="register-btn">회원가입</button>
+      <button class="btn btn--outline" id="login-btn">로그인</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- NAVIGATION BAR -->
+  <!-- ═══════════════════════════════════════════ -->
+  <nav class="nav-bar" id="nav-bar">
+    <div class="nav-bar__inner">
+      <ul class="nav-bar__links" id="nav-links">
+        <li><a href="#patch" class="nav-link" data-section="patch">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+                clip-rule="evenodd" />
+            </svg>
+            패치노트
+          </a></li>
+
+        <li><a href="#ranking" class="nav-link" data-section="ranking">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" />
+            </svg>
+            랭킹
+          </a></li>
+        <li><a href="#support" class="nav-link" data-section="support">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-2 0c0 .993-.241 1.929-.668 2.754l-1.524-1.525a3.997 3.997 0 00.078-2.183l1.562-1.562C15.802 8.249 16 9.1 16 10zm-5.165 3.913l1.58 1.58A5.98 5.98 0 0110 16a5.976 5.976 0 01-2.516-.552l1.562-1.562a4.006 4.006 0 001.789.027zm-4.677-2.796a4.002 4.002 0 01-.041-2.08l-.08.08-1.53-1.533A5.98 5.98 0 004 10c0 .954.223 1.856.619 2.657l1.54-1.54zm1.088-6.45A5.974 5.974 0 0110 4c.954 0 1.856.223 2.657.619l-1.54 1.54a4.002 4.002 0 00-2.346.033L7.246 4.668zM12 10a2 2 0 11-4 0 2 2 0 014 0z"
+                clip-rule="evenodd" />
+            </svg>
+            고객지원
+          </a></li>
+      </ul>
+      <button class="btn btn--game-start" id="game-start-btn">
+        <span class="btn__glow"></span>
+        <svg class="btn__icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z" />
+        </svg>
+        GAME START
+      </button>
+    </div>
+  </nav>
+
+  <!-- LIVE STATUS TICKER -->
+  <div class="status-ticker" id="status-ticker">
+    <div class="status-ticker__track">
+      <div class="status-ticker__content">
+        <span class="ticker-item"><span class="ticker-dot ticker-dot--online"></span> 서버 상태: 정상 가동중</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🛡️ AI 탐지 엔진 v3.0 가동중</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">⚡ 실시간 보호 활성화</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🔒 금일 차단: <strong class="ticker-today-blocked">-건</strong></span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">📊 평균 보안 신뢰도: <strong class="ticker-avg-score">-점</strong></span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🎮 시즌 3 업데이트 적용 완료</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item"><span class="ticker-dot ticker-dot--online"></span> 서버 상태: 정상 가동중</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🛡️ AI 탐지 엔진 v3.0 가동중</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">⚡ 실시간 보호 활성화</span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🔒 금일 차단: <strong class="ticker-today-blocked">-건</strong></span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">📊 평균 보안 신뢰도: <strong class="ticker-avg-score">-점</strong></span>
+        <span class="ticker-sep">│</span>
+        <span class="ticker-item">🎮 시즌 3 업데이트 적용 완료</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <div class="mobile-nav">
+      <button class="mobile-nav__close" id="mobile-nav-close" aria-label="메뉴 닫기">&times;</button>
+      <ul class="mobile-nav__links">
+        <li><a href="#patch">패치노트</a></li>
+
+        <li><a href="#ranking">랭킹</a></li>
+        <li><a href="#support">고객지원</a></li>
+      </ul>
+      <div class="mobile-nav__actions">
+        <button class="btn btn--outline btn--full">로그인</button>
+        <button class="btn btn--game-start btn--full" id="mobile-game-start">
+          <span class="btn__glow"></span>
+          GAME START
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- HERO SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <!-- Animated Background Fallback Overlays (Only used when background image fails to load) -->
+    <div class="hero__bg" id="hero-bg-overlay">
+      <div class="hero__grid"></div>
+      <div class="hero__particles" id="hero-particles"></div>
+      <div class="hero__gradient"></div>
+    </div>
+
+    <!-- Slider -->
+    <div class="hero__slider" id="hero-slider">
+      <!-- Slide 1 -->
+      <div class="hero__slide active" data-slide="0">
+        <div class="hero__slide-link-overlay" data-action="patch"></div>
+        <div class="hero__content">
+          <div class="hero__badge">🔥 시즌 업데이트</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">실시간 핵 탐지</span>
+            <span class="hero__title-line hero__title-line--accent">AI 보안 시스템</span>
+          </h1>
+          <p class="hero__desc">
+            AI 기반 실시간 분석으로 비정상 플레이어를 즉시 감지합니다.<br>
+            더 공정하고 깨끗한 게임 환경을 경험하세요.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg" id="hero-btn-details-1">자세히 보기</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <!-- 비주얼 영역 제거 (배경 이미지에 통합되어 노출) -->
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="hero__slide" data-slide="1">
+        <div class="hero__slide-link-overlay" data-action="login"></div>
+        <div class="hero__content">
+          <div class="hero__badge">📊 관리자 도구</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">보안 대시보드</span>
+            <span class="hero__title-line hero__title-line--accent">실시간 모니터링</span>
+          </h1>
+          <p class="hero__desc">
+            의심 유저의 핵 사용 확률을 실시간으로 확인하고<br>
+            즉각적인 제재 조치를 취할 수 있습니다.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--ghost btn--lg" id="hero-btn-guide-2">관리자 가이드 →</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <!-- 비주얼 영역 제거 (배경 이미지에 통합되어 노출) -->
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="hero__slide" data-slide="2">
+        <div class="hero__slide-link-overlay" data-action="play"></div>
+        <div class="hero__content">
+          <div class="hero__badge">🎮 LYRA 시즌 3</div>
+          <h1 class="hero__title">
+            <span class="hero__title-line">새로운 맵 &</span>
+            <span class="hero__title-line hero__title-line--accent">무기 업데이트</span>
+          </h1>
+          <p class="hero__desc">
+            시즌 3 대규모 업데이트와 함께<br>
+            강화된 보안 시스템이 적용됩니다.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary btn--lg" id="hero-btn-patch-3">업데이트 노트</button>
+            <button class="btn btn--ghost btn--lg" id="hero-btn-play-3">지금 플레이 →</button>
+          </div>
+        </div>
+        <div class="hero__visual">
+          <!-- 비주얼 영역 제거 (배경 이미지에 통합되어 노출) -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Slider Controls -->
+    <div class="hero__controls">
+      <div class="hero__indicators">
+        <button class="hero__indicator active" data-slide="0" aria-label="슬라이드 1"></button>
+        <button class="hero__indicator" data-slide="1" aria-label="슬라이드 2"></button>
+        <button class="hero__indicator" data-slide="2" aria-label="슬라이드 3"></button>
+      </div>
+      <div class="hero__arrows">
+        <button class="hero__arrow hero__arrow--prev" id="hero-prev" aria-label="이전 슬라이드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button class="hero__arrow hero__arrow--next" id="hero-next" aria-label="다음 슬라이드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FEATURE BANNERS -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="features-grid" id="features-grid">
+    <div class="features-grid__container">
+      <!-- Card 1: 보안 강화 -->
+      <div class="feature-card" data-section-target="patch">
+        <div class="feature-card__image-wrap">
+          <img src="images/security.png" alt="보안 강화" class="feature-card__img" onerror="this.src='https://placehold.co/600x400/1a1a2e/ffffff?text=AI+Security'">
+          <div class="feature-card__overlay"></div>
+        </div>
+        <div class="feature-card__content">
+          <span class="feature-card__badge">SECURITY</span>
+          <h3 class="feature-card__title">강화된 AI 보안 시스템</h3>
+          <p class="feature-card__desc">실시간 패킷 암호화 및 행동 패턴 분석 기술로 핵 사용을 사전에 완벽히 차단합니다.</p>
+          <span class="feature-card__link-text">패치노트 보기 →</span>
+        </div>
+      </div>
+      
+      <!-- Card 2: 재밌는 FPS -->
+      <div class="feature-card" id="feature-game-launch">
+        <div class="feature-card__image-wrap">
+          <img src="images/fps_game.png" alt="재밌는 FPS" class="feature-card__img" onerror="this.src='https://placehold.co/600x400/1a1a2e/ffffff?text=Lyra+Game'">
+          <div class="feature-card__overlay"></div>
+        </div>
+        <div class="feature-card__content">
+          <span class="feature-card__badge">GAMEPLAY</span>
+          <h3 class="feature-card__title">재밌고 박진감 넘치는 FPS</h3>
+          <p class="feature-card__desc">정교한 에임과 전략이 요구되는 언리얼 엔진 5 기반의 완성도 높은 FPS 게임을 플레이하세요.</p>
+          <span class="feature-card__link-text">지금 플레이 →</span>
+        </div>
+      </div>
+      
+      <!-- Card 3: 실시간 모니터링 / 랭킹 -->
+      <div class="feature-card" data-section-target="ranking">
+        <div class="feature-card__image-wrap">
+          <img src="images/ranking_dashboard.png" alt="실시간 랭킹" class="feature-card__img" onerror="this.src='https://placehold.co/600x400/1a1a2e/ffffff?text=Ranking'">
+          <div class="feature-card__overlay"></div>
+        </div>
+        <div class="feature-card__content">
+          <span class="feature-card__badge">HONOR</span>
+          <h3 class="feature-card__title">클린 플레이어 랭킹</h3>
+          <p class="feature-card__desc">비정상 유저 제재 현황과 함께 실시간으로 업데이트되는 청정 명예의 전당을 확인하세요.</p>
+          <span class="feature-card__link-text">랭킹 확인 →</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CONTENT SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="main">
+    <div class="content__container">
+      <!-- Section Header -->
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">📢</span>
+          최신 소식
+        </h2>
+        <a href="#news-all" class="section-header__more" id="view-all-news-btn">전체보기 →</a>
+      </div>
+
+      <!-- News & Event Cards -->
+      <div class="card-grid">
+        <!-- Card 1 -->
+        <article class="card card--featured" id="card-news-1">
+          <div class="card__image">
+            <img src="images/hero_bg_1.png" alt="보안 패치" class="card__img">
+            <div class="card__tag">공지사항</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">v2.4 보안 패치 업데이트 완료 안내</h3>
+            <p class="card__desc">AI 실시간 핵 탐지 엔진 v3.0 버전이 정식 적용되었습니다. 불법 메모리 변조 차단율이 기존 대비 40% 향상되었으며, 탐지 즉시 자동 차단 프로세스가 연동됩니다. 공정한 게임 환경을 위해 더욱 강력한 모니터링 체계를 가동합니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.22</span>
+              <span class="card__views">👁 2,481</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" id="card-news-2">
+          <div class="card__image">
+            <img src="images/fps_game.png" alt="봄맞이 출석 이벤트" class="card__img">
+            <div class="card__tag card__tag--event">이벤트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">시즌 3 웰컴 출석체크 & 스킨 증정 이벤트</h3>
+            <p class="card__desc">보안 시스템 강화를 기념하여 14일 연속 출석 이벤트를 진행합니다. 누적 출석 완료 시 한정판 '네온 실드' 무기 스킨 및 '클린 에이전트' 뱃지를 무료로 지급하오니 놓치지 마세요!</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.20</span>
+              <span class="card__views">👁 4,952</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" id="card-news-3">
+          <div class="card__image">
+            <img src="images/hero_bg_2.png" alt="랭킹 개편" class="card__img">
+            <div class="card__tag card__tag--update">업데이트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">실시간 클린 플레이어 랭킹 시스템 정식 오픈</h3>
+            <p class="card__desc">유저의 실시간 플레이 데이터 분석 및 게임 로그를 바탕으로 고안된 '보안 클린 점수' 기반의 랭킹 시스템이 개편되었습니다. 매주 월요일 랭킹에 따른 보상이 차등 지급되며 청정 유저들에게 혜택을 제공합니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.18</span>
+              <span class="card__views">👁 3,820</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" id="card-news-4">
+          <div class="card__image">
+            <img src="images/hero_bg_3.png" alt="정기점검" class="card__img">
+            <div class="card__tag card__tag--notice">점검</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">5/28(목) 정기 점검 및 서버 최적화 일정 안내</h3>
+            <p class="card__desc">서버 가동의 동기화 향상 및 데이터베이스 점검을 위한 정기 점검이 예정되어 있습니다. 점검 중에는 게임 클라이언트 접속이 차단되며, 점검 후 최신 보안 모듈 버전으로 자동 업데이트가 진행됩니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.15</span>
+              <span class="card__views">👁 1,495</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="card" id="card-news-5">
+          <div class="card__image">
+            <img src="images/security.png" alt="모니터링 연동" class="card__img">
+            <div class="card__tag">공지사항</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">실시간 보안 모니터링 시스템 연동 완료</h3>
+            <p class="card__desc">관리자 모바일 및 웹 대시보드 연동 작업이 완료되었습니다. 이제 어디서나 실시간으로 게임 보안 현황을 파악하고 비정상 플레이어 활동을 차단할 수 있습니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.12</span>
+              <span class="card__views">👁 2,120</span>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Quick Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-item__icon">🛡️</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-detection">-</span>
+            <span class="stat-item__label">탐지 정확도</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">👥</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-users">-</span>
+            <span class="stat-item__label">누적 보호 유저</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">⚡</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-blocked">-</span>
+            <span class="stat-item__label">금월 차단 수</span>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-item__icon">🔄</div>
+          <div class="stat-item__info">
+            <span class="stat-item__value" id="stat-uptime">-</span>
+            <span class="stat-item__label">서버 가동률</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ALL NEWS SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="news-all" style="display: none;">
+    <div class="content__container">
+      <!-- Section Header -->
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">📢</span>
+          전체 소식 아카이브
+        </h2>
+        <a href="#main" class="section-header__more" id="back-to-home-news-btn">← 홈으로 돌아가기</a>
+      </div>
+
+      <!-- News & Event Cards Grid -->
+      <div class="card-grid">
+        <!-- Card 1 -->
+        <article class="card card--featured" id="card-allnews-1">
+          <div class="card__image">
+            <img src="images/hero_bg_1.png" alt="보안 패치" class="card__img">
+            <div class="card__tag">공지사항</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">v2.4 보안 패치 업데이트 완료 안내</h3>
+            <p class="card__desc">AI 실시간 핵 탐지 엔진 v3.0 버전이 정식 적용되었습니다. 불법 메모리 변조 차단율이 기존 대비 40% 향상되었으며, 탐지 즉시 자동 차단 프로세스가 연동됩니다. 공정한 게임 환경을 위해 더욱 강력한 모니터링 체계를 가동합니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.22</span>
+              <span class="card__views">👁 2,481</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" id="card-allnews-2">
+          <div class="card__image">
+            <img src="images/fps_game.png" alt="봄맞이 출석 이벤트" class="card__img">
+            <div class="card__tag card__tag--event">이벤트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">시즌 3 웰컴 출석체크 & 스킨 증정 이벤트</h3>
+            <p class="card__desc">보안 시스템 강화를 기념하여 14일 연속 출석 이벤트를 진행합니다. 누적 출석 완료 시 한정판 '네온 실드' 무기 스킨 및 '클린 에이전트' 뱃지를 무료로 지급하오니 놓치지 마세요!</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.20</span>
+              <span class="card__views">👁 4,952</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" id="card-allnews-3">
+          <div class="card__image">
+            <img src="images/hero_bg_2.png" alt="랭킹 개편" class="card__img">
+            <div class="card__tag card__tag--update">업데이트</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">실시간 클린 플레이어 랭킹 시스템 정식 오픈</h3>
+            <p class="card__desc">유저의 실시간 플레이 데이터 분석 및 게임 로그를 바탕으로 고안된 '보안 클린 점수' 기반의 랭킹 시스템이 개편되었습니다. 매주 월요일 랭킹에 따른 보상이 차등 지급되며 청정 유저들에게 혜택을 제공합니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.18</span>
+              <span class="card__views">👁 3,820</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" id="card-allnews-4">
+          <div class="card__image">
+            <img src="images/hero_bg_3.png" alt="정기점검" class="card__img">
+            <div class="card__tag card__tag--notice">점검</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">5/28(목) 정기 점검 및 서버 최적화 일정 안내</h3>
+            <p class="card__desc">서버 가동의 동기화 향상 및 데이터베이스 점검을 위한 정기 점검이 예정되어 있습니다. 점검 중에는 게임 클라이언트 접속이 차단되며, 점검 후 최신 보안 모듈 버전으로 자동 업데이트가 진행됩니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.15</span>
+              <span class="card__views">👁 1,495</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="card" id="card-allnews-5">
+          <div class="card__image">
+            <img src="images/security.png" alt="모니터링 연동" class="card__img">
+            <div class="card__tag">공지사항</div>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">실시간 보안 모니터링 시스템 연동 완료</h3>
+            <p class="card__desc">관리자 모바일 및 웹 대시보드 연동 작업이 완료되었습니다. 이제 어디서나 실시간으로 게임 보안 현황을 파악하고 비정상 플레이어 활동을 차단할 수 있습니다.</p>
+            <div class="card__meta">
+              <span class="card__date">2026.05.12</span>
+              <span class="card__views">👁 2,120</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PATCH NOTES SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="patch" style="display: none;">
+    <div class="content__container">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">🛠️</span>
+          보안 패치노트
+        </h2>
+      </div>
+      
+      <div class="patch-timeline">
+        <!-- Patch Item 1 -->
+        <div class="patch-item">
+          <div class="patch-item__meta">
+            <span class="patch-item__version">v1.2.0</span>
+            <span class="patch-item__date">2026.05.15</span>
+          </div>
+          <div class="patch-item__content">
+            <h3 class="patch-item__title">AI Shield v3.0 머신러닝 탐지 엔진 고도화</h3>
+            <p class="patch-item__desc">에임핵과 스피드핵의 의심 패턴을 실시간 분석하는 AI 추론 성능을 향상시켰습니다. 탐지 오차율을 0.3% 미만으로 개선하고 차단 속도를 가속화했습니다.</p>
+            <ul class="patch-item__list">
+              <li>Aim 패턴 정밀 필터 신설 (각속도 가속 감지)</li>
+              <li>Speed 지표 한계 임계치 1000 단위 모니터링 세분화</li>
+              <li>비정상 클라이언트 연결 강제 격리(Kick) 최적화</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Patch Item 2 -->
+        <div class="patch-item">
+          <div class="patch-item__meta">
+            <span class="patch-item__version">v1.1.5</span>
+            <span class="patch-item__date">2026.04.28</span>
+          </div>
+          <div class="patch-item__content">
+            <h3 class="patch-item__title">언리얼 엔진 5 클라이언트 연동 최적화</h3>
+            <p class="patch-item__desc">AntiCheatFeature 플러그인에서 백엔드 서버로 전송하는 보안 텔레메트리 데이터 전송 방식을 안정화하였습니다.</p>
+            <ul class="patch-item__list">
+              <li>게임 프레임 드랍 현상 방지를 위해 비동기 백그라운드 스레드 패킷 전송 구조 적용</li>
+              <li>비정상 패킷 변조 및 가로채기 방지를 위한 데이터 무결성 검증 추가</li>
+              <li>ESP(벽투시) 탐지를 위한 액터 렌더링 검사 로직 보완</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Patch Item 3 -->
+        <div class="patch-item">
+          <div class="patch-item__meta">
+            <span class="patch-item__version">v1.0.0</span>
+            <span class="patch-item__date">2026.03.10</span>
+          </div>
+          <div class="patch-item__content">
+            <h3 class="patch-item__title">Lyra Shield 보안 보안 솔루션 정식 출시</h3>
+            <p class="patch-item__desc">언리얼 엔진 Lyra Game 클라이언트 데이터 수집과 백엔드 모니터링 시스템을 연동하는 통합 보안 플랫폼을 출시하였습니다.</p>
+            <ul class="patch-item__list">
+              <li>실시간 대시보드 및 의심 유저 모니터링 시스템 오픈</li>
+              <li>언리얼 내장 Cheats 행위 수집(Speed, Aim, GodMode, ESP) 연동</li>
+              <li>보안 점수 산출 및 관리자 수동 제재 기능 탑재</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- RANKING SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="ranking" style="display: none;">
+    <div class="content__container">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">🏆</span>
+          실시간 보안 랭킹 (클린 플레이어)
+        </h2>
+        <span class="section-header__info-text" style="color: var(--text-muted); font-size: 13px;">청정 플레이 횟수와 명예 보안 점수 기준 정렬</span>
+      </div>
+      
+      <div class="ranking-layout">
+        <div class="ranking-board">
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">순위</th>
+                <th>플레이어</th>
+                <th>클린 신뢰 지수</th>
+                <th>검증된 게임 수</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody id="ranking-tbody">
+              <!-- JS에서 동적 데이터 바인딩 -->
+              <tr>
+                <td colspan="5" style="text-align: center; padding: 48px; color: var(--text-muted);">
+                  랭킹 데이터를 불러오는 중...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="ranking-rules">
+          <div class="rules-card">
+            <h4>💡 신뢰 지수 산출 기준</h4>
+            <p>보안 신뢰 지수는 100점에서 시작하여 비정상 패킷 또는 핵 행위 감지 로그 발생 시 차감되는 구조입니다.</p>
+            <ul>
+              <li><strong>클린 (90점 이상)</strong>: 비정상 행동 감지 이력이 전혀 없는 신뢰할 수 있는 계정입니다.</li>
+              <li><strong>주의 (30 ~ 70점)</strong>: 비정상 조준선 또는 간헐적 네트워크 속도 초과 감지로 집중 모니터링 대상입니다.</li>
+              <li><strong>제재 (30점 미만)</strong>: 확실한 악성 프로그램 사용 기록으로 접속이 완전 제한 및 격리 조치됩니다.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- CUSTOMER SUPPORT SECTION -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="support" style="display: none;">
+    <div class="content__container">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">🙋</span>
+          고객지원 및 자주 묻는 질문 (FAQ)
+        </h2>
+      </div>
+      
+      <div class="faq-container">
+        <!-- FAQ 1 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Q. Lyra Shield의 AI 탐지 작동 방식이 무엇인가요?</span>
+            <svg class="faq-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>Lyra Shield는 게임 클라이언트로부터 수집되는 플레이어의 행동 텔레메트리(조준선 각도 변화, 이동 속도 벡터, 체력 상태 변화 등)를 백엔드로 전송하고, AI 추론 모델을 통해 정상 범위를 벗어난 비정상 속도핵, 에임 보정(Aim Assist), 비정상 시야 확보(ESP) 여부를 99.7%의 높은 정확도로 감지해 냅니다.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Q. 게임 실행 시 "웹 프로토콜 오류" 혹은 런처 미작동 현상은 어떻게 해결하나요?</span>
+            <svg class="faq-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>보안 클라이언트의 웹 브라우저 간 프로토콜 등록이 완료되어야 정상 런칭이 작동합니다. 압축 해제된 게임 경로에서 <strong>Register_LyraProtocol.bat</strong> 배치 파일을 찾은 다음, 반드시 <strong>[마우스 우클릭 -> 관리자 권한으로 실행]</strong>을 하여 1회 등록 절차를 밟아주시기 바랍니다.</p>
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item">
+          <button class="faq-question">
+            <span>Q. 비정상 핵 사용자로 감지되어 제재를 받았는데, 이의 신청은 어떻게 하나요?</span>
+            <svg class="faq-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+          <div class="faq-answer">
+            <p>보안 점수가 위험 범위인 30점 이하로 급락하는 경우 시스템 가이드에 따라 제재 처리됩니다. 오탐지가 의심되는 경우 플레이 도중 발생했던 시나리오 정보와 로그인 아이디를 작성하여 고객지원 메일 또는 문의 폼을 통해 접수해 주시면 보안 검증 로그를 다시 확인한 후 수동으로 조치해 드립니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- AI SHIELD SYSTEM INTRO -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="system-intro" style="display: none;">
+    <div class="content__container">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">🛡️</span>
+          AI Shield 보안 시스템 소개
+        </h2>
+      </div>
+      <div class="card-grid" style="gap: 24px;">
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">🧠</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">머신러닝 기반 실시간 분석</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">플레이어의 조준선 회전(Aim), 이동 속도(Speed), 피해량 및 이동 궤적 데이터를 실시간 수집하여, 서버측 AI 탐지 엔진이 머신러닝 패턴 분석을 통해 핵 사용 여부를 즉시 판단합니다.</p>
+        </article>
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">🔒</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">클라이언트 데이터 무결성</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">언리얼 엔진 5 클라이언트와 백엔드 간 전송되는 모든 텔레메트리 패킷은 암호화되며, 패킷 위조 및 가로채기 차단 기술(Integrity Check)이 내장되어 있습니다.</p>
+        </article>
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">⚡</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">즉각적인 자동 제재 (Auto-Kick)</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">치트 행위 감지 시 보안 신뢰 점수가 30점 미만으로 급락하며, 탐지 즉시 게임 세션에서 강제 퇴출(Kick) 및 계정 차단 프로세스가 연동됩니다.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- ADMIN MONITORING GUIDE -->
+  <!-- ═══════════════════════════════════════════ -->
+  <section class="content" id="admin-guide" style="display: none;">
+    <div class="content__container">
+      <div class="section-header">
+        <h2 class="section-header__title">
+          <span class="section-header__icon">📊</span>
+          관리자 모니터링 가이드
+        </h2>
+      </div>
+      <div class="card-grid" style="gap: 24px;">
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">🖥️</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">실시간 의심 유저 모니터링</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">보안 점수가 비정상적으로 낮은 유저들은 실시간 감시 목록에 자동 등록됩니다. 관리자는 대시보드에서 해당 플레이어의 핵 사용 확률과 최근 의심 행동 유형(예: 에임봇 패턴, 비정상 속도)을 즉시 한눈에 확인할 수 있습니다.</p>
+        </article>
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">🔍</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">상세 게임 로그 분석</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">수집된 텔레메트리 원본 로그 조회를 통해, 실제 클라이언트의 패킷 세부 항목(SpeedHack 여부, Aim 보정 여부, 무적 모드 여부 등)을 정밀 대조하여 오탐지 여부를 최종 검증합니다.</p>
+        </article>
+        <article class="card" style="padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 40px;">🔨</div>
+          <h3 style="color: var(--text-primary); font-size: 20px; font-weight: 700;">보안 점수 기반 즉각 제재</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.6;">AI 신뢰도와 누적 탐지 횟수를 가공해 산출한 클린 점수가 위험 수준에 도달한 대상은 관리 대시보드에서 원클릭으로 서버 세션 강제 차단 및 영구 제재 조치할 수 있습니다.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ═══════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__container">
+      <div class="footer__bottom" style="border-top: none; padding-top: 0; margin-top: 0; align-items: flex-start;">
+        <div class="footer__info" style="display: flex; flex-direction: column; gap: 4px; text-align: left; line-height: 1.5;">
+          <p>&copy; 2026 Lyra Shield Security. All rights reserved.</p>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">이미지 출처/제공: Epic Games Fab</p>
+          <p style="font-size: 12px; color: rgba(255, 255, 255, 0.45); margin-top: 6px;">2026년 1학기 AI컴퓨터공학부 기초캡스톤디자인</p>
+          <p style="font-size: 12px; color: rgba(255, 255, 255, 0.45);">지도교수 : 최재섭교수</p>
+          <p style="font-size: 12px; color: rgba(255, 255, 255, 0.45);">문찬우 기동혁 김다현 박성준 변재우</p>
+        </div>
+        <div class="footer__legal">
+          <a href="#" id="link-terms">이용약관</a>
+          <a href="#" id="link-privacy">개인정보처리방침</a>
+          <a href="#" id="link-policy">운영정책</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- AUTH MODAL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <button class="modal__close" id="modal-close" aria-label="닫기">&times;</button>
+      <div class="modal__header">
+        <div class="logo-icon logo-icon--modal">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" fill="currentColor" opacity="0.3" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+        <h2 class="modal__title" id="auth-modal-title">LYRA SHIELD 로그인</h2>
+        <p class="modal__subtitle" id="auth-modal-subtitle">보안 플랫폼에 접속합니다</p>
+      </div>
+
+      <div class="modal__views">
+        <!-- 로그인 뷰 -->
+        <div class="modal__view is-active" id="view-login">
+          <form class="modal__form" id="login-form">
+            <div class="form-group">
+              <label class="form-label" for="login-id">아이디</label>
+              <input class="form-input" type="text" id="login-id" placeholder="아이디를 입력하세요" autocomplete="username" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-pw">비밀번호</label>
+              <input class="form-input" type="password" id="login-pw" placeholder="비밀번호를 입력하세요"
+                autocomplete="current-password" required>
+            </div>
+            <div class="form-options">
+              <label class="form-checkbox">
+                <input type="checkbox" id="remember-me">
+                <span class="form-checkbox__mark"></span>
+                로그인 유지
+              </label>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full btn--lg" id="login-submit-btn">로그인</button>
+            <div class="modal__divider"><span>또는</span></div>
+            <button type="button" class="btn btn--outline btn--full" onclick="switchAuthView('register')">회원가입</button>
+          </form>
+        </div>
+
+        <!-- 회원가입 뷰 -->
+        <div class="modal__view" id="view-register">
+          <form class="modal__form" id="register-form">
+            <div class="form-group">
+              <label class="form-label" for="reg-name">이름</label>
+              <input class="form-input" type="text" id="reg-name" placeholder="이름을 입력하세요" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-id">아이디</label>
+              <input class="form-input" type="text" id="reg-id" placeholder="아이디를 입력하세요 (4~20자 영문/숫자)" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-pw">비밀번호</label>
+              <input class="form-input" type="password" id="reg-pw" placeholder="비밀번호를 입력하세요 (8자 이상)" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-pw-confirm">비밀번호 재확인</label>
+              <input class="form-input" type="password" id="reg-pw-confirm" placeholder="비밀번호를 다시 입력하세요" required>
+              <div class="form-error" id="reg-pw-error" style="display: none;">비밀번호가 일치하지 않습니다.</div>
+            </div>
+            <button type="submit" class="btn btn--primary btn--full btn--lg" id="register-submit-btn" style="margin-top: var(--space-md);">가입하기</button>
+            <div class="modal__divider"><span>이미 계정이 있으신가요?</span></div>
+            <button type="button" class="btn btn--outline btn--full" onclick="switchAuthView('login')">로그인 화면으로</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- GAME START OVERLAY -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="game-launch-overlay" id="game-launch-overlay">
+    <div class="game-launch">
+      <div class="game-launch__spinner">
+        <div class="spinner-ring"></div>
+        <div class="spinner-ring spinner-ring--2"></div>
+        <div class="spinner-core">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="currentColor" stroke-width="2" fill="none" />
+            <path d="M20 14L25 17V23L20 26L15 23V17L20 14Z" fill="currentColor" />
+          </svg>
+        </div>
+      </div>
+      <h2 class="game-launch__title">게임 실행 중...</h2>
+      <p class="game-launch__desc">Lyra 클라이언트를 시작하고 있습니다</p>
+
+      <!-- 유저 정보 표시 영역 -->
+      <div class="launch-user" id="launch-user-info" style="
+        display: none;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        margin-bottom: 20px;
+        min-width: 260px;
+      ">
+        <!-- JS에서 동적으로 채워짐 -->
+      </div>
+      <style>
+        .launch-user__avatar {
+          width: 40px; height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #e52d27, #f97316);
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 800; font-size: 18px; color: white;
+          flex-shrink: 0;
+        }
+        .launch-user__details {
+          display: flex; flex-direction: column; gap: 2px; text-align: left;
+        }
+        .launch-user__name {
+          font-weight: 700; font-size: 15px; color: #f1f5f9;
+        }
+        .launch-user__id {
+          font-size: 12px; color: #64748b; font-family: var(--font-mono, monospace);
+        }
+        .launch-user__stat {
+          font-size: 11px; color: #94a3b8; margin-top: 2px;
+        }
+      </style>
+
+      <div class="game-launch__progress">
+        <div class="game-launch__progress-bar" id="launch-progress"></div>
+      </div>
+      <button class="btn btn--ghost" id="launch-cancel">취소</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- LEGAL TERMS MODAL -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="legal-modal">
+    <div class="modal" style="max-width: 600px;">
+      <button class="modal__close" id="legal-modal-close" aria-label="닫기">&times;</button>
+      <div class="modal__header">
+        <h2 class="modal__title" id="legal-modal-title" style="margin-top: 0; color: var(--text-primary);">서비스 이용약관</h2>
+      </div>
+      <div class="modal__body" id="legal-modal-body" style="max-height: 400px; overflow-y: auto; text-align: left; font-size: 14px; color: var(--text-secondary); line-height: 1.7; padding-top: var(--space-md); white-space: pre-wrap; border-top: 1px solid var(--border-subtle); margin-top: var(--space-md);">
+        <!-- Content injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- BAN WARNING MODAL -->
+  <div class="modal-overlay" id="ban-modal">
+    <div class="modal" style="max-width: 500px; border-top: 4px solid var(--accent-red);">
+      <button class="modal__close" id="ban-modal-close" aria-label="닫기">&times;</button>
+      <div class="modal__header" style="text-align: center;">
+        <span style="font-size: 48px; margin-bottom: 12px; display: block;">🚫</span>
+        <h2 class="modal__title" style="margin-top: 0; color: var(--accent-red); font-family: 'Orbitron', 'Noto Sans KR', sans-serif;">게임 플레이 제한 안내</h2>
+      </div>
+      <div class="modal__body" style="text-align: center; font-size: 15px; color: var(--text-secondary); line-height: 1.7; padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); margin-top: var(--space-md);">
+        <p style="font-weight: 600; color: var(--text-primary);">해당 계정은 불법 프로그램(핵) 사용 의심 대상자로 지정되어 게임 플레이가 제한되었습니다.</p>
+        <p style="margin-top: var(--space-sm); font-size: 13px; color: var(--text-muted);">공정하고 쾌적한 게임 환경을 위한 조치이오니 양해 부탁드립니다. 관련 문의사항은 고객지원(FAQ)을 통해 문의해 주시기 바랍니다.</p>
+      </div>
+      <div style="margin-top: var(--space-lg); text-align: center;">
+        <button class="btn btn--primary" id="ban-modal-confirm-btn" style="background: var(--accent-red); border-color: var(--accent-red); min-width: 120px;">확인</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Scripts -->
+  <script src="js/utils.js?v=1.0.8"></script>
+  <script src="js/slider.js?v=1.0.8"></script>
+  <script src="js/navigation.js?v=1.0.8"></script>
+  <script src="js/modal.js?v=1.0.8"></script>
+  <script src="js/game-launch.js?v=1.0.8"></script>
+  <script src="js/effects.js?v=1.0.8"></script>
+  <script src="js/audio-sfx.js?v=1.0.8"></script>
+  <script src="js/main.js?v=1.0.8"></script>
+</body>
+
+</html>

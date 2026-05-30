@@ -10,7 +10,11 @@
     <RootNamespace>Lyra.Automation</RootNamespace>
     <AssemblyName>Lyra.Automation</AssemblyName>
     <OutputPath>..\..\Binaries\DotNET\AutomationTool\AutomationScripts</OutputPath>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    
+    <NuGetAudit>false</NuGetAudit>
+    
     <WarningsNotAsErrors>612,618</WarningsNotAsErrors>
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>

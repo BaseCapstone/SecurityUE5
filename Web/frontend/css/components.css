@@ -1,0 +1,528 @@
+/* ═══════════════════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: 10px 24px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background: var(--grad-game-btn);
+  color: white;
+  box-shadow: var(--shadow-red-glow);
+}
+.btn--primary:hover {
+  box-shadow: 0 6px 25px rgba(229, 45, 39, 0.45);
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn--outline {
+  border: 1.5px solid var(--accent-red);
+  color: var(--text-primary);
+  background: transparent;
+}
+.btn--outline:hover {
+  background: var(--accent-red);
+  color: white;
+}
+
+.btn--ghost {
+  color: var(--text-secondary);
+  background: transparent;
+}
+.btn--ghost:hover {
+  color: var(--accent-red);
+  background: rgba(229, 45, 39, 0.06);
+}
+
+.btn--lg {
+  padding: 14px 32px;
+  font-size: 16px;
+  border-radius: var(--border-radius);
+}
+
+.btn--full {
+  width: 100%;
+}
+
+/* Game Start Button — Red Prominent */
+.btn--game-start {
+  background: var(--grad-game-btn);
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  padding: 12px 36px;
+  border-radius: var(--border-radius-sm);
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+  box-shadow: 0 2px 12px rgba(229, 45, 39, 0.3);
+}
+.btn--game-start .btn__glow {
+  position: absolute;
+  inset: -2px;
+  background: var(--grad-game-btn);
+  border-radius: inherit;
+  opacity: 0;
+  filter: blur(14px);
+  transition: opacity var(--transition-base);
+  z-index: -1;
+}
+.btn--game-start:hover .btn__glow {
+  opacity: 0.7;
+}
+.btn--game-start:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 30px rgba(229, 45, 39, 0.5);
+}
+.btn--game-start .btn__icon {
+  width: 18px;
+  height: 18px;
+}
+.btn--game-start::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255,255,255,0.2) 50%,
+    transparent 60%
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
+}
+
+
+
+/* ═══════════════════════════════════════════════════
+   LOGIN MODAL
+   ═══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-base);
+}
+.modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-2xl);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: var(--space-md);
+  position: relative;
+  transform: translateY(20px) scale(0.95);
+  transition: transform var(--transition-slow);
+  box-shadow: var(--shadow-lg);
+  border-top: 3px solid var(--accent-red);
+}
+.modal-overlay.is-open .modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal__close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  font-size: 24px;
+  color: var(--text-muted);
+  padding: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+}
+.modal__close:hover {
+  color: var(--accent-red);
+  background: rgba(229, 45, 39, 0.08);
+}
+
+.modal__header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+.modal__header .logo-icon--modal {
+  color: var(--accent-red);
+}
+.modal__title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: var(--space-md);
+  color: var(--accent-navy);
+}
+.modal__subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* Form */
+.form-group {
+  margin-bottom: var(--space-md);
+}
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-tertiary);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--border-radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all var(--transition-base);
+  outline: none;
+}
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+.form-input:focus {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 3px rgba(229, 45, 39, 0.08);
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  font-size: 13px;
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+.form-checkbox input {
+  display: none;
+}
+.form-checkbox__mark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-subtle);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+.form-checkbox input:checked + .form-checkbox__mark {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+}
+.form-checkbox input:checked + .form-checkbox__mark::after {
+  content: '✓';
+  font-size: 12px;
+  color: white;
+  font-weight: 700;
+}
+
+.form-link {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.form-link:hover {
+  color: var(--accent-red);
+}
+
+.modal__divider {
+  text-align: center;
+  margin: var(--space-lg) 0;
+  position: relative;
+}
+.modal__divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-subtle);
+}
+.modal__divider span {
+  position: relative;
+  padding: 0 var(--space-md);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Modal Views (Login / Register / Forgot) */
+.modal__views {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal__view {
+  display: none;
+  animation: modalFadeIn 0.3s ease forwards;
+}
+
+.modal__view.is-active {
+  display: block;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Form Validation & Error States */
+.form-error {
+  color: var(--accent-red);
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.form-input--error {
+  border-color: var(--accent-red);
+}
+.form-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(229, 45, 39, 0.08);
+}
+
+.form-input--success {
+  border-color: var(--accent-green);
+}
+.form-input--success:focus {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════
+   GAME LAUNCH OVERLAY
+   ═══════════════════════════════════════════════════ */
+.game-launch-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.97);
+  backdrop-filter: blur(24px);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--transition-slow);
+}
+.game-launch-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.game-launch {
+  text-align: center;
+}
+
+.game-launch__spinner {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--space-xl);
+}
+.spinner-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  border-top-color: var(--accent-red);
+  border-radius: 50%;
+  animation: ringRotate 1.5s linear infinite;
+}
+.spinner-ring--2 {
+  inset: 12px;
+  border-top-color: var(--accent-orange);
+  animation-direction: reverse;
+  animation-duration: 2s;
+}
+.spinner-core {
+  position: absolute;
+  inset: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-red);
+  filter: drop-shadow(0 0 14px rgba(229, 45, 39, 0.5));
+  animation: floatCore 2s ease-in-out infinite;
+}
+
+.game-launch__title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+  color: white;
+}
+.game-launch__desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  margin-bottom: var(--space-xl);
+}
+
+.game-launch__progress {
+  width: 280px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin: 0 auto var(--space-xl);
+  overflow: hidden;
+}
+.game-launch__progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-red), var(--accent-orange));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.game-launch .btn--ghost {
+  color: rgba(255, 255, 255, 0.5);
+}
+.game-launch .btn--ghost:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ═══════════════════════════════════════════════════
+   SHARED BADGES (STATUS & PROBABILITY)
+   ═══════════════════════════════════════════════════ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.status-badge--danger {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.status-badge--warning {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.status-badge--safe {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* Light Theme Status Badges (High Contrast) */
+.light-theme .status-badge--danger,
+html.light-theme .status-badge--danger,
+.light-theme span.status-badge--danger,
+.light-theme td .status-badge--danger {
+  color: #b91c1c !important;
+  background: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+}
+.light-theme .status-badge--warning,
+html.light-theme .status-badge--warning,
+.light-theme span.status-badge--warning,
+.light-theme td .status-badge--warning {
+  color: #b45309 !important;
+  background: #fef3c7 !important;
+  border-color: #fcd34d !important;
+}
+.light-theme .status-badge--safe,
+html.light-theme .status-badge--safe,
+.light-theme span.status-badge--safe,
+.light-theme td .status-badge--safe {
+  color: #15803d !important;
+  background: #dcfce7 !important;
+  border-color: #86efac !important;
+}
+
+/* Probability Badges */
+.probability {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.probability--high {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+}
+.probability--medium {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.15);
+}
+.probability--low {
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.15);
+}
+
+/* Light Theme Probability Badges (High Contrast) */
+.light-theme .probability--high,
+html.light-theme .probability--high,
+.light-theme span.probability--high {
+  color: #b91c1c !important;
+  background: #fee2e2 !important;
+}
+.light-theme .probability--medium,
+html.light-theme .probability--medium,
+.light-theme span.probability--medium {
+  color: #b45309 !important;
+  background: #fef3c7 !important;
+}
+.light-theme .probability--low,
+html.light-theme .probability--low,
+.light-theme span.probability--low {
+  color: #15803d !important;
+  background: #dcfce7 !important;
+}
+

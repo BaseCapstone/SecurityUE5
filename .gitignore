@@ -47,3 +47,5 @@ DerivedDataCache/
 # C# / Automation build outputs
 /LyraStarterGame/Build/Scripts/obj/
 /LyraStarterGame/Build/Scripts/bin/
+Web/backend/__pycache__/
+Web/backend/venv/

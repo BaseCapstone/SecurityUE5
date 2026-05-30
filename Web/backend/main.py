@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
 from sqlalchemy import text, func
@@ -9,9 +10,44 @@ import jwt
 from datetime import datetime, timedelta
 import json
 import httpx
-from typing import Literal, Optional
+import asyncio
+from typing import Literal, Optional, Dict, Set
 
 app = FastAPI()
+
+# ═══════════════════════════════════════════════════
+# SSE(Server-Sent Events) 기반 실시간 Ban 푸시 관리자
+# 게임 클라이언트가 연결 중인 user_id → asyncio.Queue 매핑
+# ═══════════════════════════════════════════════════
+class BanEventManager:
+    """
+    게임 클라이언트마다 하나의 SSE 스트림을 유지합니다.
+    ban API가 호출되면 해당 user_id의 큐에 이벤트를 넣어
+    열려 있는 스트림으로 즉시 전달합니다.
+    """
+    def __init__(self):
+        # user_id(int) -> Set[asyncio.Queue]  (같은 계정이 여러 연결일 수 있으므로 Set)
+        self._queues: Dict[int, Set[asyncio.Queue]] = {}
+
+    def subscribe(self, user_id: int) -> asyncio.Queue:
+        q: asyncio.Queue = asyncio.Queue(maxsize=10)
+        self._queues.setdefault(user_id, set()).add(q)
+        return q
+
+    def unsubscribe(self, user_id: int, q: asyncio.Queue):
+        if user_id in self._queues:
+            self._queues[user_id].discard(q)
+            if not self._queues[user_id]:
+                del self._queues[user_id]
+
+    async def push_ban(self, user_id: int, message: str):
+        for q in list(self._queues.get(user_id, set())):
+            try:
+                await q.put({"banned": True, "message": message})
+            except asyncio.QueueFull:
+                pass  # 클라이언트가 느리면 무시
+
+ban_event_manager = BanEventManager()
 
 # 실시간 서버 가동률(Uptime) 계산용 글로벌 변수 및 미들웨어
 TOTAL_REQUESTS = 0
@@ -540,6 +576,103 @@ async def get_public_ranking(db: Session = Depends(get_db)):
     return {"ranking": top_ranking}
 
 # ═══════════════════════════════════════════════════
+# 게임 클라이언트 상태 / 실시간 밴 API (언리얼 클라이언트용)
+# ═══════════════════════════════════════════════════
+
+@app.get("/api/game/status")
+async def get_game_status(
+    current_user: User = Depends(get_current_game_user),
+    db: Session = Depends(get_db)
+):
+    """
+    [폴링 방식] 게임 클라이언트가 5초마다 호출하여 밴 여부를 확인합니다.
+    (AntiCheatDataCollector.cpp: CheckBanStatus / OnBanStatusResponse)
+
+    - 제재 계정: HTTP 403 반환  →  클라이언트가 HandleBannedAccount() 호출 후 종료
+    - 정상 계정: HTTP 200 + { "banned": false }
+    """
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
+
+    if getattr(user, "is_banned", 0) == 1:
+        # C++ OnBanStatusResponse 에서 403이면 HandleBannedAccount() 를 즉시 호출합니다.
+        raise HTTPException(
+            status_code=403,
+            detail="제재된 계정입니다."
+        )
+
+    return {"banned": False, "message": "정상 계정입니다."}
+
+
+@app.get("/api/game/status/stream")
+async def stream_game_status(
+    request: Request,
+    current_user: User = Depends(get_current_game_user),
+    db: Session = Depends(get_db)
+):
+    """
+    [SSE 방식] 관리자가 ban을 누르는 순간 HTTP long-poll 없이 즉시 킥 이벤트를 전달합니다.
+    폴링 방식(5초 딜레이)을 보완하는 실시간 Push 채널입니다.
+
+    클라이언트 연결 흐름:
+      1. 게임 시작 시 이 엔드포인트에 GET 요청 (Authorization: Bearer <game_token>)
+      2. 서버는 연결을 유지하며 30초마다 heartbeat(:keep-alive) 전송
+      3. 관리자가 ban 처리 → ban_event_manager.push_ban() → 이 스트림으로 즉시 전달
+      4. 클라이언트가 data: {"banned":true, "message":"..."} 수신 → 게임 종료
+
+    UnrealEngine 쪽 구현 참고:
+      - IHttpRequest 대신 FHttpModule SSE or WebSocket (또는 5초 폴링 유지)
+      - 현재 C++ 구현은 폴링(/api/game/status) 으로 이미 동작하므로
+        이 엔드포인트는 추후 클라이언트 업그레이드 시 활용하면 됩니다.
+    """
+    # 이미 제재된 계정은 연결 자체를 거부
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
+    if getattr(user, "is_banned", 0) == 1:
+        raise HTTPException(status_code=403, detail="제재된 계정입니다.")
+
+    user_id = current_user.id
+    q = ban_event_manager.subscribe(user_id)
+
+    async def event_generator():
+        try:
+            # 연결 확인용 최초 이벤트
+            yield f"data: {json.dumps({'connected': True, 'user_id': user_id})}\n\n"
+
+            while True:
+                # 클라이언트 연결 끊김 감지
+                if await request.is_disconnected():
+                    break
+
+                try:
+                    # 최대 30초 대기; 이벤트 없으면 heartbeat 전송
+                    event = await asyncio.wait_for(q.get(), timeout=30.0)
+                    yield f"data: {json.dumps(event)}\n\n"
+
+                    # banned 이벤트를 보냈으면 서버 측에서도 스트림 종료
+                    if event.get("banned"):
+                        break
+
+                except asyncio.TimeoutError:
+                    # SSE heartbeat — 연결 유지 및 프록시 타임아웃 방지
+                    yield ": keep-alive\n\n"
+
+        finally:
+            ban_event_manager.unsubscribe(user_id, q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # nginx 버퍼링 비활성화
+        }
+    )
+
+
+# ═══════════════════════════════════════════════════
 # 게임 로그 API (언리얼 클라이언트용)
 # ═══════════════════════════════════════════════════
 
@@ -875,12 +1008,12 @@ async def ban_user(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    """유저 제재 처리"""
+    """유저 제재 처리 — DB 갱신 후 SSE 스트림으로 게임 클라이언트에 즉시 알림"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     user.is_banned = 1
-    
+
     sanction_reason = reason or "관리자 수동 제재"
     sanction = SanctionHistory(
         user_id=user.id,
@@ -889,6 +1022,11 @@ async def ban_user(
     )
     db.add(sanction)
     db.commit()
+
+    # SSE 스트림이 열려 있으면 즉시 킥 이벤트 전송
+    ban_message = "관리자에 의해 제재된 계정입니다."
+    await ban_event_manager.push_ban(user_id, ban_message)
+
     return {"message": f"{user.username} 유저가 제재되었습니다.", "is_banned": 1}
 
 @app.post("/api/admin/users/{user_id}/unban")

@@ -2,20 +2,17 @@
    ADMIN USERS — 사용자 관리 대시보드 스크립트
    ═════════════════════════ */
 
+let adminUserData = [];
+
 /**
- * 사용자 관리 페이지: 검색, 정렬, 상세 모달 초기화
+ * 사용자 목록을 백엔드로부터 가져와서 대시보드 테이블에 렌더링합니다.
  */
-async function initUserManagement() {
-  const searchInput = document.getElementById('user-search-input');
+async function fetchAndRenderUsers() {
   const tbody = document.getElementById('all-users-tbody');
-  const headers = document.querySelectorAll('#all-users-table .sortable');
-  
-  if (!searchInput || !tbody) return;
+  if (!tbody) return;
 
   const token = sessionStorage.getItem('token');
   if (!token) return;
-
-  let userData = [];
 
   try {
     const response = await fetch('/api/admin/users', {
@@ -24,10 +21,12 @@ async function initUserManagement() {
     
     if (response.ok) {
       const data = await response.json();
-      tbody.innerHTML = ''; // 기존 더미 데이터 지우기
+      tbody.innerHTML = ''; // 기존 데이터 비우기
       
       const suspTbody = document.getElementById('admin-user-tbody');
       if (suspTbody) suspTbody.innerHTML = '';
+
+      adminUserData = [];
 
       data.users.forEach(user => {
         let scoreClass = 'probability--low';
@@ -51,7 +50,7 @@ async function initUserManagement() {
         const dateOnly = user.created_at ? user.created_at.split(' ')[0] : '-';
         const lastLoginOnly = user.last_login ? user.last_login.split(' ')[0] : '-';
 
-        // 1. 전체 사용자 목록에 추가
+        // 1. 전체 사용자 목록 tr 생성
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
         tr.innerHTML = `
@@ -81,7 +80,12 @@ async function initUserManagement() {
           aiProbability: user.ai_probability,
           aiStatus: user.ai_status
         };
-        userData.push(rowData);
+        adminUserData.push(rowData);
+
+        // 상세 모달 연결
+        tr.addEventListener('click', () => {
+          openAdminUserModal(rowData);
+        });
 
         // 2. 실시간 의심 유저 모니터링 목록에 추가
         const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신', '핵'].includes(user.ai_status);
@@ -119,12 +123,26 @@ async function initUserManagement() {
   } catch (error) {
     console.error('Failed to fetch admin users:', error);
   }
+}
 
-  // 검색 기능 (부분 일치)
+/**
+ * 사용자 관리 페이지: 검색, 정렬, 상세 모달 초기화
+ */
+async function initUserManagement() {
+  const searchInput = document.getElementById('user-search-input');
+  const tbody = document.getElementById('all-users-tbody');
+  const headers = document.querySelectorAll('#all-users-table .sortable');
+  
+  if (!searchInput || !tbody) return;
+
+  // 초기 유저 렌더링
+  await fetchAndRenderUsers();
+
+  // 검색 기능 (부분 일치) - 이벤트 리스너를 한 번만 등록
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     
-    userData.forEach(data => {
+    adminUserData.forEach(data => {
       const isMatch = data.id.includes(query) || data.nickname.includes(query);
       data.element.style.display = isMatch ? '' : 'none';
     });
@@ -151,7 +169,7 @@ async function initUserManagement() {
       header.classList.add(currentSortOrder);
 
       // 데이터 정렬
-      userData.sort((a, b) => {
+      adminUserData.sort((a, b) => {
         let valA = a[sortKey];
         let valB = b[sortKey];
         
@@ -166,7 +184,7 @@ async function initUserManagement() {
       });
 
       // DOM 요소 재배치
-      userData.forEach(data => {
+      adminUserData.forEach(data => {
         tbody.appendChild(data.element);
       });
     });
@@ -176,12 +194,6 @@ async function initUserManagement() {
   const modal = document.getElementById('admin-user-modal');
   const modalClose = document.getElementById('admin-modal-close');
   if(modal && modalClose) {
-    userData.forEach(data => {
-      data.element.addEventListener('click', () => {
-        openAdminUserModal(data);
-      });
-    });
-
     modalClose.addEventListener('click', () => {
       modal.classList.remove('is-active');
     });
@@ -207,7 +219,7 @@ window.handleDashboardBan = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자가 제재되었습니다.`, 'success');
-      initUserManagement(); // 테이블 갱신
+      await fetchAndRenderUsers(); // 테이블 갱신
       if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
       if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
     } else {
@@ -230,7 +242,7 @@ window.handleDashboardUnban = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자의 제재가 해제되었습니다.`, 'success');
-      initUserManagement(); // 테이블 갱신
+      await fetchAndRenderUsers(); // 테이블 갱신
       if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
       if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
     } else {
@@ -319,7 +331,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('제재가 해제되었습니다.', 'success');
           modal.classList.remove('is-active');
-          initUserManagement(); // 리스트 갱신
+          await fetchAndRenderUsers(); // 리스트 갱신
         } else {
           showToast('제재 해제 실패', 'error');
         }
@@ -337,7 +349,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('사용자가 제재되었습니다.', 'success');
           modal.classList.remove('is-active');
-          initUserManagement(); // 리스트 갱신
+          await fetchAndRenderUsers(); // 리스트 갱신
         } else {
           showToast('제재 처리 실패', 'error');
         }

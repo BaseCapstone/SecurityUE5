@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initParticles();
   initScrollEffects();
   initFaqAccordion();
-  fetchPublicStats();
+  fetchPublicStats(true);
+  
+  // 5초마다 실시간 데이터 연동
+  setInterval(() => fetchPublicStats(false), 5000);
 });
 
 /**
@@ -42,7 +45,7 @@ function initThemeToggle() {
 /**
  * 백엔드 통계 API를 호출하여 홈 화면 하단 및 관리자 통계 카드 데이터를 동기화합니다.
  */
-async function fetchPublicStats() {
+async function fetchPublicStats(isInitial = false) {
   try {
     const response = await fetch('/api/public/stats');
     if (response.ok) {
@@ -76,8 +79,10 @@ async function fetchPublicStats() {
       todayBlockedEls.forEach(el => el.textContent = `${data.today_blocked}건`);
       avgScoreEls.forEach(el => el.textContent = `${data.average_score}점`);
 
-      // Count Up 애니메이션 다시 시작
-      initCountUpAnimations();
+      // Count Up 애니메이션 다시 시작 (처음 로딩 시에만)
+      if (isInitial) {
+        initCountUpAnimations();
+      }
     }
   } catch (error) {
     console.error('Failed to fetch public stats:', error);

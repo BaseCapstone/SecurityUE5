@@ -37,12 +37,7 @@ function activateAdminMode() {
             </svg>
             사용자 관리
           </a></li>
-          <li><a href="#" class="nav-link" data-admin-page="stats">
-            <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-            </svg>
-            통계
-          </a></li>
+
           <li><a href="#" class="nav-link" data-admin-page="logs">
             <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
@@ -301,6 +296,12 @@ function initAdminRefresh() {
         if (typeof fetchPublicStats === 'function') {
           await fetchPublicStats();
         }
+        if (typeof fetchAdminPredictions === 'function') {
+          await fetchAdminPredictions();
+        }
+        if (typeof fetchAndRenderUsers === 'function') {
+          await fetchAndRenderUsers();
+        }
         addAdminLog('info', '대시보드 데이터가 갱신되었습니다.');
         showToast('데이터가 갱신되었습니다.', 'info');
       } catch (error) {
@@ -469,5 +470,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initAdminLogo();
   checkAdminSession();
   fetchAdminPredictions();
+
+  // 5초마다 실시간 데이터 연동
+  setInterval(async () => {
+    if (sessionStorage.getItem('lyra_admin') === 'true') {
+      try {
+        if (typeof fetchPublicStats === 'function') {
+          await fetchPublicStats();
+        }
+        if (typeof fetchAdminPredictions === 'function') {
+          await fetchAdminPredictions();
+        }
+        if (typeof fetchAndRenderUsers === 'function') {
+          await fetchAndRenderUsers();
+        }
+      } catch (e) {
+        console.error("Auto refresh failed:", e);
+      }
+    }
+  }, 5000);
 });
 

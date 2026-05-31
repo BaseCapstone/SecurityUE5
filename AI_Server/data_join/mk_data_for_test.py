@@ -23,8 +23,8 @@ print(f"로그 처리 시작...")
 # 로그 아이디는 1부터 시작하나 중간에 삭제되면 300번 로그가 시작일 수 있음
 # 가정이 아닌 실제 로그 아이디 범위를 받아오도록
 
-first_log_id = 26780
-length = 200
+first_log_id = 33850
+length = 50
 
 for log_id in range(first_log_id, first_log_id + length):
     print(f"{log_id}번 로그 처리 중...")

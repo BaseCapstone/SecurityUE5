@@ -38,3 +38,4 @@
 /AI_Server/data/
 AI_Server/ai/__pycache__/
 
+AI_Server/data_join/data/output_test.jsonl

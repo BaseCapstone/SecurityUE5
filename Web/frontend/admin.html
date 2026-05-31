@@ -428,6 +428,50 @@
     document.addEventListener('DOMContentLoaded', () => {
       fetchPublicStats();
     });
+
+  
+    async function fetchAiDetectionResult() {
+      try {
+        const response = await fetch('/api/detect/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            player_id: 6,
+            log_id: 500,
+            prediction: {
+              probability: 0.418,
+              predicted_label: 'ESP',
+              predictions: '의심'
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('AI 분석 결과 요청 실패');
+        }
+
+        const data = await response.json();
+
+        document.getElementById('admin-stat-detection').textContent =
+          `${data.prediction_result.probability_percent}%`;
+
+        document.getElementById('admin-stat-suspicious').textContent =
+          data.prediction_result.is_hack_detected ? '1' : '0';
+
+        addAdminLog(
+          data.prediction_result.is_hack_detected ? 'danger' : 'success',
+          `${data.nickname} — ${data.prediction_result.predicted_label} ${data.prediction_result.predictions} (${data.prediction_result.probability_percent}%)`
+        );
+      } catch (error) {
+        console.error('Failed to fetch AI detection result:', error);
+      }
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchPublicStats();
+      fetchAiDetectionResult();
+    });
   </script>
 </body>
 

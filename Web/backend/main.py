@@ -1,6 +1,7 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field, field_validator
 from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
 from sqlalchemy import text, func
 from sqlalchemy.orm import Session
@@ -8,10 +9,45 @@ from passlib.context import CryptContext
 import jwt
 from datetime import datetime, timedelta
 import json
-from typing import Optional, Union
 import httpx
+import asyncio
+from typing import Literal, Optional, Dict, Set
 
 app = FastAPI()
+
+# ═══════════════════════════════════════════════════
+# SSE(Server-Sent Events) 기반 실시간 Ban 푸시 관리자
+# 게임 클라이언트가 연결 중인 user_id → asyncio.Queue 매핑
+# ═══════════════════════════════════════════════════
+class BanEventManager:
+    """
+    게임 클라이언트마다 하나의 SSE 스트림을 유지합니다.
+    ban API가 호출되면 해당 user_id의 큐에 이벤트를 넣어
+    열려 있는 스트림으로 즉시 전달합니다.
+    """
+    def __init__(self):
+        # user_id(int) -> Set[asyncio.Queue]  (같은 계정이 여러 연결일 수 있으므로 Set)
+        self._queues: Dict[int, Set[asyncio.Queue]] = {}
+
+    def subscribe(self, user_id: int) -> asyncio.Queue:
+        q: asyncio.Queue = asyncio.Queue(maxsize=10)
+        self._queues.setdefault(user_id, set()).add(q)
+        return q
+
+    def unsubscribe(self, user_id: int, q: asyncio.Queue):
+        if user_id in self._queues:
+            self._queues[user_id].discard(q)
+            if not self._queues[user_id]:
+                del self._queues[user_id]
+
+    async def push_ban(self, user_id: int, message: str):
+        for q in list(self._queues.get(user_id, set())):
+            try:
+                await q.put({"banned": True, "message": message})
+            except asyncio.QueueFull:
+                pass  # 클라이언트가 느리면 무시
+
+ban_event_manager = BanEventManager()
 
 # 실시간 서버 가동률(Uptime) 계산용 글로벌 변수 및 미들웨어
 TOTAL_REQUESTS = 0
@@ -104,16 +140,20 @@ class LoginSchema(BaseModel):
     username: str
     password: str
 
-class AIPredictionDetailSchema(BaseModel):
-    probability: float     # 핵사용확률
-    predicted_label: str   # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
-    predictions: str       # 정상, 의심, 위험, 확신, 핵
+class DetectionPredictionSchema(BaseModel):
+    probability: float = Field(..., ge=0.0, le=1.0)
+    predicted_label: str
+    predictions: Literal["정상", "의심", "위험", "확신"]
+
+    @field_validator("probability")
+    @classmethod
+    def round_probability(cls, value: float) -> float:
+        return round(value, 3)
 
 class DetectionRequestSchema(BaseModel):
-    nickname: Optional[str] = None  # 컴퓨터에서 사용한 닉네임 (또는 컴퓨터 시리얼번호)
-    player_id: Optional[Union[int, str]] = None
-    log_id: Optional[int] = None
-    prediction: Optional[AIPredictionDetailSchema] = None
+    player_id: int
+    log_id: int
+    prediction: DetectionPredictionSchema
 
 class HackDetails(BaseModel):
     speed: float  # 스피드핵 비율 (%)
@@ -126,6 +166,16 @@ class HackReportSchema(BaseModel):
     player_id: Optional[str] = None
     detection_rate: float  # 검출률 (%)
     hacks: HackDetails     # 핵별 정보 딕셔너리
+
+class AIPredictionDetailSchema(BaseModel):
+    probability: float = Field(..., ge=0.0, le=1.0)
+    predicted_label: str   # 예측된 핵 종류 (예: 'ESP', '스피드핵', '갓모드', '에임핵')
+    predictions: Literal["정상", "의심", "위험", "확신"]
+
+    @field_validator("probability")
+    @classmethod
+    def round_probability(cls, value: float) -> float:
+        return round(value, 3)
 
 class AIPredictionReportSchema(BaseModel):
     player_id: Optional[str] = None         # 컴퓨터 일련번호 (username과 동일)
@@ -526,6 +576,103 @@ async def get_public_ranking(db: Session = Depends(get_db)):
     return {"ranking": top_ranking}
 
 # ═══════════════════════════════════════════════════
+# 게임 클라이언트 상태 / 실시간 밴 API (언리얼 클라이언트용)
+# ═══════════════════════════════════════════════════
+
+@app.get("/api/game/status")
+async def get_game_status(
+    current_user: User = Depends(get_current_game_user),
+    db: Session = Depends(get_db)
+):
+    """
+    [폴링 방식] 게임 클라이언트가 5초마다 호출하여 밴 여부를 확인합니다.
+    (AntiCheatDataCollector.cpp: CheckBanStatus / OnBanStatusResponse)
+
+    - 제재 계정: HTTP 403 반환  →  클라이언트가 HandleBannedAccount() 호출 후 종료
+    - 정상 계정: HTTP 200 + { "banned": false }
+    """
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
+
+    if getattr(user, "is_banned", 0) == 1:
+        # C++ OnBanStatusResponse 에서 403이면 HandleBannedAccount() 를 즉시 호출합니다.
+        raise HTTPException(
+            status_code=403,
+            detail="제재된 계정입니다."
+        )
+
+    return {"banned": False, "message": "정상 계정입니다."}
+
+
+@app.get("/api/game/status/stream")
+async def stream_game_status(
+    request: Request,
+    current_user: User = Depends(get_current_game_user),
+    db: Session = Depends(get_db)
+):
+    """
+    [SSE 방식] 관리자가 ban을 누르는 순간 HTTP long-poll 없이 즉시 킥 이벤트를 전달합니다.
+    폴링 방식(5초 딜레이)을 보완하는 실시간 Push 채널입니다.
+
+    클라이언트 연결 흐름:
+      1. 게임 시작 시 이 엔드포인트에 GET 요청 (Authorization: Bearer <game_token>)
+      2. 서버는 연결을 유지하며 30초마다 heartbeat(:keep-alive) 전송
+      3. 관리자가 ban 처리 → ban_event_manager.push_ban() → 이 스트림으로 즉시 전달
+      4. 클라이언트가 data: {"banned":true, "message":"..."} 수신 → 게임 종료
+
+    UnrealEngine 쪽 구현 참고:
+      - IHttpRequest 대신 FHttpModule SSE or WebSocket (또는 5초 폴링 유지)
+      - 현재 C++ 구현은 폴링(/api/game/status) 으로 이미 동작하므로
+        이 엔드포인트는 추후 클라이언트 업그레이드 시 활용하면 됩니다.
+    """
+    # 이미 제재된 계정은 연결 자체를 거부
+    user = db.query(User).filter(User.id == current_user.id).first()
+    if not user:
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없습니다.")
+    if getattr(user, "is_banned", 0) == 1:
+        raise HTTPException(status_code=403, detail="제재된 계정입니다.")
+
+    user_id = current_user.id
+    q = ban_event_manager.subscribe(user_id)
+
+    async def event_generator():
+        try:
+            # 연결 확인용 최초 이벤트
+            yield f"data: {json.dumps({'connected': True, 'user_id': user_id})}\n\n"
+
+            while True:
+                # 클라이언트 연결 끊김 감지
+                if await request.is_disconnected():
+                    break
+
+                try:
+                    # 최대 30초 대기; 이벤트 없으면 heartbeat 전송
+                    event = await asyncio.wait_for(q.get(), timeout=30.0)
+                    yield f"data: {json.dumps(event)}\n\n"
+
+                    # banned 이벤트를 보냈으면 서버 측에서도 스트림 종료
+                    if event.get("banned"):
+                        break
+
+                except asyncio.TimeoutError:
+                    # SSE heartbeat — 연결 유지 및 프록시 타임아웃 방지
+                    yield ": keep-alive\n\n"
+
+        finally:
+            ban_event_manager.unsubscribe(user_id, q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # nginx 버퍼링 비활성화
+        }
+    )
+
+
+# ═══════════════════════════════════════════════════
 # 게임 로그 API (언리얼 클라이언트용)
 # ═══════════════════════════════════════════════════
 
@@ -617,216 +764,103 @@ async def analyze_hack_detection(
     payload: DetectionRequestSchema,
     db: Session = Depends(get_db)
 ):
+    
     """
-    payload는 dict 형태
-    예시 payload = {'player_id': 6, 'log_id': 500, 'prediction': {'probability': 0.418, 'predicted_label': 'ESP', 'predictions': '의심'}}
-
-    여기서 player_id를 사용하여 유저를 조회하고 nickname을 추출
-    log_id는 로그 조회에 사용, 대시보드엔 표시 X
-    prediction은 마찬가지로 dict 형태로 받아서 분석결과를 반환
-    probability는 확률 (0~1 사이 소수점 3자리까지의 값)
+    받은 데이터를 기반으로 player_id를 통해 user를 조회하여 닉네임 추출
+    로그는 무시해도됨
+    prediction을 기반으로 대시보드에 띄우면 된다
     predicted_label은 예측된 핵 종류 (예: 'ESP', '스피드핵', '갓모드', '에임핵')
-    predictions는 '정상', '의심', '위험', '핵' 중 하나의 문자열로 핵 사용 여부를 나타냄
+    predictions는 '정상', '의심', '위험', '확신' 중 하나로 예측 결과의 상태를 나타냄
 
-    기존 방식 (nickname 기반 조회)도 하위 호환으로 지원합니다.
+    이거 기반으로 admin.html의 대시보드에 예측 결과를 보여주는 API
+    참고로 대시보드엔 제재 버튼이 동봉되어있음
     """
-    # 만약 prediction 객체가 있다면, 새로운 payload 형식으로 처리합니다.
-    if payload.prediction is not None:
-        if payload.player_id is None:
-            raise HTTPException(status_code=422, detail="player_id가 필요합니다.")
-        try:
-            user_id = int(payload.player_id)
-        except ValueError:
-            raise HTTPException(status_code=422, detail="player_id는 숫자여야 합니다.")
-            
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(status_code=404, detail="해당 ID의 사용자를 찾을 수 없습니다.")
-            
-        nickname = user.name or user.username
-        
-        if payload.log_id is None:
-            raise HTTPException(status_code=422, detail="log_id가 필요합니다.")
-            
-        # log_id로 로그 조회
-        log = db.query(GameLog).filter(GameLog.log_id == payload.log_id).first()
-        if not log:
-            raise HTTPException(status_code=404, detail="해당 로그를 찾을 수 없습니다.")
-            
-        # 단일 로그에 대해 패킷 이벤트 분석
-        total_packets = 0
-        speed_hack_count = 0
-        esp_count = 0
-        god_mode_count = 0
-        aim_count = 0
-        detected_packets = 0
+    """
+    AI 서버가 보낸 단일 분석 결과를 받아 대시보드용 응답으로 변환합니다.
 
-        try:
-            raw = log.event_data
-            if isinstance(raw, str):
-                evt_data = json.loads(raw)
-            else:
-                evt_data = raw
-            
-            events = evt_data if isinstance(evt_data, list) else [evt_data]
-            
-            for evt in events:
-                total_packets += 1
-                
-                is_speed = (evt.get('SpeedHack') == 1 or (evt.get('Speed') is not None and evt.get('Speed') > 1000))
-                is_esp = (evt.get('ESP') == 1)
-                is_god = (evt.get('GodMode') == 1)
-                is_aim = (evt.get('Aim') == 1)
-                
-                if is_speed:
-                    speed_hack_count += 1
-                if is_esp:
-                    esp_count += 1
-                if is_god:
-                    god_mode_count += 1
-                if is_aim:
-                    aim_count += 1
-                    
-                if is_speed or is_esp or is_god or is_aim:
-                    detected_packets += 1
-        except Exception:
-            pass
-
-        overall_detection_rate = 0.0
-        speed_pct = 0.0
-        esp_pct = 0.0
-        god_pct = 0.0
-        aim_pct = 0.0
-
-        if total_packets > 0:
-            overall_detection_rate = round((detected_packets / total_packets) * 100.0, 2)
-            speed_pct = round((speed_hack_count / total_packets) * 100.0, 2)
-            esp_pct = round((esp_count / total_packets) * 100.0, 2)
-            god_pct = round((god_mode_count / total_packets) * 100.0, 2)
-            aim_pct = round((aim_count / total_packets) * 100.0, 2)
-
-        hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
-
-        # AI 예측 결과를 DB에 저장 (player_id는 기존 대시보드 호환을 위해 username 저장)
-        new_prediction = AIPrediction(
-            player_id=user.username,
-            log_id=str(payload.log_id),
-            probability=round(payload.prediction.probability, 3),
-            predicted_label=payload.prediction.predicted_label,
-            predictions=payload.prediction.predictions
-        )
-        try:
-            db.add(new_prediction)
-            db.commit()
-            db.refresh(new_prediction)
-        except Exception as e:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
-
-        return {
-            "nickname": nickname,
-            "username": user.username,
-            "name": user.name,
-            "prediction": {
-                "probability": round(payload.prediction.probability, 3),
-                "predicted_label": payload.prediction.predicted_label,
-                "predictions": payload.prediction.predictions
-            },
-            "total_packets_analyzed": total_packets,
-            "overall_detection_rate": overall_detection_rate,
-            "hack_percentages_list": hack_percentages_list,
-            "breakdown": {
-                "speed_hack": speed_pct,
-                "esp": esp_pct,
-                "god_mode": god_pct,
-                "aim_hack": aim_pct
-            }
+    payload 예시:
+    {
+        "player_id": 6,
+        "log_id": 500,
+        "prediction": {
+            "probability": 0.418,
+            "predicted_label": "ESP",
+            "predictions": "의심"
         }
-
-    # 기존 방식의 페이로드 처리 (대시보드 상세 모달 조회 등)
-    nickname = payload.nickname or payload.player_id
-    if not nickname:
-        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
-    
-    # 1. 닉네임(username 또는 name)으로 유저 검색 (대소문자 구분 없음)
-    user = db.query(User).filter(
-        (func.lower(User.username) == str(nickname).lower()) | 
-        (func.lower(User.name) == str(nickname).lower())
-    ).first()
-    
+    }
+    """
+    user = db.query(User).filter(User.id == payload.player_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="해당 닉네임의 사용자를 찾을 수 없습니다.")
+        raise HTTPException(status_code=404, detail="해당 player_id의 사용자를 찾을 수 없습니다.")
 
-    # 2. 해당 유저의 모든 게임 로그 가져오기
-    logs = db.query(GameLog).filter(GameLog.user_id == user.id).all()
-    
-    total_packets = 0
-    speed_hack_count = 0
-    esp_count = 0
-    god_mode_count = 0
-    aim_count = 0
-    detected_packets = 0
+    prediction = payload.prediction
+    probability = round(prediction.probability, 3)
+    probability_pct = round(probability * 100.0, 2)
+    predicted_label = prediction.predicted_label.strip()
+    status_label = prediction.predictions
 
-    for log in logs:
-        try:
-            raw = log.event_data
-            if isinstance(raw, str):
-                evt_data = json.loads(raw)
-            else:
-                evt_data = raw
-            
-            events = evt_data if isinstance(evt_data, list) else [evt_data]
-            
-            for evt in events:
-                total_packets += 1
-                
-                is_speed = (evt.get('SpeedHack') == 1 or (evt.get('Speed') is not None and evt.get('Speed') > 1000))
-                is_esp = (evt.get('ESP') == 1)
-                is_god = (evt.get('GodMode') == 1)
-                is_aim = (evt.get('Aim') == 1)
-                
-                if is_speed:
-                    speed_hack_count += 1
-                if is_esp:
-                    esp_count += 1
-                if is_god:
-                    god_mode_count += 1
-                if is_aim:
-                    aim_count += 1
-                    
-                if is_speed or is_esp or is_god or is_aim:
-                    detected_packets += 1
-        except Exception:
-            pass
+    # 대시보드(/api/admin/predictions, /api/public/stats 등)가 AIPrediction 테이블을 읽으므로
+    # AI 서버가 보낸 결과를 즉시 저장한다.
+    new_prediction = AIPrediction(
+        player_id=user.username,
+        log_id=str(payload.log_id),
+        probability=probability,
+        predicted_label=predicted_label,
+        predictions=status_label
+    )
+    try:
+        db.add(new_prediction)
+        db.commit()
+        db.refresh(new_prediction)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
 
-    overall_detection_rate = 0.0
-    speed_pct = 0.0
-    esp_pct = 0.0
-    god_pct = 0.0
-    aim_pct = 0.0
+    label_map = {
+        "스피드핵": "speed_hack",
+        "esp": "esp",
+        "갓모드": "god_mode",
+        "에임핵": "aim_hack",
+    }
+    normalized_label = label_map.get(
+        predicted_label.lower().replace(" ", "").replace("-", "_"),
+        "unknown"
+    )
 
-    if total_packets > 0:
-        overall_detection_rate = round((detected_packets / total_packets) * 100.0, 2)
-        speed_pct = round((speed_hack_count / total_packets) * 100.0, 2)
-        esp_pct = round((esp_count / total_packets) * 100.0, 2)
-        god_pct = round((god_mode_count / total_packets) * 100.0, 2)
-        aim_pct = round((aim_count / total_packets) * 100.0, 2)
+    breakdown = {
+        "speed_hack": 0.0,
+        "esp": 0.0,
+        "god_mode": 0.0,
+        "aim_hack": 0.0
+    }
+    if status_label != "정상" and normalized_label in breakdown:
+        breakdown[normalized_label] = probability_pct
 
-    hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
+    hack_percentages_list = [
+        breakdown["speed_hack"],
+        breakdown["esp"],
+        breakdown["god_mode"],
+        breakdown["aim_hack"]
+    ]
 
     return {
-        "nickname": nickname,
+        "prediction_id": new_prediction.prediction_id,
+        "nickname": user.name,
         "username": user.username,
-        "name": user.name,
-        "total_packets_analyzed": total_packets,
-        "overall_detection_rate": overall_detection_rate,
+        "player_id": user.id,
+        "log_id": payload.log_id,
+        "overall_detection_rate": 0.0 if status_label == "정상" else probability_pct,
         "hack_percentages_list": hack_percentages_list,
-        "breakdown": {
-            "speed_hack": speed_pct,
-            "esp": esp_pct,
-            "god_mode": god_pct,
-            "aim_hack": aim_pct
-        }
+        "prediction_result": {
+            "probability": probability,
+            "probability_percent": probability_pct,
+            "predicted_label": predicted_label,
+            "normalized_label": normalized_label,
+            "predictions": status_label,
+            "is_hack_detected": status_label != "정상"
+        },
+        "breakdown": breakdown,
+        "created_at": str(new_prediction.created_at)
     }
 
 @app.post("/api/detect/report")
@@ -974,12 +1008,12 @@ async def ban_user(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    """유저 제재 처리"""
+    """유저 제재 처리 — DB 갱신 후 SSE 스트림으로 게임 클라이언트에 즉시 알림"""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
     user.is_banned = 1
-    
+
     sanction_reason = reason or "관리자 수동 제재"
     sanction = SanctionHistory(
         user_id=user.id,
@@ -988,6 +1022,11 @@ async def ban_user(
     )
     db.add(sanction)
     db.commit()
+
+    # SSE 스트림이 열려 있으면 즉시 킥 이벤트 전송
+    ban_message = "관리자에 의해 제재된 계정입니다."
+    await ban_event_manager.push_ban(user_id, ban_message)
+
     return {"message": f"{user.username} 유저가 제재되었습니다.", "is_banned": 1}
 
 @app.post("/api/admin/users/{user_id}/unban")

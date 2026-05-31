@@ -49,3 +49,5 @@ DerivedDataCache/
 /LyraStarterGame/Build/Scripts/bin/
 AI_Server/data/
 AI_Server/models/
+Web/backend/__pycache__/
+Web/backend/venv/

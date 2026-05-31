@@ -2,20 +2,17 @@
    ADMIN USERS — 사용자 관리 대시보드 스크립트
    ═════════════════════════ */
 
+let adminUserData = [];
+
 /**
- * 사용자 관리 페이지: 검색, 정렬, 상세 모달 초기화
+ * 사용자 목록을 백엔드로부터 가져와서 대시보드 테이블에 렌더링합니다.
  */
-async function initUserManagement() {
-  const searchInput = document.getElementById('user-search-input');
+async function fetchAndRenderUsers() {
   const tbody = document.getElementById('all-users-tbody');
-  const headers = document.querySelectorAll('#all-users-table .sortable');
-  
-  if (!searchInput || !tbody) return;
+  if (!tbody) return;
 
   const token = sessionStorage.getItem('token');
   if (!token) return;
-
-  let userData = [];
 
   try {
     const response = await fetch('/api/admin/users', {
@@ -24,10 +21,12 @@ async function initUserManagement() {
     
     if (response.ok) {
       const data = await response.json();
-      tbody.innerHTML = ''; // 기존 더미 데이터 지우기
+      tbody.innerHTML = ''; // 기존 데이터 비우기
       
       const suspTbody = document.getElementById('admin-user-tbody');
       if (suspTbody) suspTbody.innerHTML = '';
+
+      adminUserData = [];
 
       data.users.forEach(user => {
         let scoreClass = 'probability--low';
@@ -51,7 +50,12 @@ async function initUserManagement() {
         const dateOnly = user.created_at ? user.created_at.split(' ')[0] : '-';
         const lastLoginOnly = user.last_login ? user.last_login.split(' ')[0] : '-';
 
-        // 1. 전체 사용자 목록에 추가
+        // 보안 점수 계산 (100 - 핵 의심 확률)
+        let hackProb = user.ai_probability !== '-' ? parseFloat(user.ai_probability) : 0.0;
+        let securityScoreVal = 100.0 - hackProb;
+        let securityScoreDisplay = securityScoreVal.toFixed(1) + '%';
+
+        // 1. 전체 사용자 목록 tr 생성
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
         tr.innerHTML = `
@@ -59,7 +63,7 @@ async function initUserManagement() {
           <td>${user.name || user.username}</td>
           <td>${dateOnly}</td>
           <td>${lastLoginOnly}</td>
-          <td><span class="probability ${scoreClass}">${user.ai_probability !== '-' ? user.ai_probability : '0.0%'}</span></td>
+          <td><span class="probability ${scoreClass}">${securityScoreDisplay}</span></td>
           <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
         `;
         tbody.appendChild(tr);
@@ -73,15 +77,20 @@ async function initUserManagement() {
           nicknameDisplay: user.name || user.username,
           date: dateOnly,
           lastLogin: lastLoginOnly,
-          score: user.ai_probability !== '-' ? parseFloat(user.ai_probability) : 0,
-          scoreDisplay: user.ai_probability !== '-' ? user.ai_probability : '0.0%',
+          score: securityScoreVal,
+          scoreDisplay: securityScoreDisplay,
           status: statusText,
           isBanned: user.is_banned,
           aiPredictedLabel: user.ai_predicted_label,
           aiProbability: user.ai_probability,
           aiStatus: user.ai_status
         };
-        userData.push(rowData);
+        adminUserData.push(rowData);
+
+        // 상세 모달 연결
+        tr.addEventListener('click', () => {
+          openAdminUserModal(rowData);
+        });
 
         // 2. 실시간 의심 유저 모니터링 목록에 추가
         const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신', '핵'].includes(user.ai_status);
@@ -119,12 +128,26 @@ async function initUserManagement() {
   } catch (error) {
     console.error('Failed to fetch admin users:', error);
   }
+}
 
-  // 검색 기능 (부분 일치)
+/**
+ * 사용자 관리 페이지: 검색, 정렬, 상세 모달 초기화
+ */
+async function initUserManagement() {
+  const searchInput = document.getElementById('user-search-input');
+  const tbody = document.getElementById('all-users-tbody');
+  const headers = document.querySelectorAll('#all-users-table .sortable');
+  
+  if (!searchInput || !tbody) return;
+
+  // 초기 유저 렌더링
+  await fetchAndRenderUsers();
+
+  // 검색 기능 (부분 일치) - 이벤트 리스너를 한 번만 등록
   searchInput.addEventListener('input', (e) => {
     const query = e.target.value.toLowerCase().trim();
     
-    userData.forEach(data => {
+    adminUserData.forEach(data => {
       const isMatch = data.id.includes(query) || data.nickname.includes(query);
       data.element.style.display = isMatch ? '' : 'none';
     });
@@ -151,7 +174,7 @@ async function initUserManagement() {
       header.classList.add(currentSortOrder);
 
       // 데이터 정렬
-      userData.sort((a, b) => {
+      adminUserData.sort((a, b) => {
         let valA = a[sortKey];
         let valB = b[sortKey];
         
@@ -166,7 +189,7 @@ async function initUserManagement() {
       });
 
       // DOM 요소 재배치
-      userData.forEach(data => {
+      adminUserData.forEach(data => {
         tbody.appendChild(data.element);
       });
     });
@@ -176,12 +199,6 @@ async function initUserManagement() {
   const modal = document.getElementById('admin-user-modal');
   const modalClose = document.getElementById('admin-modal-close');
   if(modal && modalClose) {
-    userData.forEach(data => {
-      data.element.addEventListener('click', () => {
-        openAdminUserModal(data);
-      });
-    });
-
     modalClose.addEventListener('click', () => {
       modal.classList.remove('is-active');
     });
@@ -207,7 +224,7 @@ window.handleDashboardBan = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자가 제재되었습니다.`, 'success');
-      initUserManagement(); // 테이블 갱신
+      await fetchAndRenderUsers(); // 테이블 갱신
       if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
       if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
     } else {
@@ -230,7 +247,7 @@ window.handleDashboardUnban = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자의 제재가 해제되었습니다.`, 'success');
-      initUserManagement(); // 테이블 갱신
+      await fetchAndRenderUsers(); // 테이블 갱신
       if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
       if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
     } else {
@@ -247,9 +264,12 @@ async function openAdminUserModal(data) {
     tabsSwitch('logs');
   }
 
+  const userId = data.id.replace('#', '');
+  const token = sessionStorage.getItem('token');
+
   const modal = document.getElementById('admin-user-modal');
   document.getElementById('admin-user-title').textContent = data.nicknameDisplay;
-  const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.scoreDisplay})` : '';
+  const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.aiProbability})` : '';
   document.getElementById('admin-user-id').textContent = `${data.idDisplay}${aiInfo} | 상태: ${data.status}`;
 
   // 실시간 4대 핵 탐지 수치 갱신 (Speed, ESP, GodMode, Aim)
@@ -282,10 +302,8 @@ async function openAdminUserModal(data) {
   }
 
   try {
-    const response = await fetch('/api/detect/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nickname: data.username })
+    const response = await fetch(`/api/admin/users/${userId}/hack-stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     if (response.ok) {
       const analyzeData = await response.json();
@@ -300,9 +318,6 @@ async function openAdminUserModal(data) {
   } catch (err) {
     console.error('Failed to fetch user hack percentages:', err);
   }
-
-  const userId = data.id.replace('#', '');
-  const token = sessionStorage.getItem('token');
 
   const banBtn = document.getElementById('admin-btn-ban');
   if (banBtn) {
@@ -319,7 +334,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('제재가 해제되었습니다.', 'success');
           modal.classList.remove('is-active');
-          initUserManagement(); // 리스트 갱신
+          await fetchAndRenderUsers(); // 리스트 갱신
         } else {
           showToast('제재 해제 실패', 'error');
         }
@@ -337,7 +352,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('사용자가 제재되었습니다.', 'success');
           modal.classList.remove('is-active');
-          initUserManagement(); // 리스트 갱신
+          await fetchAndRenderUsers(); // 리스트 갱신
         } else {
           showToast('제재 처리 실패', 'error');
         }
@@ -476,6 +491,67 @@ async function openAdminUserModal(data) {
     }
   } catch (error) {
     logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
+  }
+
+  // Fetch AI predictions logs
+  const predList = document.getElementById('admin-user-prediction-list');
+  if (predList) {
+    predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
+    
+    fetch(`/api/admin/users/${userId}/predictions`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(result => {
+      if (!result) {
+        predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">데이터를 불러오지 못했습니다.</span></li>';
+        return;
+      }
+      
+      predList.innerHTML = '';
+      if (result.predictions.length === 0) {
+        predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 예측 로그가 없습니다.</span></li>';
+        return;
+      }
+      
+      result.predictions.forEach(p => {
+        // Parse date properly
+        const dateObj = new Date(p.created_at.replace(' ', 'T') + 'Z');
+        const time = dateObj.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        let type = 'info';
+        if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
+          type = 'danger';
+        } else if (p.predictions === '의심') {
+          type = 'warning';
+        } else if (p.predictions === '정상') {
+          type = 'success';
+        }
+        
+        const li = document.createElement('li');
+        li.className = `admin-log__item admin-log__item--${type}`;
+        li.innerHTML = `
+          <span class="admin-log__time" style="font-size: 11px; white-space: nowrap; color: #94a3b8;">${time}</span>
+          <span class="admin-log__msg">
+            AI 분석: <strong>${p.predictions}</strong> (확률: ${(p.probability * 100).toFixed(1)}%, 탐지핵: ${p.predicted_label}, 로그번호: #${p.log_id})
+          </span>
+        `;
+        predList.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
+    });
   }
 }
 

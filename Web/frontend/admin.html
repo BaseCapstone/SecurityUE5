@@ -107,12 +107,7 @@
           </svg>
           사용자 관리
         </a></li>
-        <li><a href="#" class="nav-link" data-admin-page="stats">
-          <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zm6-4a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zm6-3a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"/>
-          </svg>
-          통계
-        </a></li>
+
         <li><a href="#" class="nav-link" data-admin-page="logs">
           <svg class="nav-icon" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
@@ -156,34 +151,30 @@
             <div class="admin-stat-card admin-stat-card--red">
               <div class="admin-stat-card__icon">🛡️</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-detection">99.7%</span>
+                <span class="admin-stat-card__value" id="admin-stat-detection">--</span>
                 <span class="admin-stat-card__label">탐지 정확도</span>
               </div>
-              <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 0.3%</div>
             </div>
             <div class="admin-stat-card admin-stat-card--blue">
               <div class="admin-stat-card__icon">👥</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-online">247</span>
+                <span class="admin-stat-card__value" id="admin-stat-online">--</span>
                 <span class="admin-stat-card__label">현재 접속자</span>
               </div>
-              <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 12</div>
             </div>
             <div class="admin-stat-card admin-stat-card--orange">
               <div class="admin-stat-card__icon">⚠️</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-suspicious">5</span>
+                <span class="admin-stat-card__value" id="admin-stat-suspicious">--</span>
                 <span class="admin-stat-card__label">의심 유저</span>
               </div>
-              <div class="admin-stat-card__trend admin-stat-card__trend--down">▼ 2</div>
             </div>
             <div class="admin-stat-card admin-stat-card--green">
               <div class="admin-stat-card__icon">🚫</div>
               <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-banned">38</span>
+                <span class="admin-stat-card__value" id="admin-stat-banned">--</span>
                 <span class="admin-stat-card__label">금월 제재</span>
               </div>
-              <div class="admin-stat-card__trend admin-stat-card__trend--up">▲ 6</div>
             </div>
           </div>
 
@@ -261,76 +252,7 @@
           </div>
         </div><!-- end data-page="users" -->
 
-        <!-- ═══ PAGE: 통계 ═══ -->
-        <div data-page="stats" style="display: none;">
-          <div class="admin-stats">
-            <div class="admin-stat-card admin-stat-card--orange">
-              <div class="admin-stat-card__icon">💨</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="stats-speed-pct">0.0%</span>
-                <span class="admin-stat-card__label">스피드핵 탐지 비율</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--red">
-              <div class="admin-stat-card__icon">🛡️</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="stats-god-pct">0.0%</span>
-                <span class="admin-stat-card__label">갓모드 탐지 비율</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--green">
-              <div class="admin-stat-card__icon">👁️</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="stats-esp-pct">0.0%</span>
-                <span class="admin-stat-card__label">ESP 탐지 비율</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--blue">
-              <div class="admin-stat-card__icon">🎯</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="stats-aim-pct">0.0%</span>
-                <span class="admin-stat-card__label">에임핵 탐지 비율</span>
-              </div>
-            </div>
-          </div>
-          <div class="admin-panels">
-            <div class="admin-panel admin-panel--wide">
-              <div class="admin-panel__header">
-                <h3 class="admin-panel__title">📈 주간 탐지 추이</h3>
-              </div>
-                <div style="display: flex; align-items: flex-end; gap: 12px; height: 180px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.06);">
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-mon" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">월</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-tue" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">화</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-wed" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">수</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-thu" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">목</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-fri" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">금</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-sat" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">토</span>
-                  </div>
-                  <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px;">
-                    <div id="chart-bar-sun" style="width:100%; background: linear-gradient(180deg, #e52d27, #f97316); border-radius:4px 4px 0 0; height:0%; transition: height 0.5s ease;"></div>
-                    <span style="font-size:11px;">일</span>
-                  </div>
-                </div>
-            </div>
-          </div>
-        </div><!-- end data-page="stats" -->
+
 
         <!-- ═══ PAGE: 탐지 로그 ═══ -->
         <div data-page="logs" style="display: none;">
@@ -446,6 +368,12 @@
               <!-- Javascript에서 동적 삽입 -->
             </ul>
           </div>
+          <div class="admin-modal__section" style="margin-top: 16px;">
+            <h3 class="admin-modal__section-title">🤖 AI 실시간 판정 로그</h3>
+            <ul class="admin-log" id="admin-user-prediction-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
+              <!-- Javascript에서 동적 삽입 -->
+            </ul>
+          </div>
         </div>
 
         <!-- Tab 2: Sanction Status & History -->
@@ -478,7 +406,7 @@
   <script src="js/utils.js?v=1.1.2"></script>
   <script src="js/effects.js?v=1.1.2"></script>
   <script src="js/admin.js?v=1.1.2"></script>
-  <script src="js/admin-users.js?v=1.1.2"></script>
+  <script src="js/admin-users.js?v=1.2.0"></script>
   
   <script>
     // 퍼블릭 통계 데이터 수동 동기화 호출
@@ -505,50 +433,6 @@
     
     document.addEventListener('DOMContentLoaded', () => {
       fetchPublicStats();
-    });
-
-  
-    async function fetchAiDetectionResult() {
-      try {
-        const response = await fetch('/api/detect/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            player_id: 6,
-            log_id: 500,
-            prediction: {
-              probability: 0.418,
-              predicted_label: 'ESP',
-              predictions: '의심'
-            }
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('AI 분석 결과 요청 실패');
-        }
-
-        const data = await response.json();
-
-        document.getElementById('admin-stat-detection').textContent =
-          `${data.prediction_result.probability_percent}%`;
-
-        document.getElementById('admin-stat-suspicious').textContent =
-          data.prediction_result.is_hack_detected ? '1' : '0';
-
-        addAdminLog(
-          data.prediction_result.is_hack_detected ? 'danger' : 'success',
-          `${data.nickname} — ${data.prediction_result.predicted_label} ${data.prediction_result.predictions} (${data.prediction_result.probability_percent}%)`
-        );
-      } catch (error) {
-        console.error('Failed to fetch AI detection result:', error);
-      }
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchPublicStats();
-      fetchAiDetectionResult();
     });
   </script>
 </body>

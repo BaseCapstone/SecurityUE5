@@ -8,7 +8,7 @@ DEFAULT_TIMEOUT_SECONDS = 10
 
 
 def get_web_server_url() -> str | None:
-    return os.getenv("WEB_SERVER_ANALYSIS_URL") or os.getenv("AWS_WEB_SERVER_ANALYSIS_URL")
+    return os.getenv("WEB_SERVER_ANALYSIS_URL","http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000/api/detect/analyze") or os.getenv("AWS_WEB_SERVER_ANALYSIS_URL")
 
 
 def send_analysis_result(

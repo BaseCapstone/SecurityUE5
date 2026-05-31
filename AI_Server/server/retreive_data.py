@@ -166,18 +166,17 @@ def extract_user_id(payload):
 
     return first_log.get("userId") or first_log.get("user_id")
 
-def build_result(payload: Any, prediction: dict[str, Any], log_id: str = None) -> dict[str, Any]:
+def build_result(payload: Any, prediction: dict[str, Any], log_id: str = None, user_id: str = None) -> dict[str, Any]:
     
     if not isinstance(payload, list):
         return {
-            "player_id": extract_user_id(payload),
+            "player_id": user_id,
             "log_id": log_id,
-
             "prediction": prediction,
         }
 
     return {
-        "player_id": extract_user_id(payload),
+        "player_id": user_id,
         "log_id": log_id,
         "prediction": prediction,
     }
@@ -202,6 +201,7 @@ def receive_game_log(payload: Any = Body(...)) -> dict[str, Any]:
         )
     # payload is {log_id:..., frames: [{}, {}, ...]
     log_id = payload.get("log_id")
+    user_id = payload.get("user_id")
     payload = payload.get("frames")
     frames = normalize_frames(payload)
     x = torch.tensor(frames, dtype=torch.float32).unsqueeze(0)
@@ -218,14 +218,11 @@ def receive_game_log(payload: Any = Body(...)) -> dict[str, Any]:
             detail=f"Prediction failed: {exc}",
         ) from exc
 
-    result = build_result(payload, prediction, log_id)
+    result = build_result(payload, prediction, log_id, user_id)
     if result["prediction"]["predicted_label"] != "정상":
         forward_result = send_analysis_result(result)
     else:
-        raise HTTPException(
-            status_code=422,
-            detail="Anomaly detected: " + result["prediction"]["predicted_label"],
-        )
+        forward_result = {"ok": True, "message": "No anomaly detected, not forwarded to web server."}
 
     return {
         "ok": True,

@@ -1,7 +1,7 @@
 import requests
 import json
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://ec2-13-124-52-143.ap-northeast-2.compute.amazonaws.com:8000"
 
 def test_detect_endpoint(user_id, log_id):
     url = f"{BASE_URL}/api/detect/analyze"
@@ -9,9 +9,9 @@ def test_detect_endpoint(user_id, log_id):
         "user_id": user_id,
         "log_id": log_id,
         "prediction": {
-            "probability": 0.418,
-            "predicted_label": "ESP",
-            "predictions": "의심"
+            "probability": 0.58,
+            "predicted_label": "에임핵",
+            "predictions": "확신"
         }
     }
     headers = {"Content-Type": "application/json"}

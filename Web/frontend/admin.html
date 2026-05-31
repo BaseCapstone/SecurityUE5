@@ -368,6 +368,12 @@
               <!-- Javascript에서 동적 삽입 -->
             </ul>
           </div>
+          <div class="admin-modal__section" style="margin-top: 16px;">
+            <h3 class="admin-modal__section-title">🤖 AI 실시간 판정 로그</h3>
+            <ul class="admin-log" id="admin-user-prediction-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
+              <!-- Javascript에서 동적 삽입 -->
+            </ul>
+          </div>
         </div>
 
         <!-- Tab 2: Sanction Status & History -->
@@ -427,50 +433,6 @@
     
     document.addEventListener('DOMContentLoaded', () => {
       fetchPublicStats();
-    });
-
-  
-    async function fetchAiDetectionResult() {
-      try {
-        const response = await fetch('/api/detect/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            player_id: 6,
-            log_id: 500,
-            prediction: {
-              probability: 0.418,
-              predicted_label: 'ESP',
-              predictions: '의심'
-            }
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error('AI 분석 결과 요청 실패');
-        }
-
-        const data = await response.json();
-
-        document.getElementById('admin-stat-detection').textContent =
-          `${data.prediction_result.probability_percent}%`;
-
-        document.getElementById('admin-stat-suspicious').textContent =
-          data.prediction_result.is_hack_detected ? '1' : '0';
-
-        addAdminLog(
-          data.prediction_result.is_hack_detected ? 'danger' : 'success',
-          `${data.nickname} — ${data.prediction_result.predicted_label} ${data.prediction_result.predictions} (${data.prediction_result.probability_percent}%)`
-        );
-      } catch (error) {
-        console.error('Failed to fetch AI detection result:', error);
-      }
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchPublicStats();
-      fetchAiDetectionResult();
     });
   </script>
 </body>

@@ -918,8 +918,20 @@ async def report_ai_prediction(
     if not player_id:
         raise HTTPException(status_code=422, detail="player_id 또는 nickname이 필요합니다.")
         
+    # Resolve player_id to username if it's user ID (digits)
+    user = None
+    if player_id.isdigit():
+        user = db.query(User).filter(User.id == int(player_id)).first()
+    if not user:
+        user = db.query(User).filter(User.username == player_id).first()
+        
+    if not user:
+        raise HTTPException(status_code=404, detail="해당 player_id의 사용자를 찾을 수 없습니다.")
+        
+    resolved_player_id = user.username
+
     new_prediction = AIPrediction(
-        player_id=player_id,
+        player_id=resolved_player_id,
         log_id=payload.log_id,
         probability=payload.prediction.probability,
         predicted_label=payload.prediction.predicted_label,
@@ -957,7 +969,7 @@ async def report_ai_prediction(
     
     return {
         "message": "AI 예측 결과가 등록되었습니다.",
-        "player_id": player_id,
+        "player_id": resolved_player_id,
         "log_id": payload.log_id,
         "predictions": payload.prediction.predictions,
         "hack_percentages_list": hack_percentages_list
@@ -1243,6 +1255,35 @@ async def get_user_logs_for_admin(
         })
     
     return {"user_id": user_id, "logs": result, "total": len(result)}
+
+
+@app.get("/api/admin/users/{user_id}/predictions")
+async def get_user_predictions_for_admin(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """관리자 전용 — 특정 유저의 AI 예측 결과 목록 반환."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+        
+    preds = db.query(AIPrediction).filter(
+        AIPrediction.player_id == user.username
+    ).order_by(AIPrediction.created_at.desc()).limit(100).all()
+    
+    result = []
+    for p in preds:
+        result.append({
+            "prediction_id": p.prediction_id,
+            "player_id": p.player_id,
+            "log_id": p.log_id,
+            "probability": p.probability,
+            "predicted_label": p.predicted_label,
+            "predictions": p.predictions,
+            "created_at": str(p.created_at)
+        })
+    return {"user_id": user_id, "username": user.username, "predictions": result}
 
 # ═══════════════════════════════════════════════════
 # 서버 시작 시 테이블 자동 생성

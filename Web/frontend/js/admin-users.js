@@ -492,6 +492,67 @@ async function openAdminUserModal(data) {
   } catch (error) {
     logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
   }
+
+  // Fetch AI predictions logs
+  const predList = document.getElementById('admin-user-prediction-list');
+  if (predList) {
+    predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
+    
+    fetch(`/api/admin/users/${userId}/predictions`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.ok ? res.json() : null)
+    .then(result => {
+      if (!result) {
+        predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">데이터를 불러오지 못했습니다.</span></li>';
+        return;
+      }
+      
+      predList.innerHTML = '';
+      if (result.predictions.length === 0) {
+        predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 예측 로그가 없습니다.</span></li>';
+        return;
+      }
+      
+      result.predictions.forEach(p => {
+        // Parse date properly
+        const dateObj = new Date(p.created_at.replace(' ', 'T') + 'Z');
+        const time = dateObj.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        let type = 'info';
+        if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
+          type = 'danger';
+        } else if (p.predictions === '의심') {
+          type = 'warning';
+        } else if (p.predictions === '정상') {
+          type = 'success';
+        }
+        
+        const li = document.createElement('li');
+        li.className = `admin-log__item admin-log__item--${type}`;
+        li.innerHTML = `
+          <span class="admin-log__time" style="font-size: 11px; white-space: nowrap; color: #94a3b8;">${time}</span>
+          <span class="admin-log__msg">
+            AI 분석: <strong>${p.predictions}</strong> (확률: ${(p.probability * 100).toFixed(1)}%, 탐지핵: ${p.predicted_label}, 로그번호: #${p.log_id})
+          </span>
+        `;
+        predList.appendChild(li);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      predList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
+    });
+  }
 }
 
 /**

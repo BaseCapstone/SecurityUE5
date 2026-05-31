@@ -9,7 +9,7 @@ def test_detect_endpoint(user_id, log_id):
         "user_id": user_id,
         "log_id": log_id,
         "prediction": {
-            "probability": 0.58,
+            "probability": 0.77,
             "predicted_label": "에임핵",
             "predictions": "확신"
         }
@@ -29,5 +29,5 @@ def test_detect_endpoint(user_id, log_id):
         print(f"Connection error: {e}")
 
 if __name__ == "__main__":
-    test_detect_endpoint(user_id=6, log_id=500)
+    test_detect_endpoint(user_id=2, log_id=424)
 

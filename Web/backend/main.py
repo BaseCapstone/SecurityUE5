@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
+﻿from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
@@ -151,21 +151,9 @@ class DetectionPredictionSchema(BaseModel):
         return round(value, 3)
 
 class DetectionRequestSchema(BaseModel):
-    player_id: int
+    user_id: int
     log_id: int
     prediction: DetectionPredictionSchema
-
-class HackDetails(BaseModel):
-    speed: float  # 스피드핵 비율 (%)
-    esp: float    # ESP 비율 (%)
-    god: float    # 무적핵 비율 (%)
-    aim: float    # 에임핵 비율 (%)
-
-class HackReportSchema(BaseModel):
-    nickname: Optional[str] = None          # 컴퓨터 시리얼번호 (닉네임)
-    player_id: Optional[str] = None
-    detection_rate: float  # 검출률 (%)
-    hacks: HackDetails     # 핵별 정보 딕셔너리
 
 class AIPredictionDetailSchema(BaseModel):
     probability: float = Field(..., ge=0.0, le=1.0)
@@ -176,15 +164,6 @@ class AIPredictionDetailSchema(BaseModel):
     @classmethod
     def round_probability(cls, value: float) -> float:
         return round(value, 3)
-
-class AIPredictionReportSchema(BaseModel):
-    player_id: Optional[str] = None         # 컴퓨터 일련번호 (username과 동일)
-    nickname: Optional[str] = None          # 닉네임 호환용 필드
-    log_id: str            # 몇번째 로그인지
-    prediction: AIPredictionDetailSchema
-
-
-
 
 # ═══════════════════════════════════════════════════
 # DB 세션 & JWT 인증 의존성
@@ -410,7 +389,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
     total_users = user_count
     
     # 2. 실시간 검출/차단 로그 수 분석 (AI 예측 결과를 기준으로 집계)
-    hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신", "핵"])).count()
+    hack_log_count = db.query(AIPrediction).filter(AIPrediction.predictions.in_(["의심", "위험", "확신"])).count()
             
     # 3. 유저 AI 판정 기반 상태 집계 및 평균 보안 점수 계산
     danger_count = 0
@@ -421,14 +400,14 @@ async def get_public_stats(db: Session = Depends(get_db)):
     all_users = db.query(User).filter(User.role != "admin").all()
     for u in all_users:
         # AI 예측 로그를 기반으로 보안 점수 계산
-        preds = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).all()
+        preds = db.query(AIPrediction).filter(AIPrediction.user_id == u.id).all()
         score = 100
         for p in preds:
             if p.predictions == "의심":
                 score -= 5
             elif p.predictions == "위험":
                 score -= 15
-            elif p.predictions in ["확신", "핵"]:
+            elif p.predictions == "확신":
                 score -= 30
         if score < 0:
             score = 0
@@ -441,16 +420,16 @@ async def get_public_stats(db: Session = Depends(get_db)):
             continue
             
         last_pred = db.query(AIPrediction).filter(
-            AIPrediction.player_id == u.username,
+            AIPrediction.user_id == u.id,
             AIPrediction.predictions != "정상"
         ).order_by(AIPrediction.probability.desc()).first()
         if not last_pred:
             last_pred = db.query(AIPrediction).filter(
-                AIPrediction.player_id == u.username
+                AIPrediction.user_id == u.id
             ).order_by(AIPrediction.probability.desc()).first()
 
         if last_pred:
-            if last_pred.predictions in ["위험", "확신", "핵"]:
+            if last_pred.predictions in ["위험", "확신"]:
                 danger_count += 1
             elif last_pred.predictions == "의심":
                 warning_count += 1
@@ -478,7 +457,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
     utc_today_start = kst_today_midnight - timedelta(hours=9)
     
     today_blocked = db.query(AIPrediction).filter(
-        AIPrediction.predictions.in_(["의심", "위험", "확신", "핵"]),
+        AIPrediction.predictions.in_(["의심", "위험", "확신"]),
         AIPrediction.created_at >= utc_today_start
     ).count()
     
@@ -514,7 +493,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
                     has_cheat = True
                     break
             
-            ai_detected = (p.predictions in ["의심", "위험", "확신", "핵"])
+            ai_detected = (p.predictions in ["의심", "위험", "확신"])
             if has_cheat == ai_detected:
                 correct_count += 1
             evaluated_count += 1
@@ -553,20 +532,20 @@ async def get_public_ranking(db: Session = Depends(get_db)):
         if u.role == "admin":
             continue
             
-        preds = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).all()
+        preds = db.query(AIPrediction).filter(AIPrediction.user_id == u.id).all()
         score = 100
         for p in preds:
             if p.predictions == "의심":
                 score -= 5
             elif p.predictions == "위험":
                 score -= 15
-            elif p.predictions in ["확신", "핵"]:
+            elif p.predictions == "확신":
                 score -= 30
         if score < 0:
             score = 0
             
         # 검증된 게임 수는 AI 검사가 완료된 고유 log_id 개수로 연동
-        total_logs = db.query(AIPrediction.log_id).filter(AIPrediction.player_id == u.username).distinct().count()
+        total_logs = db.query(AIPrediction.log_id).filter(AIPrediction.user_id == u.id).distinct().count()
         masked_username = mask_string(u.username)
         
         ranking_list.append({
@@ -774,21 +753,11 @@ async def analyze_hack_detection(
 ):
     
     """
-    받은 데이터를 기반으로 player_id를 통해 user를 조회하여 닉네임 추출
-    로그는 무시해도됨
-    prediction을 기반으로 대시보드에 띄우면 된다
-    predicted_label은 예측된 핵 종류 (예: 'ESP', '스피드핵', '갓모드', '에임핵')
-    predictions는 '정상', '의심', '위험', '확신' 중 하나로 예측 결과의 상태를 나타냄
-
-    이거 기반으로 admin.html의 대시보드에 예측 결과를 보여주는 API
-    참고로 대시보드엔 제재 버튼이 동봉되어있음
-    """
-    """
-    AI 서버가 보낸 단일 분석 결과를 받아 대시보드용 응답으로 변환합니다.
+    AI 서버가 보낸 단일 분석 결과를 DB에 저장합니다.
 
     payload 예시:
     {
-        "player_id": 6,
+        "user_id": 6,
         "log_id": 500,
         "prediction": {
             "probability": 0.418,
@@ -797,186 +766,47 @@ async def analyze_hack_detection(
         }
     }
     """
-    user = db.query(User).filter(User.id == payload.player_id).first()
+    user = db.query(User).filter(User.id == payload.user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="해당 player_id의 사용자를 찾을 수 없습니다.")
+        raise HTTPException(status_code=404, detail="해당 user_id의 사용자를 찾을 수 없습니다.")
 
     prediction = payload.prediction
     probability = round(prediction.probability, 3)
-    probability_pct = round(probability * 100.0, 2)
     predicted_label = prediction.predicted_label.strip()
     status_label = prediction.predictions
 
-    # 대시보드(/api/admin/predictions, /api/public/stats 등)가 AIPrediction 테이블을 읽으므로
-    # AI 서버가 보낸 결과를 즉시 저장한다.
-    new_prediction = AIPrediction(
-        player_id=user.username,
-        log_id=str(payload.log_id),
-        probability=probability,
-        predicted_label=predicted_label,
-        predictions=status_label
-    )
-    try:
+    existing_prediction = db.query(AIPrediction).filter(
+        AIPrediction.user_id == user.id,
+        AIPrediction.log_id == payload.log_id
+    ).first()
+
+    if existing_prediction:
+        existing_prediction.probability = probability
+        existing_prediction.predicted_label = predicted_label
+        existing_prediction.predictions = status_label
+        new_prediction = existing_prediction
+    else:
+        new_prediction = AIPrediction(
+            user_id=user.id,
+            log_id=payload.log_id,
+            probability=probability,
+            predicted_label=predicted_label,
+            predictions=status_label
+        )
         db.add(new_prediction)
+
+    try:
         db.commit()
         db.refresh(new_prediction)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
 
-    label_map = {
-        "스피드핵": "speed_hack",
-        "esp": "esp",
-        "갓모드": "god_mode",
-        "에임핵": "aim_hack",
-    }
-    normalized_label = label_map.get(
-        predicted_label.lower().replace(" ", "").replace("-", "_"),
-        "unknown"
-    )
-
-    breakdown = {
-        "speed_hack": 0.0,
-        "esp": 0.0,
-        "god_mode": 0.0,
-        "aim_hack": 0.0
-    }
-    if status_label != "정상" and normalized_label in breakdown:
-        breakdown[normalized_label] = probability_pct
-
-    hack_percentages_list = [
-        breakdown["speed_hack"],
-        breakdown["esp"],
-        breakdown["god_mode"],
-        breakdown["aim_hack"]
-    ]
-
     return {
-        "prediction_id": new_prediction.prediction_id,
-        "nickname": user.name,
-        "username": user.username,
-        "player_id": user.id,
-        "log_id": payload.log_id,
-        "overall_detection_rate": 0.0 if status_label == "정상" else probability_pct,
-        "hack_percentages_list": hack_percentages_list,
-        "prediction_result": {
-            "probability": probability,
-            "probability_percent": probability_pct,
-            "predicted_label": predicted_label,
-            "normalized_label": normalized_label,
-            "predictions": status_label,
-            "is_hack_detected": status_label != "정상"
-        },
-        "breakdown": breakdown,
-        "created_at": str(new_prediction.created_at)
+        "message": "AI 예측 결과가 저장되었습니다.",
+        "user_id": user.id,
+        "log_id": payload.log_id
     }
-
-@app.post("/api/detect/report")
-async def report_hack_detection(
-    payload: HackReportSchema
-):
-    """
-    컴퓨터 시리얼번호(닉네임), 검출률(%), 그리고 스피드핵, ESP, 무적핵, 에임핵 비율이
-    포함된 딕셔너리를 받아와서 처리하고, 각각의 비율을 순서대로 담은 퍼센트 리스트를 반환합니다.
-    """
-    nickname = payload.nickname or payload.player_id
-    if not nickname:
-        raise HTTPException(status_code=422, detail="nickname 또는 player_id가 필요합니다.")
-        
-    detection_rate = payload.detection_rate
-    
-    # 딕셔너리(객체)에서 각각의 핵 비율 값 추출
-    speed_pct = payload.hacks.speed
-    esp_pct = payload.hacks.esp
-    god_pct = payload.hacks.god
-    aim_pct = payload.hacks.aim
-    
-    # 스피드, esp, god모드, 에임핵 순서의 퍼센트 리스트
-    hack_percentages_list = [speed_pct, esp_pct, god_pct, aim_pct]
-    
-    return {
-        "nickname": nickname,
-        "detection_rate": detection_rate,
-        "hack_percentages_list": hack_percentages_list,
-        "hacks_dict": {
-            "speed": speed_pct,
-            "esp": esp_pct,
-            "god": god_pct,
-            "aim": aim_pct
-        }
-    }
-
-@app.post("/api/predict/report")
-async def report_ai_prediction(
-    payload: AIPredictionReportSchema,
-    db: Session = Depends(get_db)
-):
-    """
-    AI 모델 예측 결과를 딕셔너리 형태로 받아와 DB에 저장합니다.
-    """
-    player_id = payload.player_id or payload.nickname
-    if not player_id:
-        raise HTTPException(status_code=422, detail="player_id 또는 nickname이 필요합니다.")
-        
-    # Resolve player_id to username if it's user ID (digits)
-    user = None
-    if player_id.isdigit():
-        user = db.query(User).filter(User.id == int(player_id)).first()
-    if not user:
-        user = db.query(User).filter(User.username == player_id).first()
-        
-    if not user:
-        raise HTTPException(status_code=404, detail="해당 player_id의 사용자를 찾을 수 없습니다.")
-        
-    resolved_player_id = user.username
-
-    new_prediction = AIPrediction(
-        player_id=resolved_player_id,
-        log_id=payload.log_id,
-        probability=payload.prediction.probability,
-        predicted_label=payload.prediction.predicted_label,
-        predictions=payload.prediction.predictions
-    )
-    
-    try:
-        db.add(new_prediction)
-        db.commit()
-        db.refresh(new_prediction)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"예측 결과 저장 실패: {str(e)}")
-
-    # 갓모드, 스피드핵, ESP, 에임핵 수치를 리스트(혹은 응답) 형태로 넘겨줍니다.
-    # 순서: [스피드핵, 갓모드, ESP, 에임핵]
-    speed_pct = 0.0
-    god_pct = 0.0
-    esp_pct = 0.0
-    aim_pct = 0.0
-    
-    label = payload.prediction.predicted_label
-    prob = round(payload.prediction.probability * 100.0, 2)  # 퍼센트로 변환
-    
-    if label == "스피드핵":
-        speed_pct = prob
-    elif label == "갓모드":
-        god_pct = prob
-    elif label == "ESP":
-        esp_pct = prob
-    elif label == "에임핵":
-        aim_pct = prob
-        
-    hack_percentages_list = [speed_pct, god_pct, esp_pct, aim_pct]
-    
-    return {
-        "message": "AI 예측 결과가 등록되었습니다.",
-        "player_id": resolved_player_id,
-        "log_id": payload.log_id,
-        "predictions": payload.prediction.predictions,
-        "hack_percentages_list": hack_percentages_list
-    }
-
-
-
 
 # ═══════════════════════════════════════════════════
 # 관리자 전용 API (role='admin' 필수)
@@ -1001,12 +831,12 @@ async def get_all_users(
         log_count = db.query(GameLog).filter(GameLog.user_id == u.id).count()
         # AI 예측 중 가장 높은 위험도(확률)를 가진 예측 정보 가져오기
         last_pred = db.query(AIPrediction).filter(
-            AIPrediction.player_id == u.username,
+            AIPrediction.user_id == u.id,
             AIPrediction.predictions != "정상"
         ).order_by(AIPrediction.probability.desc()).first()
         if not last_pred:
             last_pred = db.query(AIPrediction).filter(
-                AIPrediction.player_id == u.username
+                AIPrediction.user_id == u.id
             ).order_by(AIPrediction.probability.desc()).first()
 
         pred_label = last_pred.predicted_label if last_pred else "-"
@@ -1028,47 +858,6 @@ async def get_all_users(
         })
     
     return {"users": result, "total": len(result)}
-
-@app.get("/api/admin/users/{user_id}/hack-stats")
-async def get_user_hack_stats(
-    user_id: int,
-    admin: User = Depends(require_admin),
-    db: Session = Depends(get_db)
-):
-    """특정 유저의 각 핵 종류별 최대 탐지 확률(퍼센트)을 반환합니다."""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
-
-    labels = ["스피드핵", "ESP", "갓모드", "에임핵"]
-    stats = {}
-    for label in labels:
-        max_prob_row = db.query(func.max(AIPrediction.probability)).filter(
-            AIPrediction.player_id == user.username,
-            AIPrediction.predicted_label == label,
-            AIPrediction.predictions != "정상"
-        ).scalar()
-        
-        if max_prob_row is None:
-            max_prob_row = db.query(func.max(AIPrediction.probability)).filter(
-                AIPrediction.player_id == user.username,
-                AIPrediction.predicted_label == label
-            ).scalar()
-            
-        stats[label] = round((max_prob_row * 100.0), 1) if max_prob_row is not None else 0.0
-
-    hack_percentages_list = [
-        stats["스피드핵"],
-        stats["ESP"],
-        stats["갓모드"],
-        stats["에임핵"]
-    ]
-
-    return {
-        "user_id": user_id,
-        "username": user.username,
-        "hack_percentages_list": hack_percentages_list
-    }
 
 @app.post("/api/admin/users/{user_id}/ban")
 async def ban_user(
@@ -1182,7 +971,7 @@ async def get_predictions(
     predictions_list = db.query(AIPrediction).order_by(AIPrediction.created_at.desc()).limit(100).all()
     
     total = len(predictions_list)
-    status_counts = {"정상": 0, "의심": 0, "위험": 0, "확신": 0, "핵": 0}
+    status_counts = {"정상": 0, "의심": 0, "위험": 0, "확신": 0}
     label_counts = {"스피드핵": 0, "갓모드": 0, "ESP": 0, "에임핵": 0}
     
     for p in predictions_list:
@@ -1207,8 +996,7 @@ async def get_predictions(
     result = []
     for p in predictions_list:
         result.append({
-            "prediction_id": p.prediction_id,
-            "player_id": p.player_id,
+            "user_id": p.user_id,
             "log_id": p.log_id,
             "probability": p.probability,
             "predicted_label": p.predicted_label,
@@ -1269,14 +1057,13 @@ async def get_user_predictions_for_admin(
         raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
         
     preds = db.query(AIPrediction).filter(
-        AIPrediction.player_id == user.username
+        AIPrediction.user_id == user.id
     ).order_by(AIPrediction.created_at.desc()).limit(100).all()
     
     result = []
     for p in preds:
         result.append({
-            "prediction_id": p.prediction_id,
-            "player_id": p.player_id,
+            "user_id": p.user_id,
             "log_id": p.log_id,
             "probability": p.probability,
             "predicted_label": p.predicted_label,
@@ -1308,6 +1095,39 @@ async def startup_event():
                 print("[DB] Added is_banned column to users table.")
     except Exception as e:
         print(f"[DB] Migration failed or is_banned already exists: {e}")
+
+    # 3. ai_predictions 테이블을 user_id 기반으로 정리
+    try:
+        with engine.begin() as conn:
+            if engine.dialect.name == "sqlite":
+                prediction_columns = [row[1] for row in conn.execute(text("PRAGMA table_info(ai_predictions)")).fetchall()]
+                drop_column_sql = "ALTER TABLE ai_predictions DROP COLUMN {column_name}"
+            else:
+                prediction_columns = [row[0] for row in conn.execute(text("SHOW COLUMNS FROM ai_predictions")).fetchall()]
+                drop_column_sql = "ALTER TABLE ai_predictions DROP COLUMN {column_name}"
+
+            old_prediction_user_column = "player" + "_id"
+            if "user_id" not in prediction_columns:
+                conn.execute(text("ALTER TABLE ai_predictions ADD COLUMN user_id INTEGER NULL"))
+                print("[DB] Added user_id column to ai_predictions table.")
+
+            if old_prediction_user_column in prediction_columns:
+                conn.execute(text(
+                    f"""
+                    UPDATE ai_predictions
+                    SET user_id = (
+                        SELECT users.id
+                        FROM users
+                        WHERE users.username = ai_predictions.{old_prediction_user_column}
+                        LIMIT 1
+                    )
+                    WHERE user_id IS NULL
+                    """
+                ))
+                conn.execute(text(drop_column_sql.format(column_name=old_prediction_user_column)))
+                print("[DB] Migrated ai_predictions to user_id column.")
+    except Exception as e:
+        print(f"[DB] Migration failed while updating ai_predictions user_id column: {e}")
 
 
 # ═══════════════════════════════════════════════════

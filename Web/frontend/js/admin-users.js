@@ -37,7 +37,7 @@ async function fetchAndRenderUsers() {
           scoreClass = 'probability--high';
           statusBadge = 'status-badge--danger';
           statusText = '제재됨';
-        } else if (user.ai_status === '위험' || user.ai_status === '확신' || user.ai_status === '핵') {
+        } else if (user.ai_status === '위험' || user.ai_status === '확신') {
           scoreClass = 'probability--high';
           statusBadge = 'status-badge--danger';
           statusText = user.ai_status;
@@ -93,7 +93,7 @@ async function fetchAndRenderUsers() {
         });
 
         // 2. 실시간 의심 유저 모니터링 목록에 추가
-        const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신', '핵'].includes(user.ai_status);
+        const isSuspicious = user.is_banned === 1 || ['의심', '위험', '확신'].includes(user.ai_status);
         if (isSuspicious && user.role !== 'admin') {
           const trSusp = document.createElement('tr');
           trSusp.style.cursor = 'pointer';
@@ -139,9 +139,6 @@ async function initUserManagement() {
   const headers = document.querySelectorAll('#all-users-table .sortable');
   
   if (!searchInput || !tbody) return;
-
-  // 초기 유저 렌더링
-  await fetchAndRenderUsers();
 
   // 검색 기능 (부분 일치) - 이벤트 리스너를 한 번만 등록
   searchInput.addEventListener('input', (e) => {
@@ -224,9 +221,7 @@ window.handleDashboardBan = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자가 제재되었습니다.`, 'success');
-      await fetchAndRenderUsers(); // 테이블 갱신
-      if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
-      if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
+      showToast('변경 내용은 새로고침 버튼을 누르면 대시보드에 반영됩니다.', 'info');
     } else {
       showToast('제재 처리 실패', 'error');
     }
@@ -247,9 +242,7 @@ window.handleDashboardUnban = async (event, userId, username) => {
     });
     if (response.ok) {
       showToast(`${username} 사용자의 제재가 해제되었습니다.`, 'success');
-      await fetchAndRenderUsers(); // 테이블 갱신
-      if (typeof fetchAdminPredictions === 'function') fetchAdminPredictions(); // 로그 및 그래프 갱신
-      if (typeof fetchPublicStats === 'function') fetchPublicStats(); // 대시보드 요약카드 갱신
+      showToast('변경 내용은 새로고침 버튼을 누르면 대시보드에 반영됩니다.', 'info');
     } else {
       showToast('제재 해제 실패', 'error');
     }
@@ -272,17 +265,6 @@ async function openAdminUserModal(data) {
   const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.aiProbability})` : '';
   document.getElementById('admin-user-id').textContent = `${data.idDisplay}${aiInfo} | 상태: ${data.status}`;
 
-  // 실시간 4대 핵 탐지 수치 갱신 (Speed, ESP, GodMode, Aim)
-  const speedEl = document.getElementById('modal-speed-pct');
-  const godEl = document.getElementById('modal-god-pct');
-  const espEl = document.getElementById('modal-esp-pct');
-  const aimEl = document.getElementById('modal-aim-pct');
-  
-  if (speedEl) speedEl.textContent = '0.0%';
-  if (godEl) godEl.textContent = '0.0%';
-  if (espEl) espEl.textContent = '0.0%';
-  if (aimEl) aimEl.textContent = '0.0%';
-
   // 우측 제재 상태 카드 데이터 바인딩
   const banStatusCard = document.getElementById('admin-user-ban-status-card');
   if (banStatusCard) {
@@ -301,24 +283,6 @@ async function openAdminUserModal(data) {
     }
   }
 
-  try {
-    const response = await fetch(`/api/admin/users/${userId}/hack-stats`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (response.ok) {
-      const analyzeData = await response.json();
-      const pctList = analyzeData.hack_percentages_list; // [Speed, ESP, GodMode, Aim]
-      if (pctList && pctList.length === 4) {
-        if (speedEl) speedEl.textContent = `${pctList[0]}%`;
-        if (espEl) espEl.textContent = `${pctList[1]}%`; // ESP
-        if (godEl) godEl.textContent = `${pctList[2]}%`; // GodMode
-        if (aimEl) aimEl.textContent = `${pctList[3]}%`; // Aim
-      }
-    }
-  } catch (err) {
-    console.error('Failed to fetch user hack percentages:', err);
-  }
-
   const banBtn = document.getElementById('admin-btn-ban');
   if (banBtn) {
     if (data.isBanned === 1) {
@@ -334,7 +298,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('제재가 해제되었습니다.', 'success');
           modal.classList.remove('is-active');
-          await fetchAndRenderUsers(); // 리스트 갱신
+          showToast('변경 내용은 새로고침 버튼을 누르면 대시보드에 반영됩니다.', 'info');
         } else {
           showToast('제재 해제 실패', 'error');
         }
@@ -352,7 +316,7 @@ async function openAdminUserModal(data) {
         if (response.ok) {
           showToast('사용자가 제재되었습니다.', 'success');
           modal.classList.remove('is-active');
-          await fetchAndRenderUsers(); // 리스트 갱신
+          showToast('변경 내용은 새로고침 버튼을 누르면 대시보드에 반영됩니다.', 'info');
         } else {
           showToast('제재 처리 실패', 'error');
         }
@@ -529,7 +493,7 @@ async function openAdminUserModal(data) {
         });
         
         let type = 'info';
-        if (p.predictions === '위험' || p.predictions === '확신' || p.predictions === '핵') {
+        if (p.predictions === '위험' || p.predictions === '확신') {
           type = 'danger';
         } else if (p.predictions === '의심') {
           type = 'warning';

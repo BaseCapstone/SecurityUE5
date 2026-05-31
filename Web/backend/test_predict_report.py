@@ -10,13 +10,13 @@ def login_and_get_token(username, password):
     return None
 
 def test_prediction_report():
-    print("\n--- 1. Testing AI Prediction Report Submission ---")
-    url = f"{BASE_URL}/api/predict/report"
+    print("\n--- 1. Testing AI Prediction Submission ---")
+    url = f"{BASE_URL}/api/detect/analyze"
     # User's exact structure from request:
-    # {'player_id': '257', 'log_id': '1211', 'prediction': {'probability': 0.3716, 'predicted_label': '갓모드', 'predictions': '의심'}}
+    # {'user_id': '257', 'log_id': '1211', 'prediction': {'probability': 0.3716, 'predicted_label': '갓모드', 'predictions': '의심'}}
     payload = {
-        "player_id": "testuser01",
-        "log_id": "1211",
+        "user_id": 1,
+        "log_id": 1211,
         "prediction": {
             "probability": 0.3716,
             "predicted_label": "갓모드",

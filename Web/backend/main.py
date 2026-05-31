@@ -440,7 +440,15 @@ async def get_public_stats(db: Session = Depends(get_db)):
             danger_count += 1
             continue
             
-        last_pred = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).order_by(AIPrediction.created_at.desc()).first()
+        last_pred = db.query(AIPrediction).filter(
+            AIPrediction.player_id == u.username,
+            AIPrediction.predictions != "정상"
+        ).order_by(AIPrediction.probability.desc()).first()
+        if not last_pred:
+            last_pred = db.query(AIPrediction).filter(
+                AIPrediction.player_id == u.username
+            ).order_by(AIPrediction.probability.desc()).first()
+
         if last_pred:
             if last_pred.predictions in ["위험", "확신", "핵"]:
                 danger_count += 1
@@ -979,8 +987,16 @@ async def get_all_users(
     result = []
     for u in users:
         log_count = db.query(GameLog).filter(GameLog.user_id == u.id).count()
-        # 최근 AI 예측 정보 가져오기 (가장 최근 1개)
-        last_pred = db.query(AIPrediction).filter(AIPrediction.player_id == u.username).order_by(AIPrediction.created_at.desc()).first()
+        # AI 예측 중 가장 높은 위험도(확률)를 가진 예측 정보 가져오기
+        last_pred = db.query(AIPrediction).filter(
+            AIPrediction.player_id == u.username,
+            AIPrediction.predictions != "정상"
+        ).order_by(AIPrediction.probability.desc()).first()
+        if not last_pred:
+            last_pred = db.query(AIPrediction).filter(
+                AIPrediction.player_id == u.username
+            ).order_by(AIPrediction.probability.desc()).first()
+
         pred_label = last_pred.predicted_label if last_pred else "-"
         pred_prob = f"{round(last_pred.probability * 100.0, 1)}%" if last_pred else "-"
         pred_status = last_pred.predictions if last_pred else "정상"
@@ -1000,6 +1016,47 @@ async def get_all_users(
         })
     
     return {"users": result, "total": len(result)}
+
+@app.get("/api/admin/users/{user_id}/hack-stats")
+async def get_user_hack_stats(
+    user_id: int,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """특정 유저의 각 핵 종류별 최대 탐지 확률(퍼센트)을 반환합니다."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+
+    labels = ["스피드핵", "ESP", "갓모드", "에임핵"]
+    stats = {}
+    for label in labels:
+        max_prob_row = db.query(func.max(AIPrediction.probability)).filter(
+            AIPrediction.player_id == user.username,
+            AIPrediction.predicted_label == label,
+            AIPrediction.predictions != "정상"
+        ).scalar()
+        
+        if max_prob_row is None:
+            max_prob_row = db.query(func.max(AIPrediction.probability)).filter(
+                AIPrediction.player_id == user.username,
+                AIPrediction.predicted_label == label
+            ).scalar()
+            
+        stats[label] = round((max_prob_row * 100.0), 1) if max_prob_row is not None else 0.0
+
+    hack_percentages_list = [
+        stats["스피드핵"],
+        stats["ESP"],
+        stats["갓모드"],
+        stats["에임핵"]
+    ]
+
+    return {
+        "user_id": user_id,
+        "username": user.username,
+        "hack_percentages_list": hack_percentages_list
+    }
 
 @app.post("/api/admin/users/{user_id}/ban")
 async def ban_user(

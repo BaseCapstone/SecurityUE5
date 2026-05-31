@@ -50,6 +50,11 @@ async function fetchAndRenderUsers() {
         const dateOnly = user.created_at ? user.created_at.split(' ')[0] : '-';
         const lastLoginOnly = user.last_login ? user.last_login.split(' ')[0] : '-';
 
+        // 보안 점수 계산 (100 - 핵 의심 확률)
+        let hackProb = user.ai_probability !== '-' ? parseFloat(user.ai_probability) : 0.0;
+        let securityScoreVal = 100.0 - hackProb;
+        let securityScoreDisplay = securityScoreVal.toFixed(1) + '%';
+
         // 1. 전체 사용자 목록 tr 생성
         const tr = document.createElement('tr');
         tr.style.cursor = 'pointer';
@@ -58,7 +63,7 @@ async function fetchAndRenderUsers() {
           <td>${user.name || user.username}</td>
           <td>${dateOnly}</td>
           <td>${lastLoginOnly}</td>
-          <td><span class="probability ${scoreClass}">${user.ai_probability !== '-' ? user.ai_probability : '0.0%'}</span></td>
+          <td><span class="probability ${scoreClass}">${securityScoreDisplay}</span></td>
           <td><span class="status-badge ${statusBadge}">${statusText}</span></td>
         `;
         tbody.appendChild(tr);
@@ -72,8 +77,8 @@ async function fetchAndRenderUsers() {
           nicknameDisplay: user.name || user.username,
           date: dateOnly,
           lastLogin: lastLoginOnly,
-          score: user.ai_probability !== '-' ? parseFloat(user.ai_probability) : 0,
-          scoreDisplay: user.ai_probability !== '-' ? user.ai_probability : '0.0%',
+          score: securityScoreVal,
+          scoreDisplay: securityScoreDisplay,
           status: statusText,
           isBanned: user.is_banned,
           aiPredictedLabel: user.ai_predicted_label,
@@ -259,9 +264,12 @@ async function openAdminUserModal(data) {
     tabsSwitch('logs');
   }
 
+  const userId = data.id.replace('#', '');
+  const token = sessionStorage.getItem('token');
+
   const modal = document.getElementById('admin-user-modal');
   document.getElementById('admin-user-title').textContent = data.nicknameDisplay;
-  const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.scoreDisplay})` : '';
+  const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.aiProbability})` : '';
   document.getElementById('admin-user-id').textContent = `${data.idDisplay}${aiInfo} | 상태: ${data.status}`;
 
   // 실시간 4대 핵 탐지 수치 갱신 (Speed, ESP, GodMode, Aim)
@@ -294,10 +302,8 @@ async function openAdminUserModal(data) {
   }
 
   try {
-    const response = await fetch('/api/detect/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nickname: data.username })
+    const response = await fetch(`/api/admin/users/${userId}/hack-stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
     if (response.ok) {
       const analyzeData = await response.json();
@@ -312,9 +318,6 @@ async function openAdminUserModal(data) {
   } catch (err) {
     console.error('Failed to fetch user hack percentages:', err);
   }
-
-  const userId = data.id.replace('#', '');
-  const token = sessionStorage.getItem('token');
 
   const banBtn = document.getElementById('admin-btn-ban');
   if (banBtn) {

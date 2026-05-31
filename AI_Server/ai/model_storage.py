@@ -55,3 +55,12 @@ def get_latest_model_path() -> Path:
         )
 
     return model_paths[-1]
+
+def get_first_model_path() -> Path:
+    model_paths = get_saved_model_paths()
+    if not model_paths:
+        raise FileNotFoundError(
+            f"No model file found in {MODEL_DIR}. Train the model first."
+        )
+
+    return model_paths[0]

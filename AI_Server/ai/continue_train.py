@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from model_storage import get_latest_model_path, get_next_model_path
+from model_storage import get_first_model_path, get_latest_model_path, get_next_model_path
 from MovementAnomalyRNN import MovementAnomalyRNN
 from set_data import MovementJsonlDataset
 
@@ -22,7 +22,7 @@ def continue_train_model(
     num_labels=4,
     learning_rate=1e-3,
 ):
-    load_path = get_latest_model_path()
+    load_path = get_first_model_path()
 
     model = MovementAnomalyRNN(feature_dim=feature_dim, num_labels=num_labels).to(device)
     model.load_state_dict(torch.load(load_path, map_location=device))
@@ -67,7 +67,7 @@ def main():
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--feature-dim", type=int, default=15)
     parser.add_argument("--num-labels", type=int, default=4)
-    parser.add_argument("--learning-rate", type=float, default=1e-3)
+    parser.add_argument("--learning-rate", type=float, default=3e-4)
     args = parser.parse_args()
 
     dataset = MovementJsonlDataset(

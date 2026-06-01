@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
 from database import SessionLocal, Base, engine, User, GameLog, AIPrediction, SanctionHistory
-from sqlalchemy import text, func
+from sqlalchemy import text, func, case
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 import jwt
@@ -395,43 +395,78 @@ async def get_public_stats(db: Session = Depends(get_db)):
     warning_count = 0
     total_score = 0
     user_with_score_count = 0
-    
-    all_users = db.query(User).filter(User.role != "admin").all()
-    for u in all_users:
-        # AI 예측 로그를 기반으로 보안 점수 계산
-        preds = db.query(AIPrediction).filter(AIPrediction.user_id == u.id).all()
-        score = 100
-        for p in preds:
-            if p.predictions == "의심":
-                score -= 5
-            elif p.predictions == "위험":
-                score -= 15
-            elif p.predictions == "확신":
-                score -= 30
-        if score < 0:
-            score = 0
-            
+
+    # 유저별 패널티 집계
+    user_penalties = (
+        db.query(
+            User.id,
+            User.is_banned,
+            func.coalesce(
+                func.sum(
+                    case(
+                        (AIPrediction.predictions == "의심", 5),
+                        (AIPrediction.predictions == "위험", 15),
+                        (AIPrediction.predictions == "확신", 30),
+                        else_=0
+                    )
+                ),
+                0
+            ).label("penalty")
+        )
+        .outerjoin(
+            AIPrediction,
+            User.id == AIPrediction.user_id
+        )
+        .filter(User.role != "admin")
+        .group_by(User.id)
+        .all()
+    )
+
+    # 유저별 최고 위험도 예측 조회
+    highest_pred_subq = (
+        db.query(
+            AIPrediction.user_id,
+            func.max(AIPrediction.probability).label("max_prob")
+        )
+        .group_by(AIPrediction.user_id)
+        .subquery()
+    )
+
+    pred_status_map = {}
+
+    highest_preds = (
+        db.query(
+            AIPrediction.user_id,
+            AIPrediction.predictions
+        )
+        .join(
+            highest_pred_subq,
+            (AIPrediction.user_id == highest_pred_subq.c.user_id) &
+            (AIPrediction.probability == highest_pred_subq.c.max_prob)
+        )
+        .all()
+    )
+
+    for pred in highest_preds:
+        pred_status_map[pred.user_id] = pred.predictions
+
+    for row in user_penalties:
+
+        score = max(0, 100 - row.penalty)
+
         total_score += score
         user_with_score_count += 1
-        
-        if u.is_banned == 1:
+
+        if row.is_banned == 1:
             danger_count += 1
             continue
-            
-        last_pred = db.query(AIPrediction).filter(
-            AIPrediction.user_id == u.id,
-            AIPrediction.predictions != "정상"
-        ).order_by(AIPrediction.probability.desc()).first()
-        if not last_pred:
-            last_pred = db.query(AIPrediction).filter(
-                AIPrediction.user_id == u.id
-            ).order_by(AIPrediction.probability.desc()).first()
 
-        if last_pred:
-            if last_pred.predictions in ["위험", "확신"]:
-                danger_count += 1
-            elif last_pred.predictions == "의심":
-                warning_count += 1
+        status = pred_status_map.get(row.id)
+
+        if status in ["위험", "확신"]:
+            danger_count += 1
+        elif status == "의심":
+            warning_count += 1
 
     # 최근 10분 내 로그인 유저 수 (어드민 포함 실제 로그인 유저)
     ten_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
@@ -466,36 +501,61 @@ async def get_public_stats(db: Session = Depends(get_db)):
         average_score = 100.0
     
     # Compute dynamic detection accuracy
-    preds = db.query(AIPrediction).all()
+        prediction_logs = (
+        db.query(
+            AIPrediction.predictions,
+            GameLog.event_data
+        )
+        .join(
+            GameLog,
+            GameLog.log_id == AIPrediction.log_id
+        )
+        .all()
+    )
+
     correct_count = 0
     evaluated_count = 0
-    for p in preds:
+
+    for pred_status, event_data in prediction_logs:
+
         try:
-            log_id_int = int(p.log_id)
-        except ValueError:
+            evt_data = (
+                json.loads(event_data)
+                if isinstance(event_data, str)
+                else event_data
+            )
+
+            events = (
+                evt_data
+                if isinstance(evt_data, list)
+                else [evt_data]
+            )
+
+        except Exception:
             continue
-        log = db.query(GameLog).filter(GameLog.log_id == log_id_int).first()
-        if log:
-            try:
-                evt_data = json.loads(log.event_data) if isinstance(log.event_data, str) else log.event_data
-                events = evt_data if isinstance(evt_data, list) else [evt_data]
-            except Exception:
-                continue
-            
-            has_cheat = False
-            for evt in events:
-                if (evt.get('SpeedHack') == 1 or 
-                    (evt.get('Speed') is not None and evt.get('Speed') > 1000) or
-                    evt.get('ESP') == 1 or 
-                    evt.get('GodMode') == 1 or 
-                    evt.get('Aim') == 1):
-                    has_cheat = True
-                    break
-            
-            ai_detected = (p.predictions in ["의심", "위험", "확신"])
-            if has_cheat == ai_detected:
-                correct_count += 1
-            evaluated_count += 1
+
+        has_cheat = False
+
+        for evt in events:
+            if (
+                evt.get("SpeedHack") == 1
+                or (
+                    evt.get("Speed") is not None
+                    and evt.get("Speed") > 1000
+                )
+                or evt.get("ESP") == 1
+                or evt.get("GodMode") == 1
+                or evt.get("Aim") == 1
+            ):
+                has_cheat = True
+                break
+
+        ai_detected = pred_status in ["의심", "위험", "확신"]
+
+        if has_cheat == ai_detected:
+            correct_count += 1
+
+        evaluated_count += 1
             
     if evaluated_count > 0:
         detection_accuracy_val = f"{round((correct_count / evaluated_count) * 100.0, 1)}%"
@@ -524,42 +584,66 @@ async def get_public_stats(db: Session = Depends(get_db)):
 
 @app.get("/api/public/ranking")
 async def get_public_ranking(db: Session = Depends(get_db)):
-    users = db.query(User).all()
-    ranking_list = []
-    
-    for u in users:
-        if u.role == "admin":
-            continue
-            
-        preds = db.query(AIPrediction).filter(AIPrediction.user_id == u.id).all()
-        score = 100
-        for p in preds:
-            if p.predictions == "의심":
-                score -= 5
-            elif p.predictions == "위험":
-                score -= 15
-            elif p.predictions == "확신":
-                score -= 30
-        if score < 0:
-            score = 0
-            
-        # 검증된 게임 수는 AI 검사가 완료된 고유 log_id 개수로 연동
-        total_logs = db.query(AIPrediction.log_id).filter(AIPrediction.user_id == u.id).distinct().count()
-        masked_username = mask_string(u.username)
-        
-        ranking_list.append({
-            "username": masked_username,
+
+    user_scores = (
+        db.query(
+            User.id,
+            User.username,
+
+            (
+                100 -
+                func.coalesce(
+                    func.sum(
+                        case(
+                            (AIPrediction.predictions == "의심", 5),
+                            (AIPrediction.predictions == "위험", 15),
+                            (AIPrediction.predictions == "확신", 30),
+                            else_=0
+                        )
+                    ),
+                    0
+                )
+            ).label("score"),
+
+            func.count(
+                func.distinct(AIPrediction.log_id)
+            ).label("total_logs")
+        )
+        .outerjoin(
+            AIPrediction,
+            User.id == AIPrediction.user_id
+        )
+        .filter(User.role != "admin")
+        .group_by(User.id)
+        .all()
+    )
+
+    ranking = []
+
+    for row in user_scores:
+
+        score = max(0, row.score)
+
+        ranking.append({
+            "username": mask_string(row.username),
             "score": score,
-            "total_logs": total_logs,
-            "status": "정상" if score >= 70 else ("주의" if score >= 30 else "제재")
+            "total_logs": row.total_logs,
+            "status": (
+                "정상"
+                if score >= 70
+                else "주의"
+                if score >= 30
+                else "제재"
+            )
         })
-        
-    # 정렬: 스코어 내림차순 -> 검증된 로그 수 내림차순
-    ranking_list.sort(key=lambda x: (-x["score"], -x["total_logs"]))
-    
-    # 상위 10명만 노출
-    top_ranking = ranking_list[:10]
-    return {"ranking": top_ranking}
+
+    ranking.sort(
+        key=lambda x: (-x["score"], -x["total_logs"])
+    )
+
+    return {
+        "ranking": ranking[:10]
+    }
 
 # ═══════════════════════════════════════════════════
 # 게임 클라이언트 상태 / 실시간 밴 API (언리얼 클라이언트용)

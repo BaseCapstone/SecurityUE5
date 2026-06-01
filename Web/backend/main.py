@@ -933,26 +933,80 @@ async def get_all_users(
     admin: User = Depends(require_admin),
     db: Session = Depends(get_db)
 ):
-    """관리자 전용 — 전체 유저 목록 (민감 정보 마스킹 처리)."""
-    users = db.query(User).all()
-    
-    result = []
-    for u in users:
-        log_count = db.query(GameLog).filter(GameLog.user_id == u.id).count()
-        # AI 예측 중 가장 높은 위험도(확률)를 가진 예측 정보 가져오기
-        last_pred = db.query(AIPrediction).filter(
-            AIPrediction.user_id == u.id,
-            AIPrediction.predictions != "정상"
-        ).order_by(AIPrediction.probability.desc()).first()
-        if not last_pred:
-            last_pred = db.query(AIPrediction).filter(
-                AIPrediction.user_id == u.id
-            ).order_by(AIPrediction.probability.desc()).first()
+    """관리자 전용 — 전체 유저 목록 (기존 로직 유지 + N+1 제거)"""
 
-        pred_label = last_pred.predicted_label if last_pred else "-"
-        pred_prob = f"{round(last_pred.probability * 100.0, 1)}%" if last_pred else "-"
-        pred_status = last_pred.predictions if last_pred else "정상"
-        
+    users = db.query(User).all()
+
+    # 유저별 로그 수 집계
+    log_count_map = {
+        row.user_id: row.log_count
+        for row in (
+            db.query(
+                GameLog.user_id,
+                func.count(GameLog.log_id).label("log_count")
+            )
+            .group_by(GameLog.user_id)
+            .all()
+        )
+    }
+
+    # 모든 AI 예측을 확률 내림차순으로 한 번에 조회
+    all_preds = (
+        db.query(AIPrediction)
+        .order_by(
+            AIPrediction.user_id,
+            AIPrediction.probability.desc()
+        )
+        .all()
+    )
+
+    pred_map = {}
+
+    for pred in all_preds:
+
+        user_id = pred.user_id
+
+        if user_id not in pred_map:
+            pred_map[user_id] = {
+                "best_any": pred,
+                "best_non_normal": None
+            }
+
+        if (
+            pred.predictions != "정상"
+            and pred_map[user_id]["best_non_normal"] is None
+        ):
+            pred_map[user_id]["best_non_normal"] = pred
+
+    result = []
+
+    for u in users:
+
+        pred_info = pred_map.get(u.id)
+
+        last_pred = None
+
+        if pred_info:
+            last_pred = (
+                pred_info["best_non_normal"]
+                or pred_info["best_any"]
+            )
+
+        pred_label = (
+            last_pred.predicted_label
+            if last_pred else "-"
+        )
+
+        pred_prob = (
+            f"{round(last_pred.probability * 100.0, 1)}%"
+            if last_pred else "-"
+        )
+
+        pred_status = (
+            last_pred.predictions
+            if last_pred else "정상"
+        )
+
         result.append({
             "id": u.id,
             "username": u.username,
@@ -961,13 +1015,16 @@ async def get_all_users(
             "is_banned": getattr(u, "is_banned", 0),
             "created_at": str(u.created_at),
             "last_login": str(u.last_login) if u.last_login else None,
-            "game_logs_count": log_count,
+            "game_logs_count": log_count_map.get(u.id, 0),
             "ai_predicted_label": pred_label,
             "ai_probability": pred_prob,
             "ai_status": pred_status
         })
-    
-    return {"users": result, "total": len(result)}
+
+    return {
+        "users": result,
+        "total": len(result)
+    }
 
 @app.post("/api/admin/users/{user_id}/ban")
 async def ban_user(

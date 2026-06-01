@@ -702,7 +702,7 @@ async def forward_log_to_external(log_id: int, user_id: int, frames: list):
                 "user_id": user_id,
                 "frames": frames  
             }
-            response = await client.post(EXTERNAL_DOMAIN_URL, json=payload, timeout=5.0)
+            response = await client.post(EXTERNAL_DOMAIN_URL, json=payload, timeout=10.0)
             response.raise_for_status()
         except Exception as e:
             print(f" [경고] 외부 도메인 전송 실패 (Log ID: {log_id}): {e}")
@@ -712,20 +712,20 @@ async def forward_log_to_external(log_id: int, user_id: int, frames: list):
 async def save_game_log(
     background_tasks: BackgroundTasks,
     log_data: list = Body(...), # 💡 Lyra가 보낸 json 리스트 형태의 로그인 event_data
-    #current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
+    current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
     db: Session = Depends(get_db)
 ):
 
-    current_user = {
-        "id": 2,
-        "name": "테스트유저",
-        "username": "testuser01",
-        "password_hash": "$2b$12$G/6q6J8B5BNeaipFz./x1uOZrIa1TliE9jmwTc4NrHeUOc3qE8aJC",
-        "role": "user",
-        "is_banned": 0,
-        "created_at": "2026-05-04 15:44:06",
-        "last_login": "2026-05-04 06:45:45"
-    }
+    # current_user = {
+    #     "id": 2,
+    #     "name": "테스트유저",
+    #     "username": "testuser01",
+    #     "password_hash": "$2b$12$G/6q6J8B5BNeaipFz./x1uOZrIa1TliE9jmwTc4NrHeUOc3qE8aJC",
+    #     "role": "user",
+    #     "is_banned": 0,
+    #     "created_at": "2026-05-04 15:44:06",
+    #     "last_login": "2026-05-04 06:45:45"
+    # }
     """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
     try:
         if not log_data:
@@ -762,7 +762,7 @@ async def save_game_log(
 
 @app.post("/api/detect/analyze")
 async def analyze_hack_detection(
-    payload: DetectionRequestSchema,
+    payload: dict = Body(...),
     db: Session = Depends(get_db)
 ):
     
@@ -780,18 +780,18 @@ async def analyze_hack_detection(
         }
     }
     """
-    user = db.query(User).filter(User.id == payload.user_id).first()
+    user = db.query(User).filter(User.id == payload["user_id"]).first()
     if not user:
         raise HTTPException(status_code=404, detail="해당 user_id의 사용자를 찾을 수 없습니다.")
 
-    prediction = payload.prediction
-    probability = round(prediction.probability, 3)
-    predicted_label = prediction.predicted_label.strip()
-    status_label = prediction.predictions
+    prediction = payload["prediction"]
+    probability = round(prediction["probability"], 3)
+    predicted_label = prediction["predicted_label"].strip()
+    status_label = prediction["predictions"]
 
     existing_prediction = db.query(AIPrediction).filter(
         AIPrediction.user_id == user.id,
-        AIPrediction.log_id == payload.log_id
+        AIPrediction.log_id == payload["log_id"]
     ).first()
 
     if existing_prediction:
@@ -802,7 +802,7 @@ async def analyze_hack_detection(
     else:
         new_prediction = AIPrediction(
             user_id=user.id,
-            log_id=payload.log_id,
+            log_id=payload["log_id"],
             probability=probability,
             predicted_label=predicted_label,
             predictions=status_label
@@ -819,7 +819,7 @@ async def analyze_hack_detection(
     return {
         "message": "AI 예측 결과가 저장되었습니다.",
         "user_id": user.id,
-        "log_id": payload.log_id
+        "log_id": payload["log_id"]
     }
 
 # ═══════════════════════════════════════════════════

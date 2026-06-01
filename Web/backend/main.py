@@ -709,9 +709,20 @@ async def forward_log_to_external(log_id: int, user_id: int, frames: list):
 async def save_game_log(
     background_tasks: BackgroundTasks,
     log_data: list = Body(...), # 💡 Lyra가 보낸 json 리스트 형태의 로그인 event_data
-    current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
+    #current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
     db: Session = Depends(get_db)
 ):
+
+    current_user = {
+        "id": 2,
+        "name": "테스트유저",
+        "username": "testuser01",
+        "password_hash": "$2b$12$G/6q6J8B5BNeaipFz./x1uOZrIa1TliE9jmwTc4NrHeUOc3qE8aJC",
+        "role": "user",
+        "is_banned": 0,
+        "created_at": "2026-05-04 15:44:06",
+        "last_login": "2026-05-04 06:45:45"
+    }
     """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
     try:
         if not log_data:
@@ -721,7 +732,7 @@ async def save_game_log(
         event_data_json = json.dumps(log_data)
         
         new_log = GameLog(
-            user_id=current_user.id,
+            user_id=current_user["id"],  # 💡 현재는 테스트 유저 ID로 고정
             event_data=event_data_json
         )
         db.add(new_log)
@@ -734,7 +745,7 @@ async def save_game_log(
         background_tasks.add_task(
             forward_log_to_external, 
             new_log.log_id, 
-            current_user.id, 
+            current_user["id"], 
             log_data # 💡 텍스트가 아닌 JSON 리스트 형태 그대로 전달
         )
 
@@ -744,7 +755,7 @@ async def save_game_log(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user.id}
+    return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user["id"], "log_id": new_log.log_id}
 
 @app.post("/api/detect/analyze")
 async def analyze_hack_detection(

@@ -102,18 +102,24 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 def decode_bearer_token(authorization: Optional[str]) -> dict:
+    print(f" [디버그] Authorization 헤더: {authorization}")
     if not authorization:
+        print(" [디버그] Authorization 헤더가 없습니다.")
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
+        print(f" [디버그] 잘못된 인증 형식: {authorization}")
         raise HTTPException(status_code=401, detail="잘못된 인증 형식입니다.")
 
     try:
+        print(f" [디버그] 디코딩할 토큰: {parts[1]}")
         return jwt.decode(parts[1], SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
+        print(" [디버그] 토큰이 만료되었습니다.")
         raise HTTPException(status_code=401, detail="토큰이 만료되었습니다. 다시 로그인해주세요.")
     except jwt.InvalidTokenError:
+        print(" [디버그] 유효하지 않은 토큰입니다.")
         raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
 
 def mask_string(s: str, visible: int = 2) -> str:
@@ -213,6 +219,7 @@ def get_current_game_user(
     db: Session = Depends(get_db)
 ) -> User:
     payload = decode_bearer_token(authorization)
+    
     if payload.get("token_type") != "game":
         raise HTTPException(status_code=401, detail="게임 토큰이 필요합니다.")
 
@@ -796,9 +803,12 @@ async def forward_log_to_external(log_id: int, user_id: int, frames: list):
 async def save_game_log(
     background_tasks: BackgroundTasks,
     log_data: list = Body(...), # 💡 Lyra가 보낸 json 리스트 형태의 로그인 event_data
-    #current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
+    current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
     db: Session = Depends(get_db)
 ):
+
+    """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
+    
 
     # current_user = {
     #     "id": 2,
@@ -810,19 +820,6 @@ async def save_game_log(
     #     "created_at": "2026-05-04 15:44:06",
     #     "last_login": "2026-05-04 06:45:45"
     # }
-    """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
-
-
-    current_user = {
-        "id": 2,
-        "name": "테스트유저",
-        "username": "testuser01",
-        "password_hash": "$2b$12$G/6q6J8B5BNeaipFz./x1uOZrIa1TliE9jmwTc4NrHeUOc3qE8aJC",
-        "role": "user",
-        "is_banned": 0,
-        "created_at": "2026-05-04 15:44:06",
-        "last_login": "2026-05-04 06:45:45"
-    }
     try:
         if not log_data:
             raise HTTPException(status_code=400, detail="로그 데이터가 비어 있습니다.")
@@ -831,7 +828,7 @@ async def save_game_log(
         event_data_json = json.dumps(log_data)
         
         new_log = GameLog(
-            user_id=current_user["id"],  # 💡 현재는 테스트 유저 ID로 고정
+            user_id=current_user.id,  # 💡 현재는 테스트 유저 ID로 고정
             event_data=event_data_json
         )
         db.add(new_log)
@@ -844,7 +841,7 @@ async def save_game_log(
         background_tasks.add_task(
             forward_log_to_external, 
             new_log.log_id, 
-            current_user["id"], 
+            current_user.id, 
             log_data # 💡 텍스트가 아닌 JSON 리스트 형태 그대로 전달
         )
 
@@ -854,7 +851,7 @@ async def save_game_log(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-    return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user["id"], "log_id": new_log.log_id}
+    return {"message": "로그 데이터가 저장되었습니다.", "user_id": current_user.id, "log_id": new_log.log_id}
 
 @app.post("/api/detect/analyze")
 async def analyze_hack_detection(
@@ -1259,9 +1256,9 @@ async def startup_event():
             
             if "is_banned" not in columns:
                 conn.execute(text("ALTER TABLE users ADD COLUMN is_banned INTEGER DEFAULT 0"))
-                print("[DB] Added is_banned column to users table.")
+                #print("[DB] Added is_banned column to users table.")
     except Exception as e:
-        print(f"[DB] Migration failed or is_banned already exists: {e}")
+        #print(f"[DB] Migration failed or is_banned already exists: {e}")
 
     # 3. ai_predictions 테이블을 user_id 기반으로 정리
     try:
@@ -1276,7 +1273,7 @@ async def startup_event():
             old_prediction_user_column = "player" + "_id"
             if "user_id" not in prediction_columns:
                 conn.execute(text("ALTER TABLE ai_predictions ADD COLUMN user_id INTEGER NULL"))
-                print("[DB] Added user_id column to ai_predictions table.")
+                #print("[DB] Added user_id column to ai_predictions table.")
 
             if old_prediction_user_column in prediction_columns:
                 conn.execute(text(
@@ -1292,9 +1289,9 @@ async def startup_event():
                     """
                 ))
                 conn.execute(text(drop_column_sql.format(column_name=old_prediction_user_column)))
-                print("[DB] Migrated ai_predictions to user_id column.")
+                #print("[DB] Migrated ai_predictions to user_id column.")
     except Exception as e:
-        print(f"[DB] Migration failed while updating ai_predictions user_id column: {e}")
+        #print(f"[DB] Migration failed while updating ai_predictions user_id column: {e}")
 
 
 # ═══════════════════════════════════════════════════

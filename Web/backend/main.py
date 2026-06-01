@@ -7,6 +7,7 @@ from sqlalchemy import text, func
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 import jwt
+import os
 from datetime import datetime, timedelta
 import json
 import httpx
@@ -75,8 +76,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-import os
 
 # 보안: SECRET_KEY는 환경변수에서 로드 (없으면 기본값 사용, 프로덕션에서는 반드시 설정할 것)
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "lyra_shield_secret_key_change_me")
@@ -686,10 +685,14 @@ async def get_log_by_id(logId: int, db: Session = Depends(get_db)):
 
     return {"log": log_data}
 
-EXTERNAL_DOMAIN_URL = "https://vw93ues8p2k3qu-8000.proxy.runpod.net/api/analyze"
+EXTERNAL_DOMAIN_URL = os.getenv("RUNPOD_ANALYZE_URL", "").strip()
 
 # 외부 도메인 전송 비동기 함수
 async def forward_log_to_external(log_id: int, user_id: int, frames: list):
+    if not EXTERNAL_DOMAIN_URL:
+        print(f" [경고] RUNPOD_ANALYZE_URL 미설정: 외부 도메인 전송 생략 (Log ID: {log_id})")
+        return
+
     async with httpx.AsyncClient() as client:
         try:
             # 💡 frames 자리에 순수 파이썬 리스트가 매핑되어, 

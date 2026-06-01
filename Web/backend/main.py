@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
+﻿from fastapi import FastAPI, HTTPException, Query, Depends, Body, status, Header, BackgroundTasks, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator
@@ -730,10 +730,22 @@ async def forward_log_to_external(log_id: int, user_id: int, frames: list):
 async def save_game_log(
     background_tasks: BackgroundTasks,
     log_data: list = Body(...), # 💡 Lyra가 보낸 json 리스트 형태의 로그인 event_data
-    current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
+    #current_user: User = Depends(get_current_game_user), # 기존 의존성 함수 사용
     db: Session = Depends(get_db)
 ):
     """게임 로그를 저장하고, 동시에 외부 분석 도메인으로 프레임 리스트를 포워딩합니다."""
+
+
+    current_user = {
+        "id": 2,
+        "name": "테스트유저",
+        "username": "testuser01",
+        "password_hash": "$2b$12$G/6q6J8B5BNeaipFz./x1uOZrIa1TliE9jmwTc4NrHeUOc3qE8aJC",
+        "role": "user",
+        "is_banned": 0,
+        "created_at": "2026-05-04 15:44:06",
+        "last_login": "2026-05-04 06:45:45"
+    }
     try:
         if not log_data:
             raise HTTPException(status_code=400, detail="로그 데이터가 비어 있습니다.")

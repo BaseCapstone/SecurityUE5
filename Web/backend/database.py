@@ -16,7 +16,15 @@ DB_URL = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:3306/{db_name}"
 
 try:
     # MySQL 연결 시도 (빠른 실패를 위해 2초 타임아웃 지정)
-    engine = create_engine(DB_URL, connect_args={"connect_timeout": 2})
+    engine = create_engine(
+        DB_URL,
+        connect_args={"connect_timeout": 2},
+        pool_size=5,        # 평상시 유지 커넥션 수
+        max_overflow=10,    # 최대 15개까지 허용 (개발용 RDS t4g.micro 기준)
+        pool_timeout=30,    # 커넥션 대기 최대 시간 (초)
+        pool_recycle=1800,  # 30분마다 커넥션 재활용 (MySQL 타임아웃 방지)
+        pool_pre_ping=True, # 끊어진 커넥션 자동 감지 및 재연결
+    )
     with engine.connect() as conn:
         conn.execute(text("SELECT 1"))
     print("[DB] MySQL connection success!")

@@ -501,7 +501,7 @@ async def get_public_stats(db: Session = Depends(get_db)):
         average_score = 100.0
     
     # Compute dynamic detection accuracy
-        prediction_logs = (
+    prediction_logs = (
         db.query(
             AIPrediction.predictions,
             GameLog.event_data

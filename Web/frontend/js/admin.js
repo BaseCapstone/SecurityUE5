@@ -95,11 +95,6 @@ function activateAdminMode() {
   // sessionStorage에 관리자 상태 저장 (F5 대응)
   sessionStorage.setItem('lyra_admin', 'true');
 
-  // 실시간 통계 정보 불러오기
-  if (typeof fetchPublicStats === 'function') {
-    fetchPublicStats();
-  }
-
   showToast('관리자 모드로 접속하였습니다.', 'success');
 }
 
@@ -294,7 +289,10 @@ function initAdminRefresh() {
 
       try {
         if (typeof fetchPublicStats === 'function') {
-          await fetchPublicStats();
+          await fetchPublicStats(false, true);
+        }
+        if (typeof fetchAdminPredictions === 'function') {
+          await fetchAdminPredictions();
         }
         if (typeof fetchAndRenderUsers === 'function') {
           await fetchAndRenderUsers();
@@ -335,27 +333,107 @@ function initAdminLogo() {
   }
 }
 
+async function fetchAdminPredictions() {
+  const token = sessionStorage.getItem('token');
+  if (!token) return;
+
+  try {
+    const response = await fetch('/api/admin/predictions', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) return;
+
+    const data = await response.json();
+
+    const speedPctEl = document.getElementById('stats-speed-pct');
+    const godPctEl = document.getElementById('stats-god-pct');
+    const espPctEl = document.getElementById('stats-esp-pct');
+    const aimPctEl = document.getElementById('stats-aim-pct');
+
+    if (speedPctEl) speedPctEl.textContent = `${data.label_percentages['스피드핵'] || 0.0}%`;
+    if (godPctEl) godPctEl.textContent = `${data.label_percentages['갓모드'] || 0.0}%`;
+    if (espPctEl) espPctEl.textContent = `${data.label_percentages['ESP'] || 0.0}%`;
+    if (aimPctEl) aimPctEl.textContent = `${data.label_percentages['에임핵'] || 0.0}%`;
+
+    const renderPredictionItem = (p, includePlayer = true) => {
+      const time = new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let type = 'info';
+      if (p.predictions === '위험' || p.predictions === '확신') {
+        type = 'danger';
+      } else if (p.predictions === '의심') {
+        type = 'warning';
+      } else if (p.predictions === '정상') {
+        type = 'success';
+      }
+
+      const li = document.createElement('li');
+      li.className = `admin-log__item admin-log__item--${type}`;
+      li.innerHTML = includePlayer
+        ? `
+          <span class="admin-log__time">${time}</span>
+          <span class="admin-log__msg">
+            <strong>${p.user_id}</strong> — AI 분석: <strong>${p.predictions}</strong> (확률: ${(p.probability * 100).toFixed(1)}%, 탐지핵: ${p.predicted_label}, 로그번호: #${p.log_id})
+          </span>
+        `
+        : `
+          <span class="admin-log__time">${time}</span>
+          <span class="admin-log__msg"><strong>${p.user_id}</strong> — ${p.predicted_label} 감지 (${p.predictions}, ${(p.probability * 100).toFixed(1)}%)</span>
+        `;
+      return li;
+    };
+
+    const adminLogFull = document.getElementById('admin-log-full');
+    if (adminLogFull) {
+      adminLogFull.innerHTML = '';
+      if (data.predictions.length === 0) {
+        adminLogFull.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 예측 로그가 없습니다.</span></li>';
+      } else {
+        data.predictions.forEach(p => adminLogFull.appendChild(renderPredictionItem(p, true)));
+      }
+    }
+
+    const adminLogDash = document.getElementById('admin-log');
+    if (adminLogDash) {
+      adminLogDash.innerHTML = '';
+      const limitList = data.predictions.slice(0, 7);
+      if (limitList.length === 0) {
+        adminLogDash.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">최근 탐지 로그가 없습니다.</span></li>';
+      } else {
+        limitList.forEach(p => adminLogDash.appendChild(renderPredictionItem(p, false)));
+      }
+    }
+
+    const dayCounts = { mon: 0, tue: 0, wed: 0, thu: 0, fri: 0, sat: 0, sun: 0 };
+    const dayMap = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat', 0: 'sun' };
+
+    data.predictions.forEach(p => {
+      const dateStr = p.created_at ? p.created_at.replace(' ', 'T') : '';
+      if (!dateStr) return;
+
+      const dayKey = dayMap[new Date(dateStr).getDay()];
+      if (dayKey) dayCounts[dayKey]++;
+    });
+
+    const maxCount = Math.max(...Object.values(dayCounts));
+    ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(dayKey => {
+      const barEl = document.getElementById(`chart-bar-${dayKey}`);
+      if (!barEl) return;
+
+      const count = dayCounts[dayKey];
+      barEl.style.height = `${maxCount > 0 ? (count / maxCount) * 100 : 0}%`;
+      barEl.title = `탐지 건수: ${count}건`;
+    });
+  } catch (e) {
+    console.error('Failed to fetch admin predictions:', e);
+  }
+}
+
 // DOM 로드 후 초기화
 document.addEventListener('DOMContentLoaded', () => {
   initAdminRefresh();
   initUserManagement();
   initAdminLogo();
   checkAdminSession();
-
-  // 5초마다 실시간 데이터 연동
-  setInterval(async () => {
-    if (sessionStorage.getItem('lyra_admin') === 'true') {
-      try {
-        if (typeof fetchPublicStats === 'function') {
-          await fetchPublicStats();
-        }
-        if (typeof fetchAndRenderUsers === 'function') {
-          await fetchAndRenderUsers();
-        }
-      } catch (e) {
-        console.error("Auto refresh failed:", e);
-      }
-    }
-  }, 5000);
 });
 

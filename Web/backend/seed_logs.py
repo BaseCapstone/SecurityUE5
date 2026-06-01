@@ -109,8 +109,8 @@ def seed_logs():
         # Seed AI Predictions for user1 (3 normal predictions)
         for i, log in enumerate(user1_logs):
             pred = AIPrediction(
-                player_id="testuser01",
-                log_id=str(log.log_id),
+                user_id=user1.id,
+                log_id=log.log_id,
                 probability=0.01 + (i * 0.01),
                 predicted_label="스피드핵",
                 predictions="정상",
@@ -123,8 +123,8 @@ def seed_logs():
         for i, log in enumerate(user2_logs):
             if i in susp_indices:
                 pred = AIPrediction(
-                    player_id="user_warning",
-                    log_id=str(log.log_id),
+                    user_id=user2.id,
+                    log_id=log.log_id,
                     probability=0.55 + (susp_count * 0.02),
                     predicted_label="스피드핵" if susp_count % 2 == 0 else "ESP",
                     predictions="의심",
@@ -133,8 +133,8 @@ def seed_logs():
                 susp_count += 1
             else:
                 pred = AIPrediction(
-                    player_id="user_warning",
-                    log_id=str(log.log_id),
+                    user_id=user2.id,
+                    log_id=log.log_id,
                     probability=0.12,
                     predicted_label="스피드핵",
                     predictions="정상",
@@ -147,8 +147,8 @@ def seed_logs():
         for i, log in enumerate(user3_logs):
             if i in [10, 20, 30]:
                 pred = AIPrediction(
-                    player_id="user_danger",
-                    log_id=str(log.log_id),
+                    user_id=user3.id,
+                    log_id=log.log_id,
                     probability=0.92 + (danger_count * 0.02),
                     predicted_label="에임핵" if i == 20 else ("스피드핵" if i == 10 else "ESP"),
                     predictions="확신",
@@ -157,8 +157,8 @@ def seed_logs():
                 danger_count += 1
             else:
                 pred = AIPrediction(
-                    player_id="user_danger",
-                    log_id=str(log.log_id),
+                    user_id=user3.id,
+                    log_id=log.log_id,
                     probability=0.05,
                     predicted_label="스피드핵",
                     predictions="정상",

@@ -56,12 +56,11 @@ class GameLog(Base):
 
 class AIPrediction(Base):
     __tablename__ = "ai_predictions"
-    prediction_id = Column(Integer, primary_key=True, autoincrement=True)
-    player_id = Column(String(50), nullable=False)  # 컴퓨터 일련번호 (username)
-    log_id = Column(String(50), nullable=False)     # 로그 번호
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)  # 유저 ID
+    log_id = Column(Integer, primary_key=True)      # 로그 번호
     probability = Column(Float, nullable=False)     # 핵사용확률
     predicted_label = Column(String(50), nullable=False)  # 어떤 핵을 썼는지 (스피드핵, 갓모드, ESP, 에임핵)
-    predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신, 핵)
+    predictions = Column(String(50), nullable=False)      # 상태 (정상, 의심, 위험, 확신)
     created_at = Column(DateTime, default=func.now())
 
 class SanctionHistory(Base):
@@ -72,4 +71,4 @@ class SanctionHistory(Base):
     reason = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=func.now())
 
-
+

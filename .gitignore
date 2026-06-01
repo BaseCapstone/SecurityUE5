@@ -52,3 +52,11 @@ AI_Server/models/
 Web/backend/__pycache__/
 Web/backend/venv/
 AI_Server/data_join/data/output_test.jsonl
+
+# Environment variables
+.env
+.env.*
+!.env.example
+Web/backend/.env
+Web/backend/.env.*
+!Web/backend/.env.example

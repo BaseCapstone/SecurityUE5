@@ -1258,7 +1258,7 @@ async def startup_event():
                 conn.execute(text("ALTER TABLE users ADD COLUMN is_banned INTEGER DEFAULT 0"))
                 #print("[DB] Added is_banned column to users table.")
     except Exception as e:
-        #print(f"[DB] Migration failed or is_banned already exists: {e}")
+        print(f"[DB] Migration failed or is_banned already exists: {e}")
 
     # 3. ai_predictions 테이블을 user_id 기반으로 정리
     try:
@@ -1291,7 +1291,7 @@ async def startup_event():
                 conn.execute(text(drop_column_sql.format(column_name=old_prediction_user_column)))
                 #print("[DB] Migrated ai_predictions to user_id column.")
     except Exception as e:
-        #print(f"[DB] Migration failed while updating ai_predictions user_id column: {e}")
+        print(f"[DB] Migration failed while updating ai_predictions user_id column: {e}")
 
 
 # ═══════════════════════════════════════════════════

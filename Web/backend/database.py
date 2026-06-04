@@ -63,7 +63,7 @@ class GameLog(Base):
     user = relationship("User", back_populates="game_logs")
 
 class AIPrediction(Base):
-    __tablename__ = "ai_prediction_results"
+    __tablename__ = "ai_prediction"
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)  # 유저 ID
     log_id = Column(Integer, primary_key=True)      # 로그 번호
     probability = Column(Float, nullable=False)     # 핵사용확률

@@ -307,75 +307,7 @@ async function openAdminUserModal(data) {
     };
   }
 
-  const logList = document.getElementById('admin-user-log-list');
-  logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
   modal.classList.add('is-active');
-
-  try {
-    const response = await fetch(`/api/admin/users/${userId}/logs`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    if (response.ok) {
-      const result = await response.json();
-      logList.innerHTML = '';
-      
-      if (result.logs.length === 0) {
-        logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">수집된 게임 로그가 없습니다.</span></li>';
-        return;
-      }
-
-      result.logs.forEach(log => {
-        // 한국 표준시(KST) 및 날짜 시간 출력
-        const dateObj = new Date(log.created_at.replace(' ', 'T') + 'Z');
-        const time = dateObj.toLocaleDateString('ko-KR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
-        });
-        
-        let events = Array.isArray(log.event_data) ? log.event_data : [log.event_data];
-        
-        events.forEach(evt => {
-            let msg = '정상적인 플레이 패턴 확인';
-            let type = 'info';
-            
-            // 핵 감지 로직 적용
-            if (evt.SpeedHack === 1 || evt.Aim === 1 || evt.GodMode === 1 || evt.ESP === 1) {
-                let hacks = [];
-                if (evt.SpeedHack === 1) hacks.push('스피드핵');
-                if (evt.Aim === 1) hacks.push('에임핵');
-                if (evt.GodMode === 1) hacks.push('무적핵');
-                if (evt.ESP === 1) hacks.push('ESP');
-                msg = `비정상 프로그램 의심 (${hacks.join(', ')})`;
-                type = 'danger';
-            } else if (evt.Speed > 1000) {
-                msg = `비정상적인 이동 속도 감지 (속도: ${evt.Speed.toFixed(1)})`;
-                type = 'warning';
-            } else {
-                msg = `일반 플레이 로그 기록 (속도: ${evt.Speed ? evt.Speed.toFixed(1) : 0})`;
-            }
-
-            const li = document.createElement('li');
-            li.className = `admin-log__item admin-log__item--${type}`;
-            li.innerHTML = `
-              <span class="admin-log__time" style="font-size: 11px; white-space: nowrap; color: #94a3b8;">${time}</span>
-              <span class="admin-log__msg">${msg}</span>
-            `;
-            logList.appendChild(li);
-        });
-      });
-    } else {
-      logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">데이터를 불러오지 못했습니다.</span></li>';
-    }
-  } catch (error) {
-    logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span></li>';
-  }
 
   // Fetch AI predictions logs
   const predList = document.getElementById('admin-user-prediction-list');
@@ -404,12 +336,14 @@ async function openAdminUserModal(data) {
         const time = dateObj.toLocaleDateString('ko-KR', {
           year: 'numeric',
           month: '2-digit',
-          day: '2-digit'
+          day: '2-digit',
+          timeZone: 'Asia/Seoul'
         }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
           hour12: false,
           hour: '2-digit',
           minute: '2-digit',
-          second: '2-digit'
+          second: '2-digit',
+          timeZone: 'Asia/Seoul'
         });
         
         let type = 'info';

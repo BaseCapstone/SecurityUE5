@@ -344,7 +344,8 @@ async function fetchAdminPredictions() {
     const data = await response.json();
 
     const renderPredictionItem = (p, includePlayer = true) => {
-      const time = new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateObj = new Date(p.created_at.replace(' ', 'T') + 'Z');
+      const time = dateObj.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Seoul' });
       let type = 'info';
       if (p.predictions === '위험' || p.predictions === '확신') {
         type = 'danger';

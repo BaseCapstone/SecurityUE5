@@ -43,9 +43,9 @@ function initThemeToggle() {
 }
 
 /**
- * 백엔드 통계 API를 호출하여 홈 화면 하단 및 관리자 통계 카드 데이터를 동기화합니다.
+ * 백엔드 통계 API를 호출하여 홈 화면 하단 통계 데이터를 동기화합니다.
  */
-async function fetchPublicStats(isInitial = false, includeAdminDashboard = false) {
+async function fetchPublicStats(isInitial = false) {
   try {
     const response = await fetch('/api/public/stats');
     if (response.ok) {
@@ -61,17 +61,6 @@ async function fetchPublicStats(isInitial = false, includeAdminDashboard = false
       if (usersEl) usersEl.textContent = data.total_protected_users.toLocaleString();
       if (blockedEl) blockedEl.textContent = data.blocked_count.toLocaleString();
       if (uptimeEl) uptimeEl.textContent = data.server_uptime;
-
-      // 관리자 대시보드 통계 카드는 새로고침 버튼을 눌렀을 때만 갱신합니다.
-      const adminDetectionEl = includeAdminDashboard ? document.getElementById('admin-stat-detection') : null;
-      const adminOnlineEl = includeAdminDashboard ? document.getElementById('admin-stat-online') : null;
-      const adminSuspiciousEl = includeAdminDashboard ? document.getElementById('admin-stat-suspicious') : null;
-      const adminBannedEl = includeAdminDashboard ? document.getElementById('admin-stat-banned') : null;
-
-      if (adminDetectionEl) adminDetectionEl.textContent = data.detection_accuracy;
-      if (adminOnlineEl) adminOnlineEl.textContent = data.online_users;
-      if (adminSuspiciousEl) adminSuspiciousEl.textContent = data.suspicious_users;
-      if (adminBannedEl) adminBannedEl.textContent = data.banned_users;
 
       // 움직이는 티커 바 업데이트
       const todayBlockedEls = document.querySelectorAll('.ticker-today-blocked');

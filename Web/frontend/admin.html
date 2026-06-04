@@ -146,38 +146,6 @@
 
         <!-- ═══ PAGE: 대시보드 ═══ -->
         <div data-page="dashboard">
-          <!-- 실시간 통계 카드 -->
-          <div class="admin-stats">
-            <div class="admin-stat-card admin-stat-card--red">
-              <div class="admin-stat-card__icon">🛡️</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-detection">--</span>
-                <span class="admin-stat-card__label">탐지 정확도</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--blue">
-              <div class="admin-stat-card__icon">👥</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-online">--</span>
-                <span class="admin-stat-card__label">현재 접속자</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--orange">
-              <div class="admin-stat-card__icon">⚠️</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-suspicious">--</span>
-                <span class="admin-stat-card__label">의심 유저</span>
-              </div>
-            </div>
-            <div class="admin-stat-card admin-stat-card--green">
-              <div class="admin-stat-card__icon">🚫</div>
-              <div class="admin-stat-card__info">
-                <span class="admin-stat-card__value" id="admin-stat-banned">--</span>
-                <span class="admin-stat-card__label">금월 제재</span>
-              </div>
-            </div>
-          </div>
-
           <!-- 관리 패널 그리드 -->
           <div class="admin-panels">
             <!-- 의심 유저 목록 -->
@@ -324,45 +292,9 @@
         <p class="admin-modal__subtitle" id="admin-user-id">#00000</p>
       </div>
 
-      <!-- Modal Tabs -->
-      <div class="admin-modal__tabs" style="display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); margin: 12px 24px 0 24px;">
-        <button class="admin-modal__tab active" data-modal-tab="logs" style="background: none; border: none; padding: 10px 16px; color: var(--text-primary); border-bottom: 2px solid var(--accent-red); font-weight: 700; cursor: pointer; font-size: 14px; transition: all 0.2s; outline: none;">📊 플레이 분석 & 로그</button>
-        <button class="admin-modal__tab" data-modal-tab="sanctions" style="background: none; border: none; padding: 10px 16px; color: var(--text-muted); border-bottom: 2px solid transparent; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; outline: none;">🚫 제재 상태 & 이력</button>
-      </div>
-
       <div class="admin-modal__content" style="padding-top: 16px;">
-        <!-- Tab 1: Logs & Metrics -->
         <div id="modal-tab-view-logs">
           <div class="admin-modal__section" style="margin-top: 0;">
-            <h3 class="admin-modal__section-title">📊 플레이 수치 분석 (의심 지표)</h3>
-            <div class="admin-stats" style="grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0;">
-              <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
-                <div class="admin-stat-card__info">
-                  <span class="admin-stat-card__value" id="modal-speed-pct">0.0%</span>
-                  <span class="admin-stat-card__label">스피드핵 비율</span>
-                </div>
-              </div>
-              <div class="admin-stat-card admin-stat-card--orange" style="padding: 12px;">
-                <div class="admin-stat-card__info">
-                  <span class="admin-stat-card__value" id="modal-god-pct">0.0%</span>
-                  <span class="admin-stat-card__label">무적핵 (갓모드) 비율</span>
-                </div>
-              </div>
-              <div class="admin-stat-card admin-stat-card--red" style="padding: 12px;">
-                <div class="admin-stat-card__info">
-                  <span class="admin-stat-card__value" id="modal-esp-pct">0.0%</span>
-                  <span class="admin-stat-card__label">ESP 비율</span>
-                </div>
-              </div>
-              <div class="admin-stat-card admin-stat-card--green" style="padding: 12px;">
-                <div class="admin-stat-card__info">
-                  <span class="admin-stat-card__value" id="modal-aim-pct">0.0%</span>
-                  <span class="admin-stat-card__label">에임핵 비율</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="admin-modal__section" style="margin-top: 16px;">
             <h3 class="admin-modal__section-title">📋 최근 탐지 및 의심 행동 로그</h3>
             <ul class="admin-log" id="admin-user-log-list" style="max-height: 250px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
               <!-- Javascript에서 동적 삽입 -->
@@ -371,22 +303,6 @@
           <div class="admin-modal__section" style="margin-top: 16px;">
             <h3 class="admin-modal__section-title">🤖 AI 실시간 판정 로그</h3>
             <ul class="admin-log" id="admin-user-prediction-list" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto;">
-              <!-- Javascript에서 동적 삽입 -->
-            </ul>
-          </div>
-        </div>
-
-        <!-- Tab 2: Sanction Status & History -->
-        <div id="modal-tab-view-sanctions" style="display: none;">
-          <div class="admin-modal__section" style="margin-top: 0;">
-            <h3 class="admin-modal__section-title">🚫 현재 제재 상태</h3>
-            <div id="admin-user-ban-status-card" style="min-height: 140px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; gap: 8px;">
-              <!-- Javascript에서 동적 삽입 -->
-            </div>
-          </div>
-          <div class="admin-modal__section" style="margin-top: 16px;">
-            <h3 class="admin-modal__section-title">📋 과거 제재 이력</h3>
-            <ul id="admin-user-sanction-history" style="max-height: 200px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(0,0,0,0.2); padding: 8px; overflow-y: auto; list-style: none; margin: 0; display: flex; flex-direction: column; gap: 4px;">
               <!-- Javascript에서 동적 삽입 -->
             </ul>
           </div>
@@ -407,31 +323,6 @@
   <script src="js/effects.js?v=1.1.2"></script>
   <script src="js/admin.js?v=1.1.2"></script>
   <script src="js/admin-users.js?v=1.2.0"></script>
-  
-  <script>
-    // 퍼블릭 통계 데이터 수동 동기화 호출
-    async function fetchPublicStats() {
-      try {
-        const response = await fetch('/api/public/stats');
-        if (response.ok) {
-          const data = await response.json();
-          
-          const detectionEl = document.getElementById('admin-stat-detection');
-          const onlineEl = document.getElementById('admin-stat-online');
-          const suspiciousEl = document.getElementById('admin-stat-suspicious');
-          const bannedEl = document.getElementById('admin-stat-banned');
-          
-          if (detectionEl) detectionEl.textContent = data.detection_accuracy;
-          if (onlineEl) onlineEl.textContent = data.online_users;
-          if (suspiciousEl) suspiciousEl.textContent = data.suspicious_users;
-          if (bannedEl) bannedEl.textContent = data.banned_users;
-        }
-      } catch (error) {
-        console.error('Failed to fetch public stats:', error);
-      }
-    }
-    
-  </script>
 </body>
 
 </html>

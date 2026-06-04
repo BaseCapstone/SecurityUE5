@@ -288,9 +288,6 @@ function initAdminRefresh() {
       refreshBtn.disabled = true;
 
       try {
-        if (typeof fetchPublicStats === 'function') {
-          await fetchPublicStats(false, true);
-        }
         if (typeof fetchAdminPredictions === 'function') {
           await fetchAdminPredictions();
         }
@@ -345,16 +342,6 @@ async function fetchAdminPredictions() {
     if (!response.ok) return;
 
     const data = await response.json();
-
-    const speedPctEl = document.getElementById('stats-speed-pct');
-    const godPctEl = document.getElementById('stats-god-pct');
-    const espPctEl = document.getElementById('stats-esp-pct');
-    const aimPctEl = document.getElementById('stats-aim-pct');
-
-    if (speedPctEl) speedPctEl.textContent = `${data.label_percentages['스피드핵'] || 0.0}%`;
-    if (godPctEl) godPctEl.textContent = `${data.label_percentages['갓모드'] || 0.0}%`;
-    if (espPctEl) espPctEl.textContent = `${data.label_percentages['ESP'] || 0.0}%`;
-    if (aimPctEl) aimPctEl.textContent = `${data.label_percentages['에임핵'] || 0.0}%`;
 
     const renderPredictionItem = (p, includePlayer = true) => {
       const time = new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

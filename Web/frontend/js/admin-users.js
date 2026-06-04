@@ -129,7 +129,6 @@ async function fetchAndRenderUsers() {
     console.error('Failed to fetch admin users:', error);
   }
 }
-
 /**
  * 사용자 관리 페이지: 검색, 정렬, 상세 모달 초기화
  */
@@ -207,7 +206,6 @@ async function initUserManagement() {
     });
   }
 }
-
 // 대시보드 실시간 제재/해제 전역 핸들러
 window.handleDashboardBan = async (event, userId, username) => {
   event.stopPropagation(); // 모달 팝업 방지
@@ -252,11 +250,6 @@ window.handleDashboardUnban = async (event, userId, username) => {
 };
 
 async function openAdminUserModal(data) {
-  // Reset modal tab to logs on open
-  if (typeof tabsSwitch === 'function') {
-    tabsSwitch('logs');
-  }
-
   const userId = data.id.replace('#', '');
   const token = sessionStorage.getItem('token');
 
@@ -264,24 +257,6 @@ async function openAdminUserModal(data) {
   document.getElementById('admin-user-title').textContent = data.nicknameDisplay;
   const aiInfo = data.aiPredictedLabel && data.aiPredictedLabel !== '-' ? ` | AI 감지: ${data.aiPredictedLabel} (${data.aiProbability})` : '';
   document.getElementById('admin-user-id').textContent = `${data.idDisplay}${aiInfo} | 상태: ${data.status}`;
-
-  // 우측 제재 상태 카드 데이터 바인딩
-  const banStatusCard = document.getElementById('admin-user-ban-status-card');
-  if (banStatusCard) {
-    if (data.isBanned === 1) {
-      banStatusCard.innerHTML = `
-        <span style="font-size: 40px; filter: drop-shadow(0 0 10px rgba(229,45,39,0.3));">🚫</span>
-        <span style="font-size: 16px; font-weight: 700; color: var(--accent-red);">강력 제재 중</span>
-        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4; word-break: keep-all;">불법 프로그램 의심 대상자로 지정되어 게임 플레이 및 접속이 즉각 차단되었습니다.</p>
-      `;
-    } else {
-      banStatusCard.innerHTML = `
-        <span style="font-size: 40px; filter: drop-shadow(0 0 10px rgba(74,222,128,0.3));">✅</span>
-        <span style="font-size: 16px; font-weight: 700; color: #4ade80;">정상 상태</span>
-        <p style="font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4; word-break: keep-all;">보안 우회나 핵 감지 이력이 검출되지 않은 정상 활동 플레이어입니다.</p>
-      `;
-    }
-  }
 
   const banBtn = document.getElementById('admin-btn-ban');
   if (banBtn) {
@@ -334,62 +309,7 @@ async function openAdminUserModal(data) {
 
   const logList = document.getElementById('admin-user-log-list');
   logList.innerHTML = '<li class="admin-log__item"><span class="admin-log__msg">데이터를 불러오는 중...</span></li>';
-  
-  const sanctionHistoryList = document.getElementById('admin-user-sanction-history');
-  if (sanctionHistoryList) {
-    sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: #64748b; padding: 4px;">데이터를 불러오는 중...</li>';
-  }
-  
   modal.classList.add('is-active');
-
-  // Fetch sanction history
-  if (sanctionHistoryList) {
-    fetch(`/api/admin/users/${userId}/sanctions`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    .then(res => res.ok ? res.json() : null)
-    .then(result => {
-      if (!result) {
-        sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: var(--accent-red); padding: 4px;">불러오기 실패</li>';
-        return;
-      }
-      sanctionHistoryList.innerHTML = '';
-      if (result.sanctions.length === 0) {
-        sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: #64748b; padding: 4px;">제재 이력이 없습니다.</li>';
-      } else {
-        result.sanctions.forEach(s => {
-          const actionText = s.action === 'ban' ? '제재' : '해제';
-          const badgeClass = s.action === 'ban' ? 'color: var(--accent-red);' : 'color: var(--accent-cyan);';
-          
-          // Parse date properly supporting SQLite format
-          const dateObj = new Date(s.created_at.replace(' ', 'T') + 'Z');
-          const dateText = dateObj.toLocaleDateString('ko-KR', {
-            month: '2-digit',
-            day: '2-digit'
-          }) + ' ' + dateObj.toLocaleTimeString('ko-KR', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-          const li = document.createElement('li');
-          li.style.cssText = 'font-size: 12px; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 2px;';
-          li.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-weight: 700; ${badgeClass}">[${actionText}]</span>
-              <span style="color: #64748b; font-size: 11px;">${dateText}</span>
-            </div>
-            <div style="color: #cbd5e1; font-size: 11px; word-break: break-all;">${s.reason || ''}</div>
-          `;
-          sanctionHistoryList.appendChild(li);
-        });
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      sanctionHistoryList.innerHTML = '<li style="font-size: 12px; color: var(--accent-red); padding: 4px;">서버 연결 실패</li>';
-    });
-  }
 
   try {
     const response = await fetch(`/api/admin/users/${userId}/logs`, {
@@ -518,43 +438,3 @@ async function openAdminUserModal(data) {
     });
   }
 }
-
-/**
- * 모달 내 탭 전환 제어 함수
- */
-function tabsSwitch(target) {
-  const tabs = document.querySelectorAll('[data-modal-tab]');
-  tabs.forEach(t => {
-    if (t.dataset.modalTab === target) {
-      t.classList.add('active');
-      t.style.color = 'var(--text-primary)';
-      t.style.borderBottomColor = 'var(--accent-red)';
-      t.style.fontWeight = '700';
-    } else {
-      t.classList.remove('active');
-      t.style.color = 'var(--text-muted)';
-      t.style.borderBottomColor = 'transparent';
-      t.style.fontWeight = '600';
-    }
-  });
-
-  const logsView = document.getElementById('modal-tab-view-logs');
-  const sanctionsView = document.getElementById('modal-tab-view-sanctions');
-  if (target === 'logs') {
-    if (logsView) logsView.style.display = 'block';
-    if (sanctionsView) sanctionsView.style.display = 'none';
-  } else {
-    if (logsView) logsView.style.display = 'none';
-    if (sanctionsView) sanctionsView.style.display = 'block';
-  }
-}
-
-// DOM 로드 완료 후 탭 클릭 이벤트 바인딩
-document.addEventListener('DOMContentLoaded', () => {
-  const tabs = document.querySelectorAll('[data-modal-tab]');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabsSwitch(tab.dataset.modalTab);
-    });
-  });
-});

@@ -102,24 +102,18 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 def decode_bearer_token(authorization: Optional[str]) -> dict:
-    print(f" [디버그] Authorization 헤더: {authorization}")
     if not authorization:
-        print(" [디버그] Authorization 헤더가 없습니다.")
         raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
 
     parts = authorization.split()
     if len(parts) != 2 or parts[0].lower() != "bearer":
-        print(f" [디버그] 잘못된 인증 형식: {authorization}")
         raise HTTPException(status_code=401, detail="잘못된 인증 형식입니다.")
 
     try:
-        print(f" [디버그] 디코딩할 토큰: {parts[1]}")
         return jwt.decode(parts[1], SECRET_KEY, algorithms=[ALGORITHM])
     except jwt.ExpiredSignatureError:
-        print(" [디버그] 토큰이 만료되었습니다.")
         raise HTTPException(status_code=401, detail="토큰이 만료되었습니다. 다시 로그인해주세요.")
     except jwt.InvalidTokenError:
-        print(" [디버그] 유효하지 않은 토큰입니다.")
         raise HTTPException(status_code=401, detail="유효하지 않은 토큰입니다.")
 
 def mask_string(s: str, visible: int = 2) -> str:

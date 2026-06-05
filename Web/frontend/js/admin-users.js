@@ -249,6 +249,71 @@ window.handleDashboardUnban = async (event, userId, username) => {
   }
 };
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function resetBehaviorLogPanel() {
+  const panel = document.getElementById('admin-behavior-log-panel');
+  const body = document.getElementById('admin-behavior-log-body');
+  if (panel) panel.hidden = true;
+  if (body) body.innerHTML = '';
+}
+
+function renderBehaviorLogPanel(log) {
+  const panel = document.getElementById('admin-behavior-log-panel');
+  const body = document.getElementById('admin-behavior-log-body');
+  if (!panel || !body) return;
+
+  const rawEventData = log && Object.prototype.hasOwnProperty.call(log, 'event_data')
+    ? log.event_data
+    : null;
+  const eventDataText = JSON.stringify(rawEventData, null, 2);
+
+  body.innerHTML = `
+    <div class="admin-behavior-log__meta">
+      <span>로그번호: #${escapeHtml(log.log_id)}</span>
+      <span>유저 ID: #${escapeHtml(log.user_id ?? '-')}</span>
+      <span>수집시각: ${escapeHtml(log.created_at || '-')}</span>
+    </div>
+    <pre class="admin-behavior-log__json">${escapeHtml(eventDataText)}</pre>
+  `;
+  panel.hidden = false;
+}
+
+async function openBehaviorLogDetail(logId) {
+  const panel = document.getElementById('admin-behavior-log-panel');
+  const body = document.getElementById('admin-behavior-log-body');
+  if (!panel || !body) return;
+
+  panel.hidden = false;
+  body.innerHTML = '<span class="admin-log__msg">행동 로그를 불러오는 중...</span>';
+
+  try {
+    const response = await fetch(`/api/logs/${encodeURIComponent(logId)}`);
+    if (!response.ok) {
+      body.innerHTML = `<span class="admin-log__msg" style="color:var(--accent-red);">#${escapeHtml(logId)}에 대응하는 원본 행동 로그를 찾을 수 없습니다.</span>`;
+      return;
+    }
+
+    const result = await response.json();
+    if (!result || !result.log) {
+      body.innerHTML = '<span class="admin-log__msg" style="color:var(--accent-red);">행동 로그 응답 형식이 올바르지 않습니다.</span>';
+      return;
+    }
+
+    renderBehaviorLogPanel(result.log);
+  } catch (error) {
+    console.error('Failed to fetch behavior log:', error);
+    body.innerHTML = '<span class="admin-log__msg" style="color:var(--accent-red);">서버와 연결할 수 없습니다.</span>';
+  }
+}
+
 async function openAdminUserModal(data) {
   const userId = data.id.replace('#', '');
   const token = sessionStorage.getItem('token');
@@ -308,6 +373,7 @@ async function openAdminUserModal(data) {
   }
 
   modal.classList.add('is-active');
+  resetBehaviorLogPanel();
 
   // Fetch AI predictions logs
   const predList = document.getElementById('admin-user-prediction-list');
@@ -355,15 +421,29 @@ async function openAdminUserModal(data) {
           type = 'success';
         }
         
+        const logId = String(p.log_id);
+        const probability = Number(p.probability);
+        const probabilityText = Number.isFinite(probability)
+          ? (probability * 100).toFixed(1)
+          : '0.0';
         const li = document.createElement('li');
         li.className = `admin-log__item admin-log__item--${type}`;
         li.innerHTML = `
           <span class="admin-log__time" style="font-size: 11px; white-space: nowrap; color: #94a3b8;">${time}</span>
           <span class="admin-log__msg">
-            AI 분석: <strong>${p.predictions}</strong> (확률: ${(p.probability * 100).toFixed(1)}%, 탐지핵: ${p.predicted_label}, 로그번호: #${p.log_id})
+            AI 분석: <strong>${escapeHtml(p.predictions)}</strong> (확률: ${probabilityText}%, 탐지핵: ${escapeHtml(p.predicted_label)}, 로그번호:
+            <button class="admin-log-id-btn" type="button" data-log-id="${escapeHtml(logId)}">#${escapeHtml(logId)}</button>)
           </span>
         `;
         predList.appendChild(li);
+
+        const logButton = li.querySelector('.admin-log-id-btn');
+        if (logButton) {
+          logButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            openBehaviorLogDetail(logId);
+          });
+        }
       });
     })
     .catch(err => {
@@ -372,3 +452,10 @@ async function openAdminUserModal(data) {
     });
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const closeBehaviorLogBtn = document.getElementById('admin-behavior-log-close');
+  if (closeBehaviorLogBtn) {
+    closeBehaviorLogBtn.addEventListener('click', resetBehaviorLogPanel);
+  }
+});
